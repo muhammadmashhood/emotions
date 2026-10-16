@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --ink: #123A4A;
+        --ink-soft: #4E6875;
+        --paper: #F7F9FA;
+        --line: #DCE3E7;
+        --rag-green: #2F855A;
+        --rag-amber: #B7791F;
+        --rag-red: #B83A33;
+        --rag-neutral: #A9B6BD;
+    }
+
+    body {
+        @apply bg-paper text-ink antialiased;
+    }
+
+    *:focus-visible {
+        @apply outline-none ring-2 ring-ink ring-offset-2 ring-offset-paper;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    .panel {
+        @apply bg-white border border-line rounded-lg;
+    }
+    .btn {
+        @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition;
+    }
+    .btn-primary {
+        @apply btn bg-ink text-white hover:bg-ink/90 disabled:opacity-50;
+    }
+    .btn-secondary {
+        @apply btn bg-white border border-line text-ink hover:bg-paper disabled:opacity-50;
+    }
+    .btn-danger {
+        @apply btn bg-rag-red text-white hover:bg-rag-red/90 disabled:opacity-50;
+    }
+    .field {
+        @apply block w-full rounded-md border-line bg-white text-ink shadow-sm focus:border-ink focus:ring-ink text-sm;
+    }
+    .label {
+        @apply block text-sm font-medium text-ink-soft mb-1;
+    }
+    .table-base {
+        @apply min-w-full divide-y divide-line text-sm;
+    }
+    .table-base thead th {
+        @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ink-soft;
+    }
+    .table-base tbody td {
+        @apply px-3 py-2 align-top;
+    }
+    .table-base tbody tr {
+        @apply border-t border-line;
+    }
+}
+
+@media print {
+    .no-print { display: none !important; }
+    body { background: white; }
+    .panel { break-inside: avoid; }
+}

@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: emotion_test
+        ports:
+          - 3307:3306
+        options: >-
+          --health-cmd="mysqladmin ping -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, gd, pcntl
+          coverage: xdebug
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Install node dependencies and build assets
+        run: npm ci && npm run build
+      - name: Prepare environment
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+      - name: Pint
+        run: ./vendor/bin/pint --test
+      - name: Larastan
+        run: ./vendor/bin/phpstan analyse --memory-limit=1G --no-progress
+      - name: Pest
+        run: ./vendor/bin/pest --coverage --min=0 --ci
+        env:
+          DB_CONNECTION: mysql
+          DB_HOST: 127.0.0.1
+          DB_PORT: 3307
+          DB_DATABASE: emotion_test
+          DB_USERNAME: root
+          DB_PASSWORD: secret
