@@ -4,7 +4,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 
 - [x] **M0 — Foundations**
 - [x] **M1 — Tenancy, users, roles**
-- [ ] **M2 — Typeform connection and client**
+- [x] **M2 — Typeform connection and client**
 - [ ] **M3 — Linking, structure parsing, versions, mapping editor**
 - [ ] **M4 — Ingestion and scoring**
 - [ ] **M5 — Hospital dashboard and evaluations**
@@ -32,3 +32,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest --filter "Tenancy|Invitation|HospitalManagement|Smoke"`; or log in as `admin@example.com` after `migrate --seed`, create a hospital, invite a user, open the link from Mailpit.
 
 **Known gaps:** admin overview is a stub until M6; dashboard is an empty state until M5.
+
+## M2 — Typeform connection and client
+
+**Built:** `TypeformClient` (me, workspaces, forms list, form, put/get/delete webhook, responses, file download) with 5 s / 20 s timeouts, retries on 429/5xx/connection errors (1 s, 2 s, 4 s, `Retry-After` honoured), per-connection throttle via `RateLimiter`, typed exceptions, token-free logging. DTOs in `Domain/Typeform/Data`. `ConnectionManager` (verify with `/me`, encrypted save, test), `FormCatalog` (cached per-workspace listing, excludes forms linked elsewhere). Screens: Settings → Typeform, hospital form picker (search, workspace filter, HTTPS warning).
+
+**Verify:** `./vendor/bin/pest tests/Unit/Typeform tests/Feature/Admin/TypeformConnectionTest.php`.
+
+**Known gaps:** the picker's "Link form" action is wired in M3.

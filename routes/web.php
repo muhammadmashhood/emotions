@@ -32,7 +32,9 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
     Route::get('hospitals', Admin\Hospitals\Index::class)->name('hospitals.index');
     Route::get('hospitals/create', Admin\Hospitals\Create::class)->name('hospitals.create');
     Route::get('hospitals/{hospital}', Admin\Hospitals\Show::class)->name('hospitals.show');
+    Route::get('hospitals/{hospital}/forms/link', Admin\Forms\LinkForm::class)->name('hospitals.forms.link');
     Route::get('users', Admin\Users\Index::class)->name('users.index');
+    Route::get('settings/typeform', Admin\Settings\Typeform::class)->name('settings.typeform');
 });
 
 require __DIR__.'/auth.php';
