@@ -136,6 +136,34 @@ test('a super admin sees pending and partial evaluations in the numbers, hospita
     expect((new DashboardQuery(superAdmin()))->headline($this->hospital, $this->filters)['count'])->toBe(5);
 });
 
+test('kpis: likelihood to recommend, critical items passed and facilities', function () {
+    $k = $this->query->kpis($this->hospital, $this->filters);
+    // no NPS answers in the dataset; yes/no answers: 10,0,10 (back) + 10,NA,0 (clean) → 3 of 5 passed
+    expect($k)->toBe(['nps_avg' => null, 'nps_count' => 0, 'yes_pct' => 60.0, 'yes_total' => 5, 'facilities' => 4]);
+
+    $nps = FormField::query()->where('form_version_id', $this->version->id)->where('title', 'NPS')->firstOrFail();
+    foreach (Submission::query()->where('form_id', $this->form->id)->where('submitted_at', '>=', '2026-05-01')->get() as $s) {
+        Answer::factory()->create(['submission_id' => $s->id, 'typeform_field_id' => $nps->typeform_field_id, 'form_field_id' => $nps->id, 'value_number' => 8, 'points' => 8, 'max_points' => 10]);
+    }
+    expect($this->query->kpis($this->hospital, $this->filters)['nps_avg'])->toBe(8.0);
+});
+
+test('facility ranking and heat-map', function () {
+    $ranking = $this->query->facilityRanking($this->hospital, $this->filters);
+    expect(collect($ranking['top'])->pluck('avg', 'name')->all())->toBe(['Facility 90' => 90.0, 'Facility 80' => 80.0, 'Facility 70' => 70.0, 'Facility 50' => 50.0])
+        ->and($ranking['bottom'])->toBe([])->and($ranking['total'])->toBe(4);
+
+    $byForm = $this->query->heatmap($this->hospital, $this->filters, null);
+    expect($byForm['columns'])->toBe(['ER', 'OPD'])
+        ->and(collect($byForm['rows'])->firstWhere('label', 'Facility 80')['cells'])->toBe(['ER' => 80.0, 'OPD' => null])
+        ->and(collect($byForm['rows'])->firstWhere('label', 'Facility 90')['cells']['OPD'])->toBe(90.0);
+
+    $bySection = $this->query->heatmap($this->hospital, $this->filters, $this->form);
+    expect($bySection['columns'])->toBe(['Experience'])
+        ->and(collect($bySection['rows'])->firstWhere('label', 'Facility 70')['cells'])->toBe(['Experience' => 70.0])
+        ->and(collect($bySection['rows'])->firstWhere('label', 'Facility 80')['cells'])->toBe(['Experience' => null]);
+});
+
 test('per-hospital summary for the admin overview', function () {
     $per = (new DashboardQuery(superAdmin()))->perHospital($this->filters);
     expect($per[$this->hospital->id])->toBe(['count' => 4, 'avg' => 72.5, 'previous_avg' => 50.0]);

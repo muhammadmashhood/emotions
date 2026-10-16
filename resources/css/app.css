@@ -8,6 +8,7 @@
         --ink-soft: #4E6875;
         --paper: #F7F9FA;
         --line: #DCE3E7;
+        --accent: #2457F5;
         --rag-green: #2F855A;
         --rag-amber: #B7791F;
         --rag-red: #B83A33;
@@ -19,7 +20,7 @@
     }
 
     *:focus-visible {
-        @apply outline-none ring-2 ring-ink ring-offset-2 ring-offset-paper;
+        @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-paper;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -33,42 +34,55 @@
 
 @layer components {
     .panel {
-        @apply bg-white border border-line rounded-lg;
+        @apply bg-white border border-line/80 rounded-2xl shadow-card;
     }
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition;
+        @apply inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition;
     }
     .btn-primary {
-        @apply btn bg-ink text-white hover:bg-ink/90 disabled:opacity-50;
+        @apply btn bg-accent text-white hover:bg-accent-deep shadow-glow disabled:opacity-50 disabled:shadow-none;
     }
     .btn-secondary {
-        @apply btn bg-white border border-line text-ink hover:bg-paper disabled:opacity-50;
+        @apply btn bg-white border border-line text-ink hover:border-ink/30 hover:bg-paper disabled:opacity-50;
     }
     .btn-danger {
         @apply btn bg-rag-red text-white hover:bg-rag-red/90 disabled:opacity-50;
     }
     .field {
-        @apply block w-full rounded-md border-line bg-white text-ink shadow-sm focus:border-ink focus:ring-ink text-sm;
+        @apply block w-full rounded-xl border-line bg-white text-ink shadow-sm focus:border-accent focus:ring-accent text-sm;
     }
     .label {
-        @apply block text-sm font-medium text-ink-soft mb-1;
+        @apply block text-xs font-semibold uppercase tracking-wide text-ink-soft mb-1;
     }
     .table-base {
         @apply min-w-full divide-y divide-line text-sm;
     }
     .table-base thead th {
-        @apply px-3 py-2 text-left text-xs font-semibold uppercase tracking-wide text-ink-soft;
+        @apply px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-soft bg-paper/70;
     }
     .table-base tbody td {
-        @apply px-3 py-2 align-top;
+        @apply px-3 py-2.5 align-top;
     }
     .table-base tbody tr {
-        @apply border-t border-line;
+        @apply border-t border-line/70 hover:bg-paper/60 transition-colors;
+    }
+    .kpi-value {
+        @apply text-4xl font-semibold tracking-tight text-ink;
+    }
+    .eyebrow {
+        @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-soft;
+    }
+    .nav-item {
+        @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition;
+    }
+    .nav-item-active {
+        @apply bg-accent text-white shadow-glow hover:bg-accent;
     }
 }
 
 @media print {
     .no-print { display: none !important; }
     body { background: white; }
-    .panel { break-inside: avoid; }
+    .panel { break-inside: avoid; box-shadow: none; }
+    main { margin-left: 0 !important; }
 }

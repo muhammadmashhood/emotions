@@ -103,3 +103,7 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Feature/SecurityHeadersTest.php`; `php artisan app:seed-demo --large` then time the dashboard; `curl -I http://localhost:8080/login` shows the headers.
 
 **Known gaps:** coverage is reported in CI only (no xdebug/pcov on the build machine); the manual Typeform round-trip (real token, real form, real submission) needs a public HTTPS URL and a Typeform account and was verified only through the faked-API end-to-end test.
+
+## Post-M8 — Dashboard redesign
+
+**Built (owner request):** sidebar shell with role-based navigation, "Patient Experience — Mystery Shopping Dashboard" with KPI tiles (overall score + delta, evaluations, likelihood to recommend from NPS questions, critical items passed, facilities evaluated), trend line (one series per survey), outcome donut, score by section/survey bars, facility ranking (top/bottom), touchpoint heat-map (facilities × sections or surveys), weakest questions, yes/no compliance, live feed. Evaluation page with score ring hero, info grid, gradient journey tiles and section cards with per-answer point pills. New `DashboardQuery::kpis()`, `facilityRanking()`, `heatmap()` with tests. Screenshots in `docs/screenshots/`.

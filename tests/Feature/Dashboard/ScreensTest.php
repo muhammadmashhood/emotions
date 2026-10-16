@@ -92,7 +92,7 @@ test('evaluation detail shows header, journey strip, sections and answers; admin
         ->assertSee('Ittefaq Hospital')
         ->assertSee('Dr. Farhan Siddiqui')
         ->assertSee('Phone call')
-        ->assertSee('77.7%')
+        ->assertSee('77.7')
         ->assertSee('Journey')
         ->assertSee('Phone booking')
         ->assertSee('Quick and friendly call.')

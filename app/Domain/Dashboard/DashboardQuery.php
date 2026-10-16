@@ -272,6 +272,135 @@ class DashboardQuery
     }
 
     /**
+     * Headline KPIs beyond the average score: likelihood to recommend (NPS-type questions, 0–10),
+     * critical items passed (% Yes among Yes/No answers) and number of distinct facilities evaluated.
+     *
+     * @return array{nps_avg: float|null, nps_count: int, yes_pct: float|null, yes_total: int, facilities: int}
+     */
+    public function kpis(?Hospital $hospital, DashboardFilters $filters): array
+    {
+        $nps = $this->base($hospital, $filters)
+            ->join('answers', 'answers.submission_id', '=', 'submissions.id')
+            ->join('form_fields', 'form_fields.id', '=', 'answers.form_field_id')
+            ->where('form_fields.type', 'nps')
+            ->whereNotNull('answers.value_number')
+            ->toBase()
+            ->selectRaw('AVG(answers.value_number) as avg, COUNT(*) as cnt')
+            ->first();
+
+        $yes = $this->base($hospital, $filters)
+            ->join('answers', 'answers.submission_id', '=', 'submissions.id')
+            ->join('form_fields', 'form_fields.id', '=', 'answers.form_field_id')
+            ->whereIn('form_fields.type', ['yes_no', 'dropdown', 'multiple_choice'])
+            ->whereNotNull('answers.points')
+            ->where('answers.max_points', '>', 0)
+            ->toBase()
+            ->selectRaw('SUM(CASE WHEN answers.points >= answers.max_points THEN 1 ELSE 0 END) as yes, COUNT(*) as total')
+            ->first();
+
+        $facilities = $this->base($hospital, $filters)
+            ->toBase()
+            ->selectRaw("COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility'))) as cnt")
+            ->value('cnt');
+
+        $yesTotal = (int) ($yes->total ?? 0);
+
+        return [
+            'nps_avg' => $nps !== null && $nps->avg !== null ? round((float) $nps->avg, 1) : null,
+            'nps_count' => (int) ($nps->cnt ?? 0),
+            'yes_pct' => $yesTotal > 0 ? round(100 * (int) $yes->yes / $yesTotal, 0) : null,
+            'yes_total' => $yesTotal,
+            'facilities' => (int) $facilities,
+        ];
+    }
+
+    /**
+     * Average score per facility (from the "facility" info field), best and worst.
+     *
+     * @return array{top: list<array{name: string, avg: float, count: int}>, bottom: list<array{name: string, avg: float, count: int}>, total: int}
+     */
+    public function facilityRanking(?Hospital $hospital, DashboardFilters $filters, int $limit = 5): array
+    {
+        $rows = $this->base($hospital, $filters)
+            ->whereNotNull('submissions.overall_pct')
+            ->toBase()
+            ->selectRaw("COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility')), 'null'), 'Unknown facility') as name, AVG(submissions.overall_pct) as avg, COUNT(*) as cnt")
+            ->groupBy('name')
+            ->orderByDesc('avg')
+            ->get()
+            ->map(fn ($r) => ['name' => (string) $r->name, 'avg' => round((float) $r->avg, 1), 'count' => (int) $r->cnt])
+            ->values();
+
+        if ($rows->count() <= $limit * 2) {
+            return ['top' => $rows->all(), 'bottom' => [], 'total' => $rows->count()];
+        }
+
+        return ['top' => $rows->take($limit)->values()->all(), 'bottom' => $rows->slice(-$limit)->values()->all(), 'total' => $rows->count()];
+    }
+
+    /**
+     * Heat-map: facilities (rows, most evaluated first) × sections of the selected form, or × forms when no form is selected.
+     *
+     * @return array{columns: list<string>, rows: list<array{label: string, count: int, cells: array<string, float|null>}>}
+     */
+    public function heatmap(?Hospital $hospital, DashboardFilters $filters, ?Form $form, int $maxRows = 8): array
+    {
+        $facilityExpr = "COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility')), 'null'), 'Unknown facility')";
+
+        $facilities = $this->base($hospital, $filters)
+            ->toBase()
+            ->selectRaw("$facilityExpr as name, COUNT(*) as cnt")
+            ->groupBy('name')
+            ->orderByDesc('cnt')
+            ->limit($maxRows)
+            ->get();
+
+        if ($facilities->isEmpty()) {
+            return ['columns' => [], 'rows' => []];
+        }
+        $names = $facilities->pluck('name')->map(fn ($n) => (string) $n)->all();
+
+        if ($form !== null) {
+            $cells = $this->base($hospital, $filters->withForm($form->id))
+                ->join('submission_section_scores as sss', 'sss.submission_id', '=', 'submissions.id')
+                ->whereNotNull('sss.pct')
+                ->whereRaw("$facilityExpr IN (".implode(',', array_fill(0, count($names), '?')).')', $names)
+                ->toBase()
+                ->selectRaw("$facilityExpr as row_name, sss.section_name as col_name, AVG(sss.pct) as avg")
+                ->groupBy('row_name', 'col_name')
+                ->get();
+            $order = $form->currentVersion?->sections()->pluck('display_order', 'name')->all() ?? [];
+            $columns = $cells->pluck('col_name')->unique()->sortBy(fn ($c) => $order[$c] ?? 999)->values()->map(fn ($c) => (string) $c)->all();
+        } else {
+            $cells = $this->base($hospital, $filters)
+                ->join('forms', 'forms.id', '=', 'submissions.form_id')
+                ->whereNotNull('submissions.overall_pct')
+                ->whereRaw("$facilityExpr IN (".implode(',', array_fill(0, count($names), '?')).')', $names)
+                ->toBase()
+                ->selectRaw("$facilityExpr as row_name, forms.title as col_name, AVG(submissions.overall_pct) as avg")
+                ->groupBy('row_name', 'col_name')
+                ->get();
+            $columns = $cells->pluck('col_name')->unique()->sort()->values()->map(fn ($c) => (string) $c)->all();
+        }
+
+        $lookup = [];
+        foreach ($cells as $c) {
+            $lookup[(string) $c->row_name][(string) $c->col_name] = round((float) $c->avg, 1);
+        }
+
+        $rows = [];
+        foreach ($facilities as $f) {
+            $cellsForRow = [];
+            foreach ($columns as $col) {
+                $cellsForRow[$col] = $lookup[(string) $f->name][$col] ?? null;
+            }
+            $rows[] = ['label' => (string) $f->name, 'count' => (int) $f->cnt, 'cells' => $cellsForRow];
+        }
+
+        return ['columns' => $columns, 'rows' => $rows];
+    }
+
+    /**
      * Per-hospital summary for the admin overview.
      *
      * @return array<int, array{count: int, avg: float|null, previous_avg: float|null}>

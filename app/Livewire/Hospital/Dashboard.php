@@ -70,6 +70,9 @@ class Dashboard extends Component
             'compliance' => $selectedForm ? $query->yesNoCompliance($selectedForm, $filters) : null,
             'recent' => $query->recent($this->hospital, $filters),
             'distribution' => $query->distribution($this->hospital, $filters),
+            'kpis' => $query->kpis($this->hospital, $filters),
+            'ranking' => $query->facilityRanking($this->hospital, $filters),
+            'heatmap' => $query->heatmap($this->hospital, $filters, $selectedForm),
             'ragGreen' => $selectedForm?->settings->ragGreenMin ?? 80,
             'ragAmber' => $selectedForm?->settings->ragAmberMin ?? 60,
         ]);

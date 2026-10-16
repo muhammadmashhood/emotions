@@ -1,10 +1,10 @@
 @props(['period', 'forms', 'branches' => collect(), 'form', 'branch' => '', 'from' => '', 'to' => ''])
-<div {{ $attributes->merge(['class' => 'panel p-3 flex flex-wrap items-end gap-3 no-print']) }}>
+<div {{ $attributes->merge(['class' => 'panel px-4 py-3 flex flex-wrap items-end gap-3 no-print']) }}>
     <div>
         <span class="label">Period</span>
-        <div class="inline-flex rounded-md border border-line overflow-hidden" role="group" aria-label="Period">
+        <div class="inline-flex rounded-xl bg-paper p-1 gap-1 max-w-full overflow-x-auto" role="group" aria-label="Period">
             @foreach(['30d' => '30 days', '90d' => '90 days', '12m' => '12 months', 'custom' => 'Custom'] as $key => $label)
-                <button type="button" wire:click="setPeriod('{{ $key }}')" class="px-3 py-2 text-sm {{ $period === $key ? 'bg-ink text-white' : 'bg-white text-ink-soft hover:bg-paper' }}" @if($period === $key) aria-pressed="true" @endif>{{ $label }}</button>
+                <button type="button" wire:click="setPeriod('{{ $key }}')" class="px-3 py-1.5 rounded-lg text-sm whitespace-nowrap transition {{ $period === $key ? 'bg-white shadow-card text-ink font-medium' : 'text-ink-soft hover:text-ink' }}" @if($period === $key) aria-pressed="true" @endif>{{ $label }}</button>
             @endforeach
         </div>
     </div>

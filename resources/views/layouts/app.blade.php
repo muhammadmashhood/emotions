@@ -13,21 +13,23 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-paper">
+    <body class="font-sans antialiased" x-data="{ sidebarOpen: false }">
+        <div class="min-h-screen bg-paper lg:flex">
             <livewire:layout.navigation />
 
-            @if (isset($header))
-                <header class="bg-white border-b border-line no-print">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8 flex flex-wrap items-center justify-between gap-3">
-                        {{ $header }}
-                    </div>
+            <div class="flex-1 min-w-0 flex flex-col">
+                <header class="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-line px-4 h-14 flex items-center justify-between no-print">
+                    <button type="button" @click="sidebarOpen = true" class="p-2 -ml-2 rounded-lg text-ink-soft hover:bg-paper" aria-label="Open menu">
+                        <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                    </button>
+                    <span class="font-semibold text-ink">{{ config('app.name') }}</span>
+                    <span class="w-6"></span>
                 </header>
-            @endif
 
-            <main>
-                {{ $slot }}
-            </main>
+                <main class="flex-1 min-w-0">
+                    {{ $slot }}
+                </main>
+            </div>
         </div>
     </body>
 </html>
