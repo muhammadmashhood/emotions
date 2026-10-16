@@ -49,12 +49,11 @@
                     <div>
                         <p class="text-sm">Link <strong>{{ $selectedForm->title }}</strong> to <strong>{{ $hospital->name }}</strong>?</p>
                         <p class="text-xs text-ink-soft">We will read its structure, register a webhook and import existing responses.</p>
+                        <x-input-error :messages="$errors->get('selected')" class="mt-1" />
                     </div>
                     <div class="flex gap-2">
                         <button type="button" wire:click="$set('selected', null)" class="btn-secondary">Cancel</button>
-                        @if(method_exists($this, 'link'))
-                            <button type="button" wire:click="link" wire:loading.attr="disabled" class="btn-primary">Link form</button>
-                        @endif
+                        <button type="button" wire:click="link" wire:loading.attr="disabled" class="btn-primary">Link form</button>
                     </div>
                 </div>
             @endif

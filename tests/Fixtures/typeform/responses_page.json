@@ -1,0 +1,554 @@
+{
+    "total_items": 2,
+    "page_count": 1,
+    "items": [
+        {
+            "landing_id": "l1",
+            "token": "apitoken000000000001",
+            "response_id": "l1",
+            "landed_at": "2026-02-01T09:00:00Z",
+            "submitted_at": "2026-02-01T09:20:00Z",
+            "metadata": {
+                "platform": "other"
+            },
+            "hidden": {},
+            "calculated": {
+                "score": 1
+            },
+            "answers": [
+                {
+                    "type": "text",
+                    "text": "Ittefaq Hospital",
+                    "field": {
+                        "id": "vmbsbI8xmK",
+                        "type": "short_text",
+                        "ref": "5ba66478-fdc1-400b-8b4d-0000ef922dde"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "SR101HBu8v",
+                        "ref": "aecbcbc9-d85f-435c-8862-00007344131b",
+                        "label": "Lahore"
+                    },
+                    "field": {
+                        "id": "0I9RaTEUb7",
+                        "type": "dropdown",
+                        "ref": "a7e8eb9d-b5bd-4978-9d3b-0000254cf0f2"
+                    }
+                },
+                {
+                    "type": "date",
+                    "date": "2026-03-14",
+                    "field": {
+                        "id": "IEbni0x1ho",
+                        "type": "date",
+                        "ref": "e12b1148-812a-472b-b8eb-0000892b2d68"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "uSKWK1f7jg",
+                        "ref": "c5fb63fc-23bd-4edf-883e-0000876c425a",
+                        "label": "Phone call"
+                    },
+                    "field": {
+                        "id": "QYZ1DOYpAG",
+                        "type": "multiple_choice",
+                        "ref": "e00cedde-4dec-4a0f-8a91-00004ce34388"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Ayesha",
+                    "field": {
+                        "id": "rs7QOmxIoQ",
+                        "type": "short_text",
+                        "ref": "175c25a1-7e7a-4509-b1e7-00001e7ee3ef"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "boolean": true,
+                    "field": {
+                        "id": "4orXiV5XNb",
+                        "type": "yes_no",
+                        "ref": "4445bc57-828e-42e9-bf0b-0000a8918227"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "YmG4Bjhlaf",
+                        "type": "opinion_scale",
+                        "ref": "6682f78e-a9f9-408a-b85b-00003c84e26c"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "wqwtV8TWkE",
+                        "type": "opinion_scale",
+                        "ref": "16d90a0d-5856-4b0c-ba3a-000062694db8"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "yuE1vvsG7a",
+                        "type": "opinion_scale",
+                        "ref": "d1fa5900-4b50-45c5-9d89-0000e33ec8ef"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Quick and friendly call.",
+                    "field": {
+                        "id": "90aWVpmfou",
+                        "type": "long_text",
+                        "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 7,
+                    "field": {
+                        "id": "8oXaOaauaw",
+                        "type": "opinion_scale",
+                        "ref": "661d313e-682f-48a7-8ae0-00008843b9b7"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "mgDeCSQOhh",
+                        "type": "opinion_scale",
+                        "ref": "1925ba3c-e867-4b3d-8a0b-00006d95fd89"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "mcEcRQ4kyC",
+                        "type": "opinion_scale",
+                        "ref": "64475a9f-46d9-4070-8028-00005bb0cb63"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 6,
+                    "field": {
+                        "id": "lKJ5gEK6qj",
+                        "type": "opinion_scale",
+                        "ref": "f8fe39b7-33c8-4e0b-854a-0000326343cc"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "T24dVFLBi1",
+                        "ref": "74c93ee0-5196-473a-b55e-000027c2ca62",
+                        "label": "N/A"
+                    },
+                    "field": {
+                        "id": "tjWZxY6duQ",
+                        "type": "dropdown",
+                        "ref": "e18781f5-69f0-432a-ba9c-000096c2669e"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 5,
+                    "field": {
+                        "id": "SSoCgycyMc",
+                        "type": "opinion_scale",
+                        "ref": "6be36781-6dfe-403d-9b7c-0000a17e1dfa"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 6,
+                    "field": {
+                        "id": "vtoiwfFHvB",
+                        "type": "opinion_scale",
+                        "ref": "898e080f-8e41-42ba-9913-0000d967ad0d"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 7,
+                    "field": {
+                        "id": "jQ4zpxP4VC",
+                        "type": "opinion_scale",
+                        "ref": "9b55dabd-e61a-413d-9c20-00005c48ef73"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Waited about 40 minutes.",
+                    "field": {
+                        "id": "zfiPXJsxs8",
+                        "type": "long_text",
+                        "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "oISSPwAK8Q",
+                        "type": "opinion_scale",
+                        "ref": "15da3524-0983-4ea4-b3b9-0000d2c700ea"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "SyBjlatGe2",
+                        "type": "opinion_scale",
+                        "ref": "dae39703-6bbf-4aaa-8a59-0000db76b880"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 10,
+                    "field": {
+                        "id": "kSZQRSB1P2",
+                        "type": "opinion_scale",
+                        "ref": "1838859b-92fa-4d9a-ba85-0000aff4d35a"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "rWAFE0dZvZ",
+                        "type": "opinion_scale",
+                        "ref": "3c9e6ce2-1a9e-4160-b5f5-00004d94969c"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "boolean": true,
+                    "field": {
+                        "id": "YPP1us0cDc",
+                        "type": "yes_no",
+                        "ref": "6d9123c2-df7e-4e6b-be98-00006c040c41"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Dr. Farhan Siddiqui",
+                    "field": {
+                        "id": "kMAb0hzra6",
+                        "type": "short_text",
+                        "ref": "325ff231-ee77-48de-a886-00000da863cd"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 10,
+                    "field": {
+                        "id": "3aO0zAU4jx",
+                        "type": "opinion_scale",
+                        "ref": "2bb09931-8e50-4130-a62f-00009c7ccff0"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "AOaAKbfZjH",
+                        "type": "opinion_scale",
+                        "ref": "99327712-b6aa-4b52-bdc5-0000be8a86e3"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 10,
+                    "field": {
+                        "id": "eRbkOgqZXh",
+                        "type": "opinion_scale",
+                        "ref": "9d19ec7c-6a32-46c9-bd60-0000cdf0497e"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "13oYldKPS1",
+                        "type": "opinion_scale",
+                        "ref": "0b0aed5a-6b14-47ef-bc46-00005be34858"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 10,
+                    "field": {
+                        "id": "F5H3MA16T9",
+                        "type": "opinion_scale",
+                        "ref": "81eed731-e9e8-498f-946d-00006d3ae941"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "F5L3WZvD7s",
+                        "ref": "8f392341-56b0-43d4-8f08-0000d9d4091c",
+                        "label": "No"
+                    },
+                    "field": {
+                        "id": "DbWbH0ThNb",
+                        "type": "dropdown",
+                        "ref": "6b37d59a-1d7c-41c9-aa5a-00005bb0eee2"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 6,
+                    "field": {
+                        "id": "HRtxgKJzl0",
+                        "type": "opinion_scale",
+                        "ref": "1127bb0d-87aa-408d-bd90-0000d63a8ec3"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 7,
+                    "field": {
+                        "id": "7iFItUTpbt",
+                        "type": "opinion_scale",
+                        "ref": "72feeaec-9c90-476e-b3fb-000003f41092"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "abcRHAVHPZ",
+                        "type": "opinion_scale",
+                        "ref": "e1820ff9-56e8-4660-b427-00000fdc8770"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "6pqmIbNHQx",
+                        "ref": "15103599-e05f-48f9-909b-000009ed39b5",
+                        "label": "Yes"
+                    },
+                    "field": {
+                        "id": "22mZwhsBfu",
+                        "type": "dropdown",
+                        "ref": "29043f04-84af-430d-a3ac-0000bd8e5a08"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "LWiT7BuYMJ",
+                        "type": "opinion_scale",
+                        "ref": "0cd4e4f4-f8b2-4e1b-be43-000033237508"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "5wnFtI4GXp",
+                        "type": "opinion_scale",
+                        "ref": "3dd6a601-13b0-4153-92cd-000002d79495"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 7,
+                    "field": {
+                        "id": "wQ3BrPxESH",
+                        "type": "opinion_scale",
+                        "ref": "577951f9-6d5e-4a79-9764-000090646437"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 7,
+                    "field": {
+                        "id": "IwpQFnUssP",
+                        "type": "opinion_scale",
+                        "ref": "05bec345-3ff9-4eec-9e1f-0000042becc6"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "boolean": false,
+                    "field": {
+                        "id": "UcOjHwJljI",
+                        "type": "yes_no",
+                        "ref": "e7142176-3617-4977-9e68-000050d877b7"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 4,
+                    "field": {
+                        "id": "zDqcgf3AWI",
+                        "type": "rating",
+                        "ref": "d8892622-1fae-4533-8e87-00008bde3009"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 9,
+                    "field": {
+                        "id": "HMnhJ9b2To",
+                        "type": "nps",
+                        "ref": "5b3b6648-f020-4fce-b8ab-0000317a0012"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "boolean": true,
+                    "field": {
+                        "id": "yD5Ot1u23M",
+                        "type": "yes_no",
+                        "ref": "f5ea73cd-c0e3-4efa-a932-00004e958489"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Overall a good experience, pharmacy could be faster.",
+                    "field": {
+                        "id": "4zl0qsrejd",
+                        "type": "long_text",
+                        "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c"
+                    }
+                },
+                {
+                    "type": "file_url",
+                    "file_url": "https://api.typeform.com/responses/files/8f3a1c2d9e/receipt.jpg",
+                    "field": {
+                        "id": "saoVwQzt9O",
+                        "type": "file_upload",
+                        "ref": "17bde61f-df93-450e-8eba-000044eaf034"
+                    }
+                }
+            ],
+            "variables": []
+        },
+        {
+            "landing_id": "l2",
+            "token": "apitoken000000000002",
+            "response_id": "l2",
+            "landed_at": "2026-02-02T09:00:00Z",
+            "submitted_at": "2026-02-02T09:20:00Z",
+            "metadata": {
+                "platform": "other"
+            },
+            "hidden": {},
+            "calculated": {
+                "score": 1
+            },
+            "answers": [
+                {
+                    "type": "text",
+                    "text": "Ittefaq Hospital",
+                    "field": {
+                        "id": "vmbsbI8xmK",
+                        "type": "short_text",
+                        "ref": "5ba66478-fdc1-400b-8b4d-0000ef922dde"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "SR101HBu8v",
+                        "ref": "aecbcbc9-d85f-435c-8862-00007344131b",
+                        "label": "Lahore"
+                    },
+                    "field": {
+                        "id": "0I9RaTEUb7",
+                        "type": "dropdown",
+                        "ref": "a7e8eb9d-b5bd-4978-9d3b-0000254cf0f2"
+                    }
+                },
+                {
+                    "type": "date",
+                    "date": "2026-03-14",
+                    "field": {
+                        "id": "IEbni0x1ho",
+                        "type": "date",
+                        "ref": "e12b1148-812a-472b-b8eb-0000892b2d68"
+                    }
+                },
+                {
+                    "type": "choice",
+                    "choice": {
+                        "id": "uSKWK1f7jg",
+                        "ref": "c5fb63fc-23bd-4edf-883e-0000876c425a",
+                        "label": "Phone call"
+                    },
+                    "field": {
+                        "id": "QYZ1DOYpAG",
+                        "type": "multiple_choice",
+                        "ref": "e00cedde-4dec-4a0f-8a91-00004ce34388"
+                    }
+                },
+                {
+                    "type": "text",
+                    "text": "Ayesha",
+                    "field": {
+                        "id": "rs7QOmxIoQ",
+                        "type": "short_text",
+                        "ref": "175c25a1-7e7a-4509-b1e7-00001e7ee3ef"
+                    }
+                },
+                {
+                    "type": "boolean",
+                    "boolean": true,
+                    "field": {
+                        "id": "4orXiV5XNb",
+                        "type": "yes_no",
+                        "ref": "4445bc57-828e-42e9-bf0b-0000a8918227"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "YmG4Bjhlaf",
+                        "type": "opinion_scale",
+                        "ref": "6682f78e-a9f9-408a-b85b-00003c84e26c"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "wqwtV8TWkE",
+                        "type": "opinion_scale",
+                        "ref": "16d90a0d-5856-4b0c-ba3a-000062694db8"
+                    }
+                },
+                {
+                    "type": "number",
+                    "number": 8,
+                    "field": {
+                        "id": "yuE1vvsG7a",
+                        "type": "opinion_scale",
+                        "ref": "d1fa5900-4b50-45c5-9d89-0000e33ec8ef"
+                    }
+                }
+            ],
+            "variables": []
+        }
+    ]
+}

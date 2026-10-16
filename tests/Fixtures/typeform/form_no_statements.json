@@ -1,0 +1,61 @@
+{
+    "id": "NOSTMT01",
+    "type": "form",
+    "title": "Flat form",
+    "settings": {
+        "language": "en"
+    },
+    "welcome_screens": [],
+    "thankyou_screens": [],
+    "fields": [
+        {
+            "id": "ZIQxe7tbn7",
+            "title": "Facility",
+            "ref": "e92ff6e4-a8c4-4401-8042-00006b8bed8b",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "short_text"
+        },
+        {
+            "id": "DaxWH5T5k5",
+            "title": "Cleanliness",
+            "ref": "8d2520df-773b-45cb-a9a4-0000b623002b",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "QaGrXpc0RN",
+            "title": "Recommend?",
+            "ref": "478bac41-3c23-4a22-85e2-00002f8b9061",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "ShQSGkto3t",
+            "title": "Comments",
+            "ref": "a6e8f47c-aa5c-4699-82da-0000244cef13",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        }
+    ],
+    "logic": [],
+    "variables": {}
+}

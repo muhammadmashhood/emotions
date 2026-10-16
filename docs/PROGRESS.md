@@ -5,7 +5,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M0 — Foundations**
 - [x] **M1 — Tenancy, users, roles**
 - [x] **M2 — Typeform connection and client**
-- [ ] **M3 — Linking, structure parsing, versions, mapping editor**
+- [x] **M3 — Linking, structure parsing, versions, mapping editor**
 - [ ] **M4 — Ingestion and scoring**
 - [ ] **M5 — Hospital dashboard and evaluations**
 - [ ] **M6 — Admin overview and operations**
@@ -40,3 +40,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Unit/Typeform tests/Feature/Admin/TypeformConnectionTest.php`.
 
 **Known gaps:** the picker's "Link form" action is wired in M3.
+
+## M3 — Linking, structure parsing, versions, mapping editor
+
+**Built:** Synthetic fixtures mirroring the real form (`tests/Fixtures/typeform/`, regenerate with `php tests/Fixtures/typeform/generate.php`; `docs/fixtures/*` is used automatically when present). `FormStructureParser` (statements/groups → sections, per-type defaults, yes/no choice detection, info keys, title cleaning, structure hash). `FormVersioner` (initial version, carry-over of names/weights/moves/scored/info keys, admin-created sections survive, new fields flagged, `refreshFromTypeform` creates a version only when the hash changes). `WebhookRegistrar` (register / check+repair / unregister), `FormLinker` (link, relink, unlink, cross-hospital guard), `MappingEditor` (validated persistence + audit diff). Screens: form picker "Link form" action, form detail (scoring settings, webhook status + repair, versions, re-sync, recalculate, unlink), mapping editor (rename, weight, reorder, add/delete sections, scored toggle, info key, "Move to…", SortableJS drag across panels, New badges, version selector, read-only older versions, rescore prompt). Job shells `BackfillFormResponses` and `RescoreFormSubmissions` (bodies in M4).
+
+**Verify:** `./vendor/bin/pest tests/Unit/Domain tests/Feature/Forms`. In the UI: link a form, open Mapping, drag "The website/ App was easy to access" into "Website/ App booking", save.
+
+**Known gaps:** jobs are dispatched but do nothing until M4.

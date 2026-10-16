@@ -1,0 +1,117 @@
+{
+    "id": "RATEYN01",
+    "type": "form",
+    "title": "Rating and yes/no",
+    "settings": {
+        "language": "en"
+    },
+    "welcome_screens": [],
+    "thankyou_screens": [],
+    "fields": [
+        {
+            "id": "94rrwU3Ple",
+            "title": "Section 1 — Experience",
+            "ref": "b28f1447-5d30-465c-af78-0000ce94e6c5",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "ViKpmgl0Vc",
+            "title": "Stars",
+            "ref": "011dc02c-4a6d-48c3-ab66-0000e598dbde",
+            "properties": {
+                "steps": 5,
+                "shape": "star"
+            },
+            "type": "rating"
+        },
+        {
+            "id": "FrTDmNc0UA",
+            "title": "Would you come back?",
+            "ref": "dcf94997-fc26-4ec5-bd5b-0000e3f87b03",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "juWa24D28y",
+            "title": "Scale one to five",
+            "ref": "c5dcb420-1412-43f1-936f-000069331a76",
+            "properties": {
+                "steps": 5,
+                "start_at_one": true
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "It7PtYLFyi",
+            "title": "NPS",
+            "ref": "0b2d1e58-0dce-46cd-9df3-0000d6a2c68a",
+            "properties": {
+                "steps": 11
+            },
+            "type": "nps"
+        },
+        {
+            "id": "hBO44t9B0n",
+            "title": "Clean?",
+            "ref": "6c398e1f-b793-4d0e-a6ba-00003f6e9834",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "jLfSVaTFlz",
+                        "ref": "a0d5aaa5-b933-4230-a90e-00007d5a7277",
+                        "label": "Yes"
+                    },
+                    {
+                        "id": "foRb0NrXOX",
+                        "ref": "3574c03d-9e1d-42d8-b69b-0000b7d0db52",
+                        "label": "No"
+                    },
+                    {
+                        "id": "b1oH02dWED",
+                        "ref": "7bfde95f-fac9-41ca-aaf4-0000a672318d",
+                        "label": "N/A"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "5TgkTfEhaf",
+            "title": "Not applicable choice",
+            "ref": "b0ea4dd0-5e46-4545-8e7b-00006d659502",
+            "properties": {
+                "choices": [
+                    {
+                        "id": "if7AZB9sPe",
+                        "ref": "e91c42ec-c8ad-4a03-a9a6-00000d99591e",
+                        "label": "yes"
+                    },
+                    {
+                        "id": "SlNkHSdPdI",
+                        "ref": "95dbc4db-b227-48f7-a147-00001e0f3d57",
+                        "label": "no"
+                    },
+                    {
+                        "id": "3QvgMtRTiW",
+                        "ref": "ef3c40f5-6650-4dd4-b697-0000ca858adc",
+                        "label": "Not applicable"
+                    }
+                ]
+            },
+            "type": "multiple_choice"
+        }
+    ],
+    "logic": [],
+    "variables": {}
+}

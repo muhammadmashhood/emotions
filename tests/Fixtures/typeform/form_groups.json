@@ -1,0 +1,132 @@
+{
+    "id": "GRP00001",
+    "type": "form",
+    "title": "Grouped form",
+    "settings": {
+        "language": "en"
+    },
+    "welcome_screens": [],
+    "thankyou_screens": [],
+    "fields": [
+        {
+            "id": "gLbC5uk0lM",
+            "title": "Hospital name",
+            "ref": "173ee8ac-b9b6-4c6d-bd1b-00005c80d7db",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "short_text"
+        },
+        {
+            "id": "ybNXVNlGIt",
+            "title": "Reception",
+            "ref": "46dbcefd-9fe7-4a3c-9b4a-00000d65f18a",
+            "properties": {
+                "fields": [
+                    {
+                        "id": "lRDIJ86dgE",
+                        "title": "Greeting",
+                        "ref": "bf95c6fd-98dd-4418-b05b-00003d31dd92",
+                        "properties": {
+                            "steps": 11,
+                            "start_at_one": false,
+                            "labels": {
+                                "left": "Very poor",
+                                "right": "Excellent"
+                            }
+                        },
+                        "validations": {
+                            "required": false
+                        },
+                        "type": "opinion_scale"
+                    },
+                    {
+                        "id": "qvSo6igpho",
+                        "title": "Badge worn?",
+                        "ref": "ecdf6d52-3ab6-4846-a429-0000d7d94da6",
+                        "properties": [],
+                        "validations": {
+                            "required": false
+                        },
+                        "type": "yes_no"
+                    }
+                ]
+            },
+            "type": "group"
+        },
+        {
+            "id": "Bv6NtaNZzB",
+            "title": "After the group, back to General",
+            "ref": "6be4731e-8fa2-4eb7-ae44-00006a715c9d",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "ApO9MVR2vy",
+            "title": "Doctor",
+            "ref": "a2dc0729-974b-414a-ae8a-0000cadc3b09",
+            "properties": {
+                "fields": [
+                    {
+                        "id": "zEERAi62mL",
+                        "title": "Listening",
+                        "ref": "b9bde03c-f3aa-48a9-a397-0000643238ee",
+                        "properties": {
+                            "steps": 11,
+                            "start_at_one": false,
+                            "labels": {
+                                "left": "Very poor",
+                                "right": "Excellent"
+                            }
+                        },
+                        "validations": {
+                            "required": false
+                        },
+                        "type": "opinion_scale"
+                    },
+                    {
+                        "id": "Hsa1Gst8YS",
+                        "title": "Nested",
+                        "ref": "17d536aa-a6c8-40c9-9f09-00007fd50a8a",
+                        "properties": {
+                            "fields": [
+                                {
+                                    "id": "Ge9pQaAMwj",
+                                    "title": "Nested question",
+                                    "ref": "70fca19e-f53a-41c8-9059-0000a6e4282c",
+                                    "properties": {
+                                        "steps": 11,
+                                        "start_at_one": false,
+                                        "labels": {
+                                            "left": "Very poor",
+                                            "right": "Excellent"
+                                        }
+                                    },
+                                    "validations": {
+                                        "required": false
+                                    },
+                                    "type": "opinion_scale"
+                                }
+                            ]
+                        },
+                        "type": "group"
+                    }
+                ]
+            },
+            "type": "group"
+        }
+    ],
+    "logic": [],
+    "variables": {}
+}

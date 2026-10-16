@@ -1,0 +1,1863 @@
+{
+    "id": "rACXmOJ2",
+    "type": "quiz",
+    "title": "Hospital Mystery Shopping Evaluation",
+    "workspace": {
+        "href": "https://api.typeform.com/workspaces/ws1"
+    },
+    "theme": {
+        "href": "https://api.typeform.com/themes/t1"
+    },
+    "settings": {
+        "language": "en",
+        "progress_bar": "proportion",
+        "meta": {
+            "allow_indexing": false
+        },
+        "hide_navigation": false,
+        "is_public": true,
+        "is_trial": false,
+        "show_progress_bar": true,
+        "show_typeform_branding": true,
+        "are_uploads_public": false,
+        "show_time_to_complete": true,
+        "show_number_of_submissions": false,
+        "show_cookie_consent": false,
+        "show_question_number": true,
+        "show_key_hint_on_choices": true,
+        "autosave_progress": true,
+        "free_form_navigation": false,
+        "use_lead_qualification": false,
+        "pro_subdomain_enabled": false,
+        "capabilities": {
+            "e2e_encryption": {
+                "enabled": false,
+                "modifiable": false
+            }
+        },
+        "partial_responses_to_all_integrations": true
+    },
+    "welcome_screens": [
+        {
+            "id": "9DZ1SnkD6U",
+            "ref": "37cb61b3-c181-4662-86fc-00009b24cfe5",
+            "title": "Welcome to the Mystery Shopping Evaluation",
+            "properties": {
+                "show_button": true,
+                "button_text": "Start",
+                "description": "Please answer honestly."
+            }
+        }
+    ],
+    "thankyou_screens": [
+        {
+            "id": "U4m1QOgITW",
+            "ref": "default_tys",
+            "title": "Thank you for your evaluation",
+            "type": "thankyou_screen",
+            "properties": {
+                "show_button": false,
+                "share_icons": false
+            }
+        }
+    ],
+    "fields": [
+        {
+            "id": "3kHqsX7AuT",
+            "title": "*Section 1 — General Information*",
+            "ref": "1ce42d58-7449-44c1-9686-0000f2baa5d1",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "vmbsbI8xmK",
+            "title": "Healthcare Facility",
+            "ref": "5ba66478-fdc1-400b-8b4d-0000ef922dde",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "short_text"
+        },
+        {
+            "id": "0I9RaTEUb7",
+            "title": "Location",
+            "ref": "a7e8eb9d-b5bd-4978-9d3b-0000254cf0f2",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "SR101HBu8v",
+                        "ref": "aecbcbc9-d85f-435c-8862-00007344131b",
+                        "label": "Lahore"
+                    },
+                    {
+                        "id": "nqHzrWLFOx",
+                        "ref": "a318f63a-6658-4059-9f99-0000cb18ca1a",
+                        "label": "Karachi"
+                    },
+                    {
+                        "id": "PlO5DuqGnm",
+                        "ref": "ef732059-a36f-4fa1-9624-00005598107c",
+                        "label": "Islamabad"
+                    },
+                    {
+                        "id": "j93bZd4bJW",
+                        "ref": "c21c3c3f-6d25-48fe-a988-000089a20348",
+                        "label": "Rawalpindi"
+                    },
+                    {
+                        "id": "UE2GFI9k4H",
+                        "ref": "99db6af2-7964-4267-a959-00004454b220",
+                        "label": "Multan"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "IEbni0x1ho",
+            "title": "Vsite Date",
+            "ref": "e12b1148-812a-472b-b8eb-0000892b2d68",
+            "properties": {
+                "structure": "DDMMYYYY",
+                "separator": "/"
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "date"
+        },
+        {
+            "id": "QYZ1DOYpAG",
+            "title": "Appointment Booking method",
+            "ref": "e00cedde-4dec-4a0f-8a91-00004ce34388",
+            "properties": {
+                "randomize": false,
+                "allow_multiple_selection": false,
+                "allow_other_choice": false,
+                "vertical_alignment": true,
+                "choices": [
+                    {
+                        "id": "uSKWK1f7jg",
+                        "ref": "c5fb63fc-23bd-4edf-883e-0000876c425a",
+                        "label": "Phone call"
+                    },
+                    {
+                        "id": "eUbA4zfsxF",
+                        "ref": "15d4246b-bdd2-4018-8b5e-0000a1e06dcd",
+                        "label": "Website/ App"
+                    },
+                    {
+                        "id": "BGTjzdMpbs",
+                        "ref": "645aab89-4fa2-45db-be33-0000aa70f129",
+                        "label": "Walk-in"
+                    }
+                ]
+            },
+            "validations": {
+                "required": true
+            },
+            "type": "multiple_choice"
+        },
+        {
+            "id": "rs7QOmxIoQ",
+            "title": "Name of the agent who handled the booking",
+            "ref": "175c25a1-7e7a-4509-b1e7-00001e7ee3ef",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "short_text"
+        },
+        {
+            "id": "ha7LKkVWAk",
+            "title": "The website/ App was easy to access",
+            "ref": "abbe4af1-3c8d-4773-93e6-0000dab4b08f",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 10"
+        },
+        {
+            "id": "tKzAROxg2L",
+            "title": "Section 2 — Website/ App booking",
+            "ref": "a3da1307-9549-49b2-821b-0000f333b605",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "xOtvekEZXd",
+            "title": "Appointment slots were clearly displayed",
+            "ref": "8cdcfa86-412d-468f-a62e-000018569f8a",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "cVxsaiwVor",
+            "title": "The booking process was quick",
+            "ref": "4f6f8c5c-1a8a-4f92-9c9a-00004ca575a2",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "fbTsPMmK6a",
+            "title": "Confirmation details were accurate",
+            "ref": "31447a6e-c940-4759-a091-00008a3b8d2a",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "LaJE44aUhP",
+            "title": "The app/website looked professional",
+            "ref": "8c4b7550-032c-48d2-ac47-0000fd418f2e",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "WsbQbFYrMP",
+            "title": "It was easy to find the right doctor",
+            "ref": "d40ee92d-fe4c-412c-9633-000063c2bfec",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "X9oGjGNidH",
+            "title": "Payment options were clear",
+            "ref": "b9a38efb-8484-4947-b206-0000733ef480",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "oaL8MbaXKv",
+            "title": "Reminders were sent before the visit",
+            "ref": "7d3cef2b-f84a-472a-9035-0000caf0b9ea",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale",
+            "description": "Rate from 1 to 5"
+        },
+        {
+            "id": "vap1krd14C",
+            "title": "Was a booking confirmation received?",
+            "ref": "10296bd5-7cb4-43d4-94cb-0000a7e53d14",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "mzWbqWWSvG",
+                        "ref": "0253ae82-f793-471b-955c-0000ec0d260b",
+                        "label": "Yes"
+                    },
+                    {
+                        "id": "Z52baEF0kt",
+                        "ref": "d401951e-1350-4fab-8402-000084e8301c",
+                        "label": "No"
+                    },
+                    {
+                        "id": "xS9ry4MihB",
+                        "ref": "d97bed78-b469-44e1-96a6-0000372565f1",
+                        "label": "N/A"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "kvBBlJID4P",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "XZfuN7ibhN",
+            "title": "Section 3 — Phone booking",
+            "ref": "775efd25-67e4-4f5b-aaf1-000039007864",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "4orXiV5XNb",
+            "title": "Was the call answered within 3 rings?",
+            "ref": "4445bc57-828e-42e9-bf0b-0000a8918227",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "YmG4Bjhlaf",
+            "title": "The agent greeted you politely",
+            "ref": "6682f78e-a9f9-408a-b85b-00003c84e26c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "wqwtV8TWkE",
+            "title": "The agent understood your request",
+            "ref": "16d90a0d-5856-4b0c-ba3a-000062694db8",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "yuE1vvsG7a",
+            "title": "The agent offered suitable appointment times",
+            "ref": "d1fa5900-4b50-45c5-9d89-0000e33ec8ef",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "szSsiPRwsb",
+            "title": "The agent confirmed the appointment details",
+            "ref": "f2158230-57f6-4f50-a732-0000eee88e1c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "ixddT8aYY4",
+            "title": "Hold time was acceptable",
+            "ref": "a04fb9ce-384a-4e19-9e17-00001affe2bf",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "oUxX3adgTc",
+            "title": "The agent spoke clearly",
+            "ref": "9a7ee734-68b8-4190-a4b7-0000fa1393c0",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "5KD8vaiRMv",
+            "title": "The agent thanked you at the end",
+            "ref": "7e12532b-af97-4e82-8e71-00007f877ca8",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "90aWVpmfou",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "OzPqsJfrTJ",
+            "title": "Section 4 — Arrival, Parking & Reception",
+            "ref": "57d2437b-7da2-4dc5-8027-0000bb067d0b",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "8oXaOaauaw",
+            "title": "Signage made the reception easy to find",
+            "ref": "661d313e-682f-48a7-8ae0-00008843b9b7",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "mgDeCSQOhh",
+            "title": "Receptionist greeted you promptly",
+            "ref": "1925ba3c-e867-4b3d-8a0b-00006d95fd89",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "mcEcRQ4kyC",
+            "title": "Check-in was quick",
+            "ref": "64475a9f-46d9-4070-8028-00005bb0cb63",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "lKJ5gEK6qj",
+            "title": "Receptionist was courteous",
+            "ref": "f8fe39b7-33c8-4e0b-854a-0000326343cc",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "cN3sOCGkfe",
+            "title": "Receptionist explained the next steps",
+            "ref": "6513292c-17f5-4792-aa70-000089c7175c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "SuaMKzLYXI",
+            "title": "Parking was easy to find",
+            "ref": "33b1ae24-2fa0-49f3-89fd-00008901f555",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "TQaEEAg6jV",
+            "title": "Security staff were helpful",
+            "ref": "6b96c473-f8d4-4ff3-82ee-0000ac8bf1bd",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "KwgJzSMvWX",
+            "title": "The entrance was accessible",
+            "ref": "2edf73d8-4f7f-4858-b545-0000e9c24616",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "tjWZxY6duQ",
+            "title": "Was your appointment found in the system immediately?",
+            "ref": "e18781f5-69f0-432a-ba9c-000096c2669e",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "7qcFORQdgi",
+                        "ref": "afe17d1a-126c-44c0-b6a4-0000fcea8998",
+                        "label": "Yes"
+                    },
+                    {
+                        "id": "oaU3iasIhi",
+                        "ref": "015a4b74-a50d-4174-82a3-0000b93df986",
+                        "label": "No"
+                    },
+                    {
+                        "id": "T24dVFLBi1",
+                        "ref": "74c93ee0-5196-473a-b55e-000027c2ca62",
+                        "label": "N/A"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "6sn4AXWPlr",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "DbwhlevfBY",
+            "title": "Section 5 — Waiting Area",
+            "ref": "c51b4748-193f-404c-889d-00009f1d52aa",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "SSoCgycyMc",
+            "title": "The waiting area was clean",
+            "ref": "6be36781-6dfe-403d-9b7c-0000a17e1dfa",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "vtoiwfFHvB",
+            "title": "Seating was comfortable and sufficient",
+            "ref": "898e080f-8e41-42ba-9913-0000d967ad0d",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "jQ4zpxP4VC",
+            "title": "Waiting time was acceptable",
+            "ref": "9b55dabd-e61a-413d-9c20-00005c48ef73",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "1cOwx18R5u",
+            "title": "Updates were given about delays",
+            "ref": "2792d6fb-4c3a-4485-812f-000069cc53ba",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "EbXJ2bx0BJ",
+            "title": "Refreshments / water were available",
+            "ref": "9f2b215d-5721-4cdf-b84a-0000ee21db23",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "x4YowFUVla",
+            "title": "Temperature and lighting were comfortable",
+            "ref": "30a9b0c7-eb1c-406f-a481-0000398b7689",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "Mu1r4QJUnQ",
+            "title": "Information displays were useful",
+            "ref": "acadfd35-0189-409c-a06f-0000ad38d2b6",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "zfiPXJsxs8",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "31vy96AVOK",
+            "title": "Section 6 — Nursing Staff",
+            "ref": "89c3f8ce-620f-4ab0-af1a-0000c79d7d8f",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "oISSPwAK8Q",
+            "title": "Nurse introduced themselves",
+            "ref": "15da3524-0983-4ea4-b3b9-0000d2c700ea",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "SyBjlatGe2",
+            "title": "Vitals were taken professionally",
+            "ref": "dae39703-6bbf-4aaa-8a59-0000db76b880",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "kSZQRSB1P2",
+            "title": "Nurse explained what they were doing",
+            "ref": "1838859b-92fa-4d9a-ba85-0000aff4d35a",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "rWAFE0dZvZ",
+            "title": "Nurse was attentive to your comfort",
+            "ref": "3c9e6ce2-1a9e-4160-b5f5-00004d94969c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "EWYF2Wh1ZZ",
+            "title": "Nurse maintained privacy",
+            "ref": "6384308a-b10e-475d-9753-0000d9346bfb",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "ZR60p4N2Kc",
+            "title": "Nurse was friendly",
+            "ref": "99ad5e90-42d6-447f-8427-0000a65acf6c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "X6UGmGbaQx",
+            "title": "Nurse answered your questions",
+            "ref": "67d1a474-32a2-47ba-b4b2-0000641b5d8a",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "mkvTH63B1x",
+            "title": "Hand hygiene was observed",
+            "ref": "470d5b70-9ac8-4730-91a7-000060b5aa81",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "YPP1us0cDc",
+            "title": "Did the nurse wear a name badge?",
+            "ref": "6d9123c2-df7e-4e6b-be98-00006c040c41",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "i3Jw6dKUu0",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "kT7R1v7C1m",
+            "title": "Section 7 — Doctor Consultation",
+            "ref": "091a6af0-5429-444e-a9ac-0000e5ce5480",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "kMAb0hzra6",
+            "title": "Name of the Doctor",
+            "ref": "325ff231-ee77-48de-a886-00000da863cd",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "short_text"
+        },
+        {
+            "id": "3aO0zAU4jx",
+            "title": "Doctor saw you at the scheduled time",
+            "ref": "2bb09931-8e50-4130-a62f-00009c7ccff0",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "AOaAKbfZjH",
+            "title": "Doctor listened carefully",
+            "ref": "99327712-b6aa-4b52-bdc5-0000be8a86e3",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "eRbkOgqZXh",
+            "title": "Doctor explained the diagnosis clearly",
+            "ref": "9d19ec7c-6a32-46c9-bd60-0000cdf0497e",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "13oYldKPS1",
+            "title": "Doctor explained the treatment options",
+            "ref": "0b0aed5a-6b14-47ef-bc46-00005be34858",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "F5H3MA16T9",
+            "title": "Doctor gave you time to ask questions",
+            "ref": "81eed731-e9e8-498f-946d-00006d3ae941",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "M5bNg98m43",
+            "title": "Doctor was respectful",
+            "ref": "00693d6f-9cc0-4180-9540-0000f7346b00",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "9K0w1Qk4Vz",
+            "title": "Doctor examined you thoroughly",
+            "ref": "6147fded-a39a-4ae9-b238-00003b41e80f",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "NrNbaxLpbV",
+            "title": "Doctor explained follow-up steps",
+            "ref": "dda284ac-7810-4905-99f6-0000dc37ab2f",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "EI7Vepjgrp",
+            "title": "Doctor washed hands / used sanitiser",
+            "ref": "112a96bc-81dd-4ebd-a9a2-0000a6e6c07d",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "OwKBAFZqOU",
+            "title": "Overall confidence in the doctor",
+            "ref": "4ad8425a-bee6-4ff3-9f00-00004b4d6dd9",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "DbWbH0ThNb",
+            "title": "Did the doctor explain possible side effects?",
+            "ref": "6b37d59a-1d7c-41c9-aa5a-00005bb0eee2",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "daSctIm1Zz",
+                        "ref": "f9dcda51-83ae-44da-9bc9-0000ec501a32",
+                        "label": "Yes"
+                    },
+                    {
+                        "id": "F5L3WZvD7s",
+                        "ref": "8f392341-56b0-43d4-8f08-0000d9d4091c",
+                        "label": "No"
+                    },
+                    {
+                        "id": "ldk776iwoW",
+                        "ref": "22f499ab-c054-4720-9833-0000377859c8",
+                        "label": "N/A"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "xl3MH1IDXI",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "JHdCHdnaqa",
+            "title": "Section 8 — Pharmacy & Billing",
+            "ref": "9ec4f758-e039-4f59-8846-00002908a199",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "HRtxgKJzl0",
+            "title": "Pharmacy was easy to locate",
+            "ref": "1127bb0d-87aa-408d-bd90-0000d63a8ec3",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "7iFItUTpbt",
+            "title": "Pharmacist explained the medication",
+            "ref": "72feeaec-9c90-476e-b3fb-000003f41092",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "abcRHAVHPZ",
+            "title": "Waiting time at pharmacy was acceptable",
+            "ref": "e1820ff9-56e8-4660-b427-00000fdc8770",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "j02UbtW1gK",
+            "title": "Billing was accurate",
+            "ref": "f018eda8-5819-4afa-9964-0000cf19df3c",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "hcyceDpG4m",
+            "title": "Billing staff were courteous",
+            "ref": "dc22dd03-9474-4f18-a63c-0000a0392f81",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "dJpraN75HS",
+            "title": "Payment methods were convenient",
+            "ref": "38180aa2-9063-48dc-9d76-000076468fe3",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "1BayJjfmB7",
+            "title": "Receipt was itemised and clear",
+            "ref": "84f043f3-1d84-44f7-8c26-0000def65611",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "22mZwhsBfu",
+            "title": "Were all prescribed medicines available?",
+            "ref": "29043f04-84af-430d-a3ac-0000bd8e5a08",
+            "properties": {
+                "alphabetical_order": false,
+                "choices": [
+                    {
+                        "id": "6pqmIbNHQx",
+                        "ref": "15103599-e05f-48f9-909b-000009ed39b5",
+                        "label": "Yes"
+                    },
+                    {
+                        "id": "Pe48bxbSP3",
+                        "ref": "2024cd80-a887-438a-8571-0000b14983d1",
+                        "label": "No"
+                    },
+                    {
+                        "id": "6RBAtufJC7",
+                        "ref": "ce387663-a3a5-4b03-9361-0000d2c57a4f",
+                        "label": "N/A"
+                    }
+                ]
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "dropdown"
+        },
+        {
+            "id": "WncmbVLNcx",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "an5DBEOQHs",
+            "title": "Section 9 — Facility & Cleanliness",
+            "ref": "598eaaa5-110e-46ac-b60d-0000cd04cfa9",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "LWiT7BuYMJ",
+            "title": "Toilets were clean",
+            "ref": "0cd4e4f4-f8b2-4e1b-be43-000033237508",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "5wnFtI4GXp",
+            "title": "Corridors were clean",
+            "ref": "3dd6a601-13b0-4153-92cd-000002d79495",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "wQ3BrPxESH",
+            "title": "Consultation room was clean",
+            "ref": "577951f9-6d5e-4a79-9764-000090646437",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "IwpQFnUssP",
+            "title": "Equipment looked well maintained",
+            "ref": "05bec345-3ff9-4eec-9e1f-0000042becc6",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "WLPYbYStSD",
+            "title": "Waste was disposed of properly",
+            "ref": "18644481-1af6-4385-8b54-000042625163",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "awH0cfTBh1",
+            "title": "Hand sanitiser was available",
+            "ref": "7b6409b1-40c6-4baa-b28e-0000077ffb33",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "tuaBnGcstd",
+            "title": "The building was well lit",
+            "ref": "d33c53c8-9270-4f88-991f-0000f484a239",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "KAaZ5NbWhO",
+            "title": "Signage was clear throughout",
+            "ref": "71bb14e1-5d96-46fa-afde-00000da0e663",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "UcOjHwJljI",
+            "title": "Were visible safety hazards present?",
+            "ref": "e7142176-3617-4977-9e68-000050d877b7",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "XflhdIz05U",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "NFidWljZhi",
+            "title": "Section 10 — Overall",
+            "ref": "8b447f4c-7533-48f0-83b1-000041d90537",
+            "properties": {
+                "hide_marks": false,
+                "button_text": "Continue"
+            },
+            "type": "statement"
+        },
+        {
+            "id": "zDqcgf3AWI",
+            "title": "Overall rating of your visit",
+            "ref": "d8892622-1fae-4533-8e87-00008bde3009",
+            "properties": {
+                "steps": 5,
+                "shape": "star"
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "rating"
+        },
+        {
+            "id": "HMnhJ9b2To",
+            "title": "How likely are you to recommend this hospital to a friend?",
+            "ref": "5b3b6648-f020-4fce-b8ab-0000317a0012",
+            "properties": {
+                "steps": 11
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "nps"
+        },
+        {
+            "id": "yD5Ot1u23M",
+            "title": "Would you return to this hospital?",
+            "ref": "f5ea73cd-c0e3-4efa-a932-00004e958489",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "yes_no"
+        },
+        {
+            "id": "S3AXNpJ5bb",
+            "title": "Value for money",
+            "ref": "07089b67-cfc3-4b31-aaa0-0000d11012d5",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "neGiVDHHMb",
+            "title": "Overall staff attitude",
+            "ref": "a33ff168-9bb0-428d-8859-00007ec5d0f7",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "KNXvN9aj0E",
+            "title": "Overall cleanliness",
+            "ref": "7dad900a-09b3-4479-bf3f-0000c999d9ac",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false,
+                "labels": {
+                    "left": "Very poor",
+                    "right": "Excellent"
+                }
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "NEWFIELD01",
+            "title": "Was the discharge process explained?",
+            "ref": "new-field-ref",
+            "properties": {
+                "steps": 11,
+                "start_at_one": false
+            },
+            "validations": {
+                "required": false
+            },
+            "type": "opinion_scale"
+        },
+        {
+            "id": "4zl0qsrejd",
+            "title": "Additional Comments",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "long_text"
+        },
+        {
+            "id": "saoVwQzt9O",
+            "title": "Upload a photo of your receipt or visit evidence",
+            "ref": "17bde61f-df93-450e-8eba-000044eaf034",
+            "properties": [],
+            "validations": {
+                "required": false
+            },
+            "type": "file_upload"
+        }
+    ],
+    "logic": [
+        {
+            "type": "field",
+            "ref": "e00cedde-4dec-4a0f-8a91-00004ce34388",
+            "actions": [
+                {
+                    "action": "jump",
+                    "details": {
+                        "to": {
+                            "type": "field",
+                            "value": "775efd25-67e4-4f5b-aaf1-000039007864"
+                        }
+                    },
+                    "condition": {
+                        "op": "is",
+                        "vars": [
+                            {
+                                "type": "field",
+                                "value": "e00cedde-4dec-4a0f-8a91-00004ce34388"
+                            },
+                            {
+                                "type": "choice",
+                                "value": "c5fb63fc-23bd-4edf-883e-0000876c425a"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "action": "jump",
+                    "details": {
+                        "to": {
+                            "type": "field",
+                            "value": "a3da1307-9549-49b2-821b-0000f333b605"
+                        }
+                    },
+                    "condition": {
+                        "op": "always",
+                        "vars": []
+                    }
+                }
+            ]
+        },
+        {
+            "type": "field",
+            "ref": "4445bc57-828e-42e9-bf0b-0000a8918227",
+            "actions": [
+                {
+                    "action": "add",
+                    "details": {
+                        "target": {
+                            "type": "variable",
+                            "value": "score"
+                        },
+                        "value": {
+                            "type": "constant",
+                            "value": -1
+                        }
+                    },
+                    "condition": {
+                        "op": "is",
+                        "vars": [
+                            {
+                                "type": "field",
+                                "value": "4445bc57-828e-42e9-bf0b-0000a8918227"
+                            },
+                            {
+                                "type": "constant",
+                                "value": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "action": "add",
+                    "details": {
+                        "target": {
+                            "type": "variable",
+                            "value": "score"
+                        },
+                        "value": {
+                            "type": "constant",
+                            "value": -1
+                        }
+                    },
+                    "condition": {
+                        "op": "is",
+                        "vars": [
+                            {
+                                "type": "field",
+                                "value": "4445bc57-828e-42e9-bf0b-0000a8918227"
+                            },
+                            {
+                                "type": "constant",
+                                "value": false
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "field",
+            "ref": "d8892622-1fae-4533-8e87-00008bde3009",
+            "actions": [
+                {
+                    "action": "add",
+                    "details": {
+                        "target": {
+                            "type": "variable",
+                            "value": "score"
+                        },
+                        "value": {
+                            "type": "constant",
+                            "value": 3
+                        }
+                    },
+                    "condition": {
+                        "op": "equal",
+                        "vars": [
+                            {
+                                "type": "field",
+                                "value": "d8892622-1fae-4533-8e87-00008bde3009"
+                            },
+                            {
+                                "type": "constant",
+                                "value": 5
+                            }
+                        ]
+                    }
+                }
+            ]
+        },
+        {
+            "type": "field",
+            "ref": "15a732ba-ab03-46c9-9d8f-0000a1937b1c",
+            "actions": [
+                {
+                    "action": "jump",
+                    "details": {
+                        "to": {
+                            "type": "field",
+                            "value": "1ce42d58-7449-44c1-9686-0000f2baa5d1"
+                        }
+                    },
+                    "condition": {
+                        "op": "always",
+                        "vars": []
+                    }
+                }
+            ]
+        }
+    ],
+    "variables": {
+        "score": 0
+    },
+    "_links": {
+        "display": "https://form.typeform.com/to/rACXmOJ2",
+        "responses": "https://api.typeform.com/forms/rACXmOJ2/responses"
+    }
+}
