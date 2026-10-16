@@ -6,7 +6,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M1 — Tenancy, users, roles**
 - [x] **M2 — Typeform connection and client**
 - [x] **M3 — Linking, structure parsing, versions, mapping editor**
-- [ ] **M4 — Ingestion and scoring**
+- [x] **M4 — Ingestion and scoring**
 - [ ] **M5 — Hospital dashboard and evaluations**
 - [ ] **M6 — Admin overview and operations**
 - [ ] **M7 — Phase 3 features**
@@ -48,3 +48,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Unit/Domain tests/Feature/Forms`. In the UI: link a form, open Mapping, drag "The website/ App was easy to access" into "Website/ App booking", save.
 
 **Known gaps:** jobs are dispatched but do nothing until M4.
+
+## M4 — Ingestion and scoring
+
+**Built:** `WebhookSignature`, `AnswerNormalizer`, `ScoringEngine` (+ `ScoringMapping`, `ScoreResult`) as pure classes. `TypeformWebhookController` on `POST /webhooks/typeform/{uuid}` (registered outside the web group: no session, no CSRF; 120/min per IP; raw body stored; 404 unknown uuid, 401 bad signature, 200 + job). `ProcessTypeformResponse` (queue `webhooks`, 3 tries, backoff 10/60/300 s). `SubmissionIngestor` (cache lock per form+token, duplicate / partial→complete rules, unknown field → `refreshFromTypeform` throttled to once per 5 min, info extraction incl. hidden fields, `require_review` status), `SubmissionScorer`, `BranchResolver` (settings-driven, used by M7), `Rescorer` + `RescoreFormSubmissions` + `php artisan evaluations:rescore {uuid} [--latest] [--on-version=N]`, `ResponseSyncer` (backfill with `before` pagination, reconcile since `last_synced_at − 24 h`), jobs `BackfillFormResponses`, `ReconcileFormResponses`, `CheckFormWebhook`, `CheckFormStructure`, commands `forms:health {webhooks|structure|reconcile}` and `deliveries:prune`, scheduled in `routes/console.php`. Admin "Deliveries" screen with payload view and retry.
+
+**Verify:** `./vendor/bin/pest tests/Feature/Ingestion` — includes the end-to-end test (link → signed webhook → scored evaluation: Phone booking 85 %, Arrival 75 %, Waiting 60 %, Nursing 92 %, Doctor 80 %, Pharmacy 77.5 %, Facility 60 %, Overall 91.67 %, overall 77.65 % amber).
+
+**Known gaps:** none.

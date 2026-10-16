@@ -13,9 +13,12 @@ use App\Policies\SubmissionPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -34,6 +37,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(Form::class, FormPolicy::class);
         Gate::policy(Submission::class, SubmissionPolicy::class);
+
+        RateLimiter::for('webhooks', fn (Request $request) => Limit::perMinute(120)->by((string) $request->ip()));
 
         Event::listen(Login::class, [RecordAuthenticationEvents::class, 'handleLogin']);
         Event::listen(Failed::class, [RecordAuthenticationEvents::class, 'handleFailed']);

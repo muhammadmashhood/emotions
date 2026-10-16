@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Page through all completed responses of a form and ingest them (spec 5.8). Body implemented with the syncer in M4.
+ * Page through all completed responses of a form and ingest them (spec 5.8).
  */
 class BackfillFormResponses implements ShouldBeUnique, ShouldQueue
 {
@@ -26,10 +26,8 @@ class BackfillFormResponses implements ShouldBeUnique, ShouldQueue
         return (string) $this->form->id;
     }
 
-    public function handle(): void
+    public function handle(ResponseSyncer $syncer): void
     {
-        if (class_exists(ResponseSyncer::class)) {
-            app(ResponseSyncer::class)->backfill($this->form);
-        }
+        $syncer->backfill($this->form);
     }
 }

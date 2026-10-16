@@ -9,7 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
 /**
- * Re-score a form's submissions (spec 7.4). Body implemented with the scoring engine in M4.
+ * Re-score a form's submissions (spec 7.4).
  */
 class RescoreFormSubmissions implements ShouldQueue
 {
@@ -25,10 +25,8 @@ class RescoreFormSubmissions implements ShouldQueue
         public bool $useLatestMapping = false,
     ) {}
 
-    public function handle(): void
+    public function handle(Rescorer $rescorer): void
     {
-        if (class_exists(Rescorer::class)) {
-            app(Rescorer::class)->rescoreForm($this->form, $this->version, $this->useLatestMapping);
-        }
+        $rescorer->rescoreForm($this->form, $this->version, $this->useLatestMapping);
     }
 }
