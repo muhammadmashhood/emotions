@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\User;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
@@ -35,6 +36,17 @@ class LoginForm extends Form
 
             throw ValidationException::withMessages([
                 'form.email' => trans('auth.failed'),
+            ]);
+        }
+
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (! $user->canAccess()) {
+            Auth::logout();
+
+            throw ValidationException::withMessages([
+                'form.email' => 'Your account is not active. Please contact your administrator.',
             ]);
         }
 

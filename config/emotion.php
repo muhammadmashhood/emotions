@@ -1,0 +1,19 @@
+<?php
+
+return [
+    'typeform' => [
+        'default_base_url' => env('TYPEFORM_DEFAULT_BASE_URL', 'https://api.typeform.com'),
+        'rate_limit_per_second' => (int) env('TYPEFORM_RATE_LIMIT_PER_SECOND', 2),
+        'connect_timeout' => 5,
+        'timeout' => 20,
+        'max_retries' => 3,
+    ],
+
+    'webhook_delivery_retention_days' => (int) env('WEBHOOK_DELIVERY_RETENTION_DAYS', 90),
+
+    // Local seeding only. Never set in production.
+    'super_admin' => [
+        'email' => env('SUPER_ADMIN_EMAIL'),
+        'password' => env('SUPER_ADMIN_PASSWORD'),
+    ],
+];

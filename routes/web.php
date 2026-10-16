@@ -1,15 +1,38 @@
 <?php
 
+use App\Livewire\Admin;
+use App\Livewire\Auth\AcceptInvitation;
+use App\Livewire\Hospital;
+use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => redirect()->route(auth()->check() ? 'dashboard' : 'login'))->name('home');
+Route::get('/', function () {
+    if (! auth()->check()) {
+        return redirect()->route('login');
+    }
 
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth'])
-    ->name('dashboard');
+    /** @var User $user */
+    $user = auth()->user();
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+    return redirect()->route($user->isSuperAdmin() ? 'admin.overview' : 'dashboard');
+})->name('home');
+
+Route::middleware('guest')->group(function () {
+    Route::get('invitations/{token}', AcceptInvitation::class)->middleware('throttle:10,1')->name('invitation.accept');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::view('profile', 'profile')->name('profile');
+    Route::get('team', Hospital\Team::class)->middleware('role:hospital_admin')->name('team');
+});
+
+Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', Admin\Overview::class)->name('overview');
+    Route::get('hospitals', Admin\Hospitals\Index::class)->name('hospitals.index');
+    Route::get('hospitals/create', Admin\Hospitals\Create::class)->name('hospitals.create');
+    Route::get('hospitals/{hospital}', Admin\Hospitals\Show::class)->name('hospitals.show');
+    Route::get('users', Admin\Users\Index::class)->name('users.index');
+});
 
 require __DIR__.'/auth.php';
