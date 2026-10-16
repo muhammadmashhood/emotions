@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\EvaluationExportController;
+use App\Http\Controllers\EvaluationFileController;
 use App\Livewire\Admin;
 use App\Livewire\Auth\AcceptInvitation;
 use App\Livewire\Hospital;
@@ -22,9 +24,19 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
+    Route::get('dashboard', Hospital\Dashboard::class)->middleware('role:hospital_admin,hospital_viewer')->name('dashboard');
+    Route::get('evaluations', Hospital\Evaluations\Index::class)->middleware('role:hospital_admin,hospital_viewer')->name('evaluations.index');
+    Route::get('evaluations/export', EvaluationExportController::class)->name('evaluations.export');
+    Route::get('evaluations/{evaluation}', Hospital\Evaluations\Show::class)->name('evaluations.show');
+    Route::get('evaluations/{evaluation}/files/{answer}', EvaluationFileController::class)->whereNumber('answer')->name('evaluations.files.show');
     Route::view('profile', 'profile')->name('profile');
     Route::get('team', Hospital\Team::class)->middleware('role:hospital_admin')->name('team');
+
+    // Admin "view as hospital": same components, explicit hospital.
+    Route::middleware('role:super_admin')->group(function () {
+        Route::get('hospitals/{hospital}/dashboard', Hospital\Dashboard::class)->name('hospitals.dashboard');
+        Route::get('hospitals/{hospital}/evaluations', Hospital\Evaluations\Index::class)->name('hospitals.evaluations.index');
+    });
 });
 
 Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {

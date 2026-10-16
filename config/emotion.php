@@ -11,6 +11,8 @@ return [
 
     'webhook_delivery_retention_days' => (int) env('WEBHOOK_DELIVERY_RETENTION_DAYS', 90),
 
+    'demo_evaluations' => (int) env('DEMO_EVALUATIONS', 300),
+
     // Local seeding only. Never set in production.
     'super_admin' => [
         'email' => env('SUPER_ADMIN_EMAIL'),

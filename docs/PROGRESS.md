@@ -7,7 +7,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M2 — Typeform connection and client**
 - [x] **M3 — Linking, structure parsing, versions, mapping editor**
 - [x] **M4 — Ingestion and scoring**
-- [ ] **M5 — Hospital dashboard and evaluations**
+- [x] **M5 — Hospital dashboard and evaluations**
 - [ ] **M6 — Admin overview and operations**
 - [ ] **M7 — Phase 3 features**
 - [ ] **M8 — Hardening and handover**
@@ -56,3 +56,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Feature/Ingestion` — includes the end-to-end test (link → signed webhook → scored evaluation: Phone booking 85 %, Arrival 75 %, Waiting 60 %, Nursing 92 %, Doctor 80 %, Pharmacy 77.5 %, Facility 60 %, Overall 91.67 %, overall 77.65 % amber).
 
 **Known gaps:** none.
+
+## M5 — Hospital dashboard and evaluations
+
+**Built:** `DashboardFilters` (presets 30d / 90d / 12m / custom, previous equal period, week/month bucket) and `DashboardQuery` (headline + delta, trend with one line per form and "Other", section averages, weakest questions, yes/no compliance, recent, distribution, per-hospital summary), always through `Submission::viewableBy()`. `EvaluationListQuery` + `EvaluationCsvExporter` (streamed, UTF-8 BOM, section columns for a single form) + `EvaluationExportController`. `EvaluationFileController` proxies Typeform uploads with the connection token (inline for images). Screens: hospital dashboard (`/dashboard`, admin `/hospitals/{uuid}/dashboard` with banner), evaluations list (filters, search, sort, export), evaluation detail (journey strip, collapsible sections, answers with points, uploads, admin raw payload / re-score / approve / reject), mini dashboard on the admin hospital page. Blade components: filters bar, journey strip, chart (Chart.js), rag pill. `DemoSeeder` + `DemoResponseFactory`: 2 hospitals × 2 forms, 300 realistic evaluations over 12 months (`DEMO_EVALUATIONS` to change).
+
+**Verify:** `./vendor/bin/pest tests/Feature/Dashboard tests/Feature/Tenancy`; `php artisan migrate:fresh --seed` then log in as `viewer@ittefaq.example.com` / `password`.
+
+**Known gaps:** PDF export and review queue come in M7.
