@@ -202,10 +202,21 @@ class DashboardQuery
      */
     public function yesNoCompliance(Form $form, DashboardFilters $filters): array
     {
+        $yesNoFieldIds = DB::table('form_fields')
+            ->join('form_versions', 'form_versions.id', '=', 'form_fields.form_version_id')
+            ->where('form_versions.form_id', $form->id)
+            ->whereIn('form_fields.type', ['yes_no', 'dropdown', 'multiple_choice'])
+            ->distinct()
+            ->pluck('form_fields.typeform_field_id')
+            ->all();
+
+        if ($yesNoFieldIds === []) {
+            return [];
+        }
+
         $rows = $this->base($form->hospital, $filters->withForm($form->id))
             ->join('answers', 'answers.submission_id', '=', 'submissions.id')
-            ->join('form_fields', 'form_fields.id', '=', 'answers.form_field_id')
-            ->whereIn('form_fields.type', ['yes_no', 'dropdown', 'multiple_choice'])
+            ->whereIn('answers.typeform_field_id', $yesNoFieldIds)
             ->whereNotNull('answers.points')
             ->where('answers.max_points', '>', 0)
             ->selectRaw('answers.typeform_field_id as field_id, SUM(CASE WHEN answers.points >= answers.max_points THEN 1 ELSE 0 END) as yes, SUM(CASE WHEN answers.points = 0 THEN 1 ELSE 0 END) as no')

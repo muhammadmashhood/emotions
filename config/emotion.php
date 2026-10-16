@@ -9,6 +9,9 @@ return [
         'max_retries' => 3,
     ],
 
+    // Extra origins allowed in script-src (space separated), e.g. an error-tracking CDN.
+    'csp_extra_sources' => env('CSP_EXTRA_SOURCES', ''),
+
     'webhook_delivery_retention_days' => (int) env('WEBHOOK_DELIVERY_RETENTION_DAYS', 90),
 
     'demo_evaluations' => (int) env('DEMO_EVALUATIONS', 300),

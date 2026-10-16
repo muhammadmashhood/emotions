@@ -10,7 +10,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M5 — Hospital dashboard and evaluations**
 - [x] **M6 — Admin overview and operations**
 - [x] **M7 — Phase 3 features**
-- [ ] **M8 — Hardening and handover**
+- [x] **M8 — Hardening and handover**
 
 ## M0 — Foundations
 
@@ -80,3 +80,26 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Feature/Phase3`.
 
 **Known gaps:** PDFs list attachment file names rather than embedding images (the files require the Typeform token and are served through the authenticated proxy instead).
+
+## M8 — Hardening and handover
+
+**Built:** `SecurityHeaders` middleware (X-Frame-Options DENY, nosniff, Referrer-Policy, Permissions-Policy, HSTS on HTTPS, CSP compatible with Livewire/Alpine/Vite, Vite dev origins only in `local`); exceptions reported without request bodies; styled error pages (401/403/404/419/429/500/503); `php artisan app:seed-demo --large` (≈50 000 evaluations, bulk path through the pure scoring engine); performance pass with a covering index on `answers` and query rewrites; complete `README.md` (setup, tests, ngrok, linking, scoring, production deployment incl. worker, cron, HTTPS, backups, `APP_KEY` care) and `docs/RUNBOOK.md`.
+
+**Performance (50 000 evaluations, 3.95 M answers, hospital with 25 000 evaluations, one form with 5 514 evaluations in the 90-day window; local MySQL 8 in Docker):**
+
+| Query | Before | After |
+|---|---|---|
+| headline | 67 ms | 22 ms |
+| trend (all forms / 12 months) | 20 / 107 ms | 16 / 59 ms |
+| section averages | 67 ms | 52 ms |
+| weakest questions | 489 ms | 257 ms |
+| yes/no compliance | 575 ms | 103 ms |
+| recent + distribution | 23 ms | 14 ms |
+| admin per-hospital summary | 134 ms | 123 ms |
+| **full dashboard** | **1 483 ms** | **645 ms** |
+
+`EXPLAIN` confirms range scans on `(form_id, submitted_at)` / `(hospital_id, status, submitted_at)` and an index-only (`Using index`) join on `answers_scoring_covering_index`.
+
+**Verify:** `./vendor/bin/pest tests/Feature/SecurityHeadersTest.php`; `php artisan app:seed-demo --large` then time the dashboard; `curl -I http://localhost:8080/login` shows the headers.
+
+**Known gaps:** coverage is reported in CI only (no xdebug/pcov on the build machine); the manual Typeform round-trip (real token, real form, real submission) needs a public HTTPS URL and a Typeform account and was verified only through the faked-API end-to-end test.

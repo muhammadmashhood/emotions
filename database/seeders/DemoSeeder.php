@@ -3,7 +3,10 @@
 namespace Database\Seeders;
 
 use App\Domain\Forms\FormVersioner;
+use App\Domain\Scoring\ScoringEngine;
+use App\Domain\Scoring\ScoringMapping;
 use App\Domain\Submissions\SubmissionIngestor;
+use App\Domain\Typeform\AnswerNormalizer;
 use App\Enums\Role;
 use App\Enums\SubmissionSource;
 use App\Enums\WebhookStatus;
@@ -15,6 +18,7 @@ use Carbon\CarbonImmutable;
 use Database\Seeders\Support\DemoResponseFactory;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 /**
  * Demo data: super admin (SuperAdminSeeder), Ittefaq Hospital and CMH, 2 forms each built from the real fixture
@@ -88,15 +92,126 @@ class DemoSeeder extends Seeder
                 $span = max(1, $start->diffInMinutes(CarbonImmutable::now()->subHours(2)));
 
                 $this->command->getOutput()->write("Seeding {$perForm} evaluations for {$name} / {$title} … ");
-                DB::transaction(function () use ($perForm, $factory, $start, $span, $ingestor, $form): void {
-                    for ($n = 1; $n <= $perForm; $n++) {
-                        // mild upward trend over the year
-                        $at = $start->addMinutes((int) ($span * ($n - 0.5) / $perForm) + mt_rand(-600, 600))->setTime(mt_rand(8, 19), mt_rand(0, 59));
-                        $ingestor->ingest($form, $factory->make($at, $n), SubmissionSource::Backfill);
-                    }
-                });
+                if ($perForm > 2000) {
+                    $this->bulkSeed($form, $factory, $start, $span, $perForm);
+                } else {
+                    DB::transaction(function () use ($perForm, $factory, $start, $span, $ingestor, $form): void {
+                        for ($n = 1; $n <= $perForm; $n++) {
+                            // mild upward trend over the year
+                            $at = $start->addMinutes((int) ($span * ($n - 0.5) / $perForm) + mt_rand(-600, 600))->setTime(mt_rand(8, 19), mt_rand(0, 59));
+                            $ingestor->ingest($form, $factory->make($at, $n), SubmissionSource::Backfill);
+                        }
+                    });
+                }
                 $this->command->getOutput()->writeln('done');
             }
+        }
+    }
+
+    /**
+     * Fast path for large datasets (`--large`): runs the pure scoring engine and bulk-inserts rows,
+     * bypassing per-row Eloquent. Produces the same data shape as the ingestor.
+     */
+    private function bulkSeed(Form $form, DemoResponseFactory $factory, CarbonImmutable $start, int $span, int $count): void
+    {
+        $version = $form->currentVersion;
+        $mapping = ScoringMapping::fromVersion($version);
+        $settings = $form->settings;
+        $engine = new ScoringEngine;
+        $normalizer = new AnswerNormalizer;
+        $infoKeys = collect($mapping->fields)->filter(fn ($f) => $f->infoKey !== null)->mapWithKeys(fn ($f) => [$f->typeformFieldId => $f->infoKey]);
+        $now = now();
+
+        for ($offset = 0; $offset < $count; $offset += 500) {
+            $batch = min(500, $count - $offset);
+            $submissions = [];
+            $payloads = [];
+
+            for ($i = 0; $i < $batch; $i++) {
+                $n = $offset + $i + 1;
+                $at = $start->addMinutes((int) ($span * ($n - 0.5) / $count) + mt_rand(-600, 600))->setTime(mt_rand(8, 19), mt_rand(0, 59));
+                $payload = $factory->make($at, $n);
+                $answers = $normalizer->normalizeAll($payload['answers']);
+                $result = $engine->score($mapping, $answers, $settings);
+
+                $info = [];
+                foreach ($answers as $a) {
+                    if ($infoKeys->has($a->fieldId) && $a->valueText !== null) {
+                        $info[$infoKeys[$a->fieldId]] = $a->valueText;
+                    }
+                }
+                $info['branch'] = $payload['hidden']['branch'];
+
+                $submissions[] = [
+                    'uuid' => (string) Str::uuid(),
+                    'form_id' => $form->id,
+                    'form_version_id' => $version->id,
+                    'hospital_id' => $form->hospital_id,
+                    'response_token' => $payload['token'],
+                    'submitted_at' => $at->toDateTimeString(),
+                    'landed_at' => $at->subMinutes(12)->toDateTimeString(),
+                    'is_partial' => false,
+                    'status' => 'approved',
+                    'source' => 'backfill',
+                    'raw' => json_encode(['answers' => $payload['answers'], 'hidden' => $payload['hidden'], 'variables' => [], 'calculated' => $payload['calculated'], 'event_type' => null]),
+                    'info' => json_encode($info),
+                    'points' => $result->points,
+                    'max_points' => $result->maxPoints,
+                    'overall_pct' => $result->overallPct,
+                    'rag' => $result->rag?->value,
+                    'scored_at' => $now,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
+                $payloads[] = [$answers, $result];
+            }
+
+            DB::table('submissions')->insert($submissions);
+            $ids = DB::table('submissions')->where('form_id', $form->id)->whereIn('response_token', array_column($submissions, 'response_token'))->pluck('id', 'response_token');
+
+            $answerRows = [];
+            $sectionRows = [];
+            foreach ($submissions as $i => $row) {
+                $submissionId = $ids[$row['response_token']];
+                [$answers, $result] = $payloads[$i];
+                foreach ($answers as $a) {
+                    $field = $mapping->field($a->fieldId);
+                    $answerRows[] = [
+                        'submission_id' => $submissionId,
+                        'typeform_field_id' => $a->fieldId,
+                        'form_field_id' => $field?->id,
+                        'answer_type' => $a->answerType,
+                        'value_text' => $a->valueText,
+                        'value_number' => $a->valueNumber,
+                        'value_json' => $a->valueJson === null ? null : json_encode($a->valueJson),
+                        'points' => $result->pointsFor($a->fieldId),
+                        'max_points' => $result->maxPointsFor($a->fieldId),
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+                foreach ($result->sections as $section) {
+                    $sectionRows[] = [
+                        'submission_id' => $submissionId,
+                        'section_id' => $section->sectionId,
+                        'section_name' => $section->name,
+                        'display_order' => $section->displayOrder,
+                        'points' => $section->points,
+                        'max_points' => $section->maxPoints,
+                        'pct' => $section->pct,
+                        'weight' => $section->weight,
+                        'created_at' => $now,
+                        'updated_at' => $now,
+                    ];
+                }
+            }
+            foreach (array_chunk($answerRows, 2000) as $chunk) {
+                DB::table('answers')->insert($chunk);
+            }
+            foreach (array_chunk($sectionRows, 2000) as $chunk) {
+                DB::table('submission_section_scores')->insert($chunk);
+            }
+            $this->command->getOutput()->write('.');
         }
     }
 

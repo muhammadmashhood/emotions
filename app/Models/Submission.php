@@ -149,16 +149,29 @@ class Submission extends Model
      */
     public function scopeHospitalVisible(Builder $query): Builder
     {
+        $partialForms = static::formsIncludingPartials();
+
         return $query->where('submissions.status', SubmissionStatus::Approved->value)
-            ->where(function (Builder $q): void {
-                $q->where('submissions.is_partial', false)
-                    ->orWhereExists(function ($sub): void {
-                        $sub->selectRaw('1')
-                            ->from('forms')
-                            ->whereColumn('forms.id', 'submissions.form_id')
-                            ->whereRaw("JSON_EXTRACT(forms.settings, '$.include_partial') = true");
-                    });
+            ->where(function (Builder $q) use ($partialForms): void {
+                $q->where('submissions.is_partial', false);
+                if ($partialForms !== []) {
+                    $q->orWhereIn('submissions.form_id', $partialForms);
+                }
             });
+    }
+
+    /**
+     * Ids of forms whose settings include partial responses (one tiny query instead of a per-row JSON subquery).
+     *
+     * @return list<int>
+     */
+    public static function formsIncludingPartials(): array
+    {
+        return Form::withTrashed()
+            ->whereRaw("JSON_EXTRACT(settings, '$.include_partial') = true")
+            ->pluck('id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
     }
 
     /**
