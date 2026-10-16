@@ -25,7 +25,7 @@ class FormLinker
         private readonly AuditLogger $audit,
     ) {}
 
-    public function link(Hospital $hospital, TypeformConnection $connection, string $typeformFormId, User $by): Form
+    public function link(Hospital $hospital, TypeformConnection $connection, string $typeformFormId, ?User $by): Form
     {
         $existing = Form::query()->where('typeform_form_id', $typeformFormId)->first();
 
@@ -51,7 +51,7 @@ class FormLinker
                 'title' => (string) ($definition['title'] ?? $typeformFormId),
                 'webhook_status' => WebhookStatus::Unregistered,
                 'status' => FormStatus::Active,
-                'linked_by' => $by->id,
+                'linked_by' => $by?->id,
             ]);
 
             $this->versioner->createInitialVersion($form, $definition);
@@ -67,6 +67,7 @@ class FormLinker
             'typeform_form_id' => $typeformFormId,
             'title' => $form->title,
             'webhook_status' => $form->webhook_status->value,
+            'automatic' => $by === null,
         ], $hospital, $by);
 
         return $form->refresh();
@@ -75,9 +76,9 @@ class FormLinker
     /**
      * Re-link a form previously unlinked from the same hospital: re-register the webhook, refresh structure, reconcile.
      */
-    public function relink(Form $form, User $by): Form
+    public function relink(Form $form, ?User $by): Form
     {
-        $form->forceFill(['status' => FormStatus::Active, 'linked_by' => $by->id])->save();
+        $form->forceFill(['status' => FormStatus::Active, 'linked_by' => $by?->id])->save();
 
         $client = TypeformClient::for($form->connection);
         $this->versioner->refreshFromTypeform($form, $client);

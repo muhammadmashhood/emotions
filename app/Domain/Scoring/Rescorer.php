@@ -3,6 +3,7 @@
 namespace App\Domain\Scoring;
 
 use App\Domain\Audit\AuditLogger;
+use App\Domain\Submissions\BranchResolver;
 use App\Domain\Submissions\SubmissionScorer;
 use App\Domain\Typeform\AnswerNormalizer;
 use App\Models\Form;
@@ -18,6 +19,7 @@ class Rescorer
         private readonly AnswerNormalizer $normalizer,
         private readonly SubmissionScorer $scorer,
         private readonly AuditLogger $audit,
+        private readonly BranchResolver $branches,
     ) {}
 
     /**
@@ -29,7 +31,10 @@ class Rescorer
         $answers = $this->normalizer->normalizeAll(is_array($submission->raw['answers'] ?? null) ? $submission->raw['answers'] : []);
 
         $submission->loadMissing('form');
-        $this->scorer->scoreAndPersist($submission, $version, $answers, $mapping ?? ScoringMapping::fromVersion($version));
+        $mapping ??= ScoringMapping::fromVersion($version);
+        $hidden = is_array($submission->raw['hidden'] ?? null) ? $submission->raw['hidden'] : [];
+        $submission->branch_id = $this->branches->resolve($submission->form, $mapping, $answers, $hidden);
+        $this->scorer->scoreAndPersist($submission, $version, $answers, $mapping);
     }
 
     /**

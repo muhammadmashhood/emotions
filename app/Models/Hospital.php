@@ -16,13 +16,15 @@ use Illuminate\Support\Str;
  * @property string|null $logo_path
  * @property bool $is_active
  * @property bool $require_review
+ * @property string|null $typeform_workspace_id
+ * @property string|null $typeform_workspace_name
  */
 class Hospital extends Model
 {
     /** @use HasFactory<HospitalFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'logo_path', 'is_active', 'require_review'];
+    protected $fillable = ['name', 'slug', 'logo_path', 'is_active', 'require_review', 'typeform_workspace_id', 'typeform_workspace_name'];
 
     protected function casts(): array
     {

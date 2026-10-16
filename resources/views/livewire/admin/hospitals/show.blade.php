@@ -69,6 +69,15 @@
                     <input type="checkbox" wire:model="require_review" class="mt-1 rounded border-line text-ink focus:ring-ink">
                     <span><span class="block text-sm font-medium text-ink">Require review</span><span class="block text-xs text-ink-soft">New evaluations wait in the review queue until approved.</span></span>
                 </label>
+                <div>
+                    <label class="label" for="workspace">Typeform workspace (automatic linking)</label>
+                    <select id="workspace" wire:model="workspace" class="field">
+                        <option value="">— none —</option>
+                        @foreach($workspaces as $ws)<option value="{{ $ws->id }}">{{ $ws->name }}</option>@endforeach
+                        @if($workspace !== '' && collect($workspaces)->firstWhere('id', $workspace) === null)<option value="{{ $workspace }}">{{ $hospital->typeform_workspace_name ?? $workspace }}</option>@endif
+                    </select>
+                    <p class="text-xs text-ink-soft mt-1">New forms created in this workspace are linked to {{ $hospital->name }} automatically (hourly). Their mapping still needs your review.</p>
+                </div>
                 <div class="flex justify-end"><button type="submit" class="btn-primary">Save settings</button></div>
             </form>
         @endif

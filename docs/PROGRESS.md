@@ -9,7 +9,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M4 — Ingestion and scoring**
 - [x] **M5 — Hospital dashboard and evaluations**
 - [x] **M6 — Admin overview and operations**
-- [ ] **M7 — Phase 3 features**
+- [x] **M7 — Phase 3 features**
 - [ ] **M8 — Hardening and handover**
 
 ## M0 — Foundations
@@ -72,3 +72,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Feature/Admin/OverviewTest.php` — includes "a deleted webhook shows an alert and Repair webhook fixes it" against a faked API.
 
 **Known gaps:** none.
+
+## M7 — Phase 3 features
+
+**Built:** Review workflow: hospitals with `require_review` queue new evaluations as `pending_review`; `/admin/review` lists them (hospital filter, note, approve / reject, audited); the same decisions are available on the evaluation detail page; hospital users only ever see approved evaluations. Branches: form settings offer a branch source (hidden field key or a survey question); `BranchResolver` creates branches on first sight and assigns `branch_id` on ingest and on re-score; branch filter on dashboard and list, branch column in list and CSV. PDF export: `GET /evaluations/{uuid}/pdf` renders the detail layout (header, journey strip, sections, answers) with dompdf, policy-checked. Workspace auto-linking: hospital settings map a Typeform workspace; `php artisan forms:auto-link` (hourly) links new forms in mapped workspaces with `needs_review = true`, audited as automatic (`linked_by` null).
+
+**Verify:** `./vendor/bin/pest tests/Feature/Phase3`.
+
+**Known gaps:** PDFs list attachment file names rather than embedding images (the files require the Typeform token and are served through the authenticated proxy instead).

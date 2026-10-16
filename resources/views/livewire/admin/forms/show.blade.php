@@ -74,6 +74,29 @@
                         <input type="checkbox" wire:model="include_partial" class="mt-0.5 rounded border-line text-ink focus:ring-ink">
                         <span>Show partial (unfinished) evaluations to hospital users</span>
                     </label>
+                    <div class="border-t border-line pt-3">
+                        <label class="label" for="branchSourceType">Branch source</label>
+                        <select id="branchSourceType" wire:model.live="branchSourceType" class="field">
+                            <option value="none">None (no branch filter)</option>
+                            <option value="hidden">Hidden field in the Typeform link</option>
+                            <option value="field">A question in the survey</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('branchSourceType')" class="mt-1" />
+                        @if($branchSourceType === 'hidden')
+                            <label class="label mt-2" for="branchHiddenKey">Hidden field key</label>
+                            <input id="branchHiddenKey" type="text" wire:model="branchHiddenKey" class="field" placeholder="branch">
+                            <p class="text-xs text-ink-soft mt-1">Share the survey as <code>…/to/{{ $form->typeform_form_id }}#{{ $branchHiddenKey ?: 'branch' }}=North+wing</code>.</p>
+                            <x-input-error :messages="$errors->get('branchHiddenKey')" class="mt-1" />
+                        @elseif($branchSourceType === 'field')
+                            <label class="label mt-2" for="branchFieldId">Question</label>
+                            <select id="branchFieldId" wire:model="branchFieldId" class="field">
+                                <option value="">— choose —</option>
+                                @foreach($branchFields as $bf)<option value="{{ $bf->typeform_field_id }}">{{ $bf->title }} ({{ str_replace('_', ' ', $bf->type) }})</option>@endforeach
+                            </select>
+                            <p class="text-xs text-ink-soft mt-1">A dropdown works best; free text spellings create separate branches.</p>
+                            <x-input-error :messages="$errors->get('branchFieldId')" class="mt-1" />
+                        @endif
+                    </div>
                     <button type="submit" class="btn-primary w-full">Save settings</button>
                 </form>
 

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\EvaluationExportController;
 use App\Http\Controllers\EvaluationFileController;
+use App\Http\Controllers\EvaluationPdfController;
 use App\Livewire\Admin;
 use App\Livewire\Auth\AcceptInvitation;
 use App\Livewire\Hospital;
@@ -29,6 +30,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('evaluations/export', EvaluationExportController::class)->name('evaluations.export');
     Route::get('evaluations/{evaluation}', Hospital\Evaluations\Show::class)->name('evaluations.show');
     Route::get('evaluations/{evaluation}/files/{answer}', EvaluationFileController::class)->whereNumber('answer')->name('evaluations.files.show');
+    Route::get('evaluations/{evaluation}/pdf', EvaluationPdfController::class)->name('evaluations.pdf');
     Route::view('profile', 'profile')->name('profile');
     Route::get('team', Hospital\Team::class)->middleware('role:hospital_admin')->name('team');
 
@@ -49,6 +51,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
     Route::get('forms/{form}/mapping', Admin\Forms\Mapping::class)->name('forms.mapping');
     Route::get('deliveries', Admin\Deliveries\Index::class)->name('deliveries');
     Route::get('audit-log', Admin\AuditLog::class)->name('audit');
+    Route::get('review', Admin\Review::class)->name('review');
     Route::get('users', Admin\Users\Index::class)->name('users.index');
     Route::get('settings/typeform', Admin\Settings\Typeform::class)->name('settings.typeform');
 });

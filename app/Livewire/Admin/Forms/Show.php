@@ -29,6 +29,13 @@ class Show extends Component
 
     public bool $useLatestMapping = false;
 
+    /** none | hidden | field */
+    public string $branchSourceType = 'none';
+
+    public string $branchHiddenKey = 'branch';
+
+    public string $branchFieldId = '';
+
     public function mount(Form $form): void
     {
         $this->authorize('manage', $form);
@@ -38,6 +45,13 @@ class Show extends Component
         $this->rag_amber_min = $settings->ragAmberMin;
         $this->yes_no_points = $settings->yesNoPoints;
         $this->include_partial = $settings->includePartial;
+
+        $source = $settings->branchSource;
+        if ($source !== null) {
+            $this->branchSourceType = $source['type'];
+            $this->branchHiddenKey = (string) ($source['key'] ?? 'branch');
+            $this->branchFieldId = (string) ($source['field_id'] ?? '');
+        }
     }
 
     public function saveSettings(AuditLogger $audit): void
@@ -47,7 +61,16 @@ class Show extends Component
             'rag_amber_min' => 'required|numeric|min:0|max:100',
             'yes_no_points' => 'required|numeric|min:1|max:100',
             'include_partial' => 'boolean',
+            'branchSourceType' => 'required|in:none,hidden,field',
+            'branchHiddenKey' => 'required_if:branchSourceType,hidden|nullable|string|max:60',
+            'branchFieldId' => 'required_if:branchSourceType,field|nullable|string|max:60',
         ]);
+
+        $branchSource = match ($this->branchSourceType) {
+            'hidden' => ['type' => 'hidden', 'key' => trim($this->branchHiddenKey) ?: 'branch'],
+            'field' => ['type' => 'field', 'field_id' => $this->branchFieldId],
+            default => null,
+        };
 
         $before = $this->form->settings->toArray();
         $this->form->settings = $this->form->settings->with([
@@ -55,6 +78,7 @@ class Show extends Component
             'rag_amber_min' => $this->rag_amber_min,
             'yes_no_points' => $this->yes_no_points,
             'include_partial' => $this->include_partial,
+            'branch_source' => $branchSource,
         ]);
         $this->form->save();
 
@@ -95,6 +119,7 @@ class Show extends Component
         $this->form->load(['hospital', 'currentVersion', 'versions' => fn ($q) => $q->withCount('fields', 'submissions')]);
 
         return view('livewire.admin.forms.show', [
+            'branchFields' => $this->form->currentVersion?->fields()->whereIn('type', ['dropdown', 'multiple_choice', 'short_text'])->orderBy('display_order')->get(['typeform_field_id', 'title', 'type']) ?? collect(),
             'submissionCount' => $this->form->submissions()->count(),
             'lastSubmission' => $this->form->submissions()->max('submitted_at'),
             'httpsOk' => str_starts_with((string) config('app.url'), 'https://'),
