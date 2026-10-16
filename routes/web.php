@@ -48,6 +48,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
     Route::get('forms/{form}', Admin\Forms\Show::class)->name('forms.show');
     Route::get('forms/{form}/mapping', Admin\Forms\Mapping::class)->name('forms.mapping');
     Route::get('deliveries', Admin\Deliveries\Index::class)->name('deliveries');
+    Route::get('audit-log', Admin\AuditLog::class)->name('audit');
     Route::get('users', Admin\Users\Index::class)->name('users.index');
     Route::get('settings/typeform', Admin\Settings\Typeform::class)->name('settings.typeform');
 });

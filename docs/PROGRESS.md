@@ -8,7 +8,7 @@ Milestone checklist from SPEC.md section 15. Each entry lists what was built, ho
 - [x] **M3 — Linking, structure parsing, versions, mapping editor**
 - [x] **M4 — Ingestion and scoring**
 - [x] **M5 — Hospital dashboard and evaluations**
-- [ ] **M6 — Admin overview and operations**
+- [x] **M6 — Admin overview and operations**
 - [ ] **M7 — Phase 3 features**
 - [ ] **M8 — Hardening and handover**
 
@@ -64,3 +64,11 @@ docker compose up -d --build   # then open http://localhost:8080/login
 **Verify:** `./vendor/bin/pest tests/Feature/Dashboard tests/Feature/Tenancy`; `php artisan migrate:fresh --seed` then log in as `viewer@ittefaq.example.com` / `password`.
 
 **Known gaps:** PDF export and review queue come in M7.
+
+## M6 — Admin overview and operations
+
+**Built:** Admin overview (`/admin`): per-hospital table (active forms, evaluations in period, average score, trend arrow vs previous period, forms needing mapping review, webhook problems, link to dashboard) with a 30d/90d/12m switch; alerts panel (missing Typeform connection or connection error, forms with `webhook_status != active` with an inline "Repair webhook" button, forms with `needs_review`, failed deliveries in the last 24 h, count of rejected requests). Audit log screen (`/admin/audit-log`) with action / hospital / user / date filters and expandable change details. Webhook repair, re-sync and the all-users screen were delivered in M3 / M1 and are linked from here.
+
+**Verify:** `./vendor/bin/pest tests/Feature/Admin/OverviewTest.php` — includes "a deleted webhook shows an alert and Repair webhook fixes it" against a faked API.
+
+**Known gaps:** none.
