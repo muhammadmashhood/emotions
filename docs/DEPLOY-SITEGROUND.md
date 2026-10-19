@@ -1,0 +1,107 @@
+# Deploying to SiteGround
+
+SiteGround shared/cloud hosting has no Docker, no Redis and no always-on processes, but it has everything this app needs:
+PHP 8.3, MySQL, cron jobs, SSH, free HTTPS. This guide deploys the app with **database-backed sessions, cache and queue**,
+driven by two cron jobs. Webhooks are processed within about a minute instead of seconds (the cron cadence).
+
+Verified locally in this mode: webhook → `jobs` table → `queue:work database --stop-when-empty` → scored evaluation, cache locks OK.
+
+## 0. Before you start
+
+- A SiteGround plan with **SSH** (GrowBig or higher) and a domain or subdomain for the app, e.g. `evaluations.yourdomain.com`, with **Let's Encrypt** enabled in Site Tools → Security → SSL Manager.
+- Site Tools → Devs → **PHP Manager** → set PHP **8.3** for that site.
+- Site Tools → Site → **MySQL** → create a database + user (all privileges). Note the names (they are prefixed with your account id).
+- Site Tools → Email → Accounts → create `no-reply@yourdomain` and note the SMTP host/port.
+- SSH access: Site Tools → Devs → SSH Keys Manager → add your public key; note user/host/port (SiteGround uses port **18765**).
+
+## 1. Build the release bundle (on your machine)
+
+SiteGround has no Node and you should not run Composer there, so the bundle ships `vendor/` and `public/build/`:
+
+```bash
+./deploy/build-release.sh
+# → release/emotion-release-YYYYmmdd-HHMM.zip  (committed files + vendor + built assets, no tests/docker/.env)
+```
+
+## 2. Upload and unpack
+
+```bash
+scp -P 18765 release/emotion-release-*.zip USER@HOST:~/
+ssh -p 18765 USER@HOST
+mkdir -p ~/www/evaluations.yourdomain.com/emotion && cd ~/www/evaluations.yourdomain.com/emotion
+unzip -oq ~/emotion-release-*.zip && rm ~/emotion-release-*.zip
+```
+
+(Site Tools → File Manager also works for uploading and extracting the zip.)
+
+## 3. Point the web root at `public/`
+
+Laravel must be served from its `public` folder. On SiteGround every site has a `public_html` folder; replace it with a symlink:
+
+```bash
+cd ~/www/evaluations.yourdomain.com
+mv public_html public_html.bak          # or rm -rf if empty
+ln -s "$PWD/emotion/public" public_html
+```
+
+`public/.htaccess` (shipped) handles the rewrite to `index.php`. Site Tools → Speed → Caching: exclude the site from dynamic cache (the app is per-user, nothing to cache).
+
+## 4. Configure
+
+```bash
+cd ~/www/evaluations.yourdomain.com/emotion
+cp .env.siteground.example .env
+nano .env       # APP_URL, DB_*, MAIL_* from Site Tools
+php artisan key:generate --force
+chmod -R ug+rwx storage bootstrap/cache
+```
+
+**Back up `APP_KEY`** (password manager). It encrypts the Typeform token and webhook secrets.
+
+## 5. Migrate and warm up
+
+```bash
+./post-deploy.sh                       # migrate --force, storage:link, config/route/view caches
+php artisan app:create-super-admin     # first admin account
+php artisan about                      # sanity check: environment production, drivers database
+```
+
+Do **not** run `db:seed` in production (the demo seeder refuses anyway).
+
+## 6. Cron jobs (Site Tools → Devs → Cron Jobs)
+
+Add the two lines from `cron.txt`, replacing `APP` with the absolute path (`pwd` prints it):
+
+| Interval | Command |
+|---|---|
+| every minute | `cd APP && php artisan schedule:run >> /dev/null 2>&1` |
+| every minute | `cd APP && php artisan queue:work database --queue=webhooks,default --stop-when-empty --max-time=50 --tries=3 --backoff=10,60,300 >> /dev/null 2>&1` |
+
+If `php` on the CLI is not 8.3 (`php -v`), use the versioned binary SiteGround provides (e.g. `/usr/local/php83/bin/php`) in both lines.
+
+## 7. Connect Typeform and link a form
+
+1. Log in → **Settings → Typeform** → paste a personal access token (scopes `accounts:read forms:read workspaces:read webhooks:read webhooks:write responses:read`).
+2. **Hospitals → New hospital → Link a form.** The webhook is registered at `https://evaluations.yourdomain.com/webhooks/typeform/{uuid}`; Typeform requires HTTPS, which Let's Encrypt provides.
+3. Submit the form in Typeform; **Admin → Deliveries** shows the request, and the evaluation appears once the next queue cron run processes it (≤ 1 min).
+
+## 8. Updating later
+
+```bash
+./deploy/build-release.sh            # locally
+scp -P 18765 release/emotion-release-*.zip USER@HOST:~/
+ssh -p 18765 USER@HOST 'cd ~/www/evaluations.yourdomain.com/emotion && unzip -oq ~/emotion-release-*.zip && rm ~/emotion-release-*.zip && ./post-deploy.sh'
+```
+
+`.env`, `storage/` and uploaded logos are never inside the zip, so they survive updates.
+
+## Troubleshooting
+
+| Symptom | Check |
+|---|---|
+| 500 on every page | `storage/logs/laravel-*.log`; usually `APP_KEY` missing or `storage/` not writable |
+| Login page loads without styling | `public/build/` missing → rebuild the bundle (`npm run build` runs inside `build-release.sh`) |
+| Deliveries stay "Pending" | queue cron not running, or wrong `php` binary in the cron line; run the queue command by hand over SSH |
+| Webhook "Error" after linking | `APP_URL` not HTTPS/public, or token lacks `webhooks:write`; fix and click **Repair webhook** |
+| Emails not sent | `MAIL_*` from Site Tools; test with `php artisan tinker --execute="Mail::raw('hi', fn($m) => $m->to('you@example.com')->subject('test'));"` |
+| Slow dashboard | `php artisan optimize` after each deploy; the heavy queries use covering indexes already |

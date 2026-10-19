@@ -120,4 +120,4 @@ automatically every hour, flagged for mapping review.
 - **Storage:** hospital logos live on the `public` disk (`php artisan storage:link`). Uploaded evaluation files stay in Typeform and are proxied on demand.
 - **Monitoring:** watch the queue (`php artisan queue:failed`), `Admin → Overview` alerts (webhook problems, failed deliveries, mapping review) and `Admin → Deliveries`.
 
-See [`docs/RUNBOOK.md`](docs/RUNBOOK.md) for operational procedures.
+See [`docs/RUNBOOK.md`](docs/RUNBOOK.md) for operational procedures and [`docs/DEPLOY-SITEGROUND.md`](docs/DEPLOY-SITEGROUND.md) for shared hosting without Docker/Redis (SiteGround).

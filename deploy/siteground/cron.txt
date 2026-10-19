@@ -1,0 +1,5 @@
+# SiteGround → Site Tools → Devs → Cron Jobs. Replace APP with the absolute app folder, e.g. /home/customer/www/example.com/emotion
+# 1) Laravel scheduler (reconcile, structure/webhook checks, auto-link, pruning) — every minute
+* * * * * cd APP && php artisan schedule:run >> /dev/null 2>&1
+# 2) Queue worker in short bursts (webhook processing, backfills, re-scores) — every minute, exits when idle or after 50 s
+* * * * * cd APP && php artisan queue:work database --queue=webhooks,default --stop-when-empty --max-time=50 --tries=3 --backoff=10,60,300 >> /dev/null 2>&1
