@@ -24,6 +24,7 @@ rm -f "$WORK/.env"
 cp "$ROOT/deploy/siteground/env.example" "$WORK/.env.siteground.example"
 cp "$ROOT/deploy/siteground/post-deploy.sh" "$WORK/post-deploy.sh"
 cp "$ROOT/deploy/siteground/cron.txt" "$WORK/cron.txt"
+cp "$ROOT/deploy/siteground/root.htaccess" "$WORK/root.htaccess"
 chmod +x "$WORK/post-deploy.sh"
 
 ZIP="$OUT/emotion-release-$STAMP.zip"

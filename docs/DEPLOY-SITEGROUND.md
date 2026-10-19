@@ -34,9 +34,12 @@ unzip -oq ~/emotion-release-*.zip && rm ~/emotion-release-*.zip
 
 (Site Tools → File Manager also works for uploading and extracting the zip.)
 
-## 3. Point the web root at `public/`
+## 3. Make only `public/` web-accessible
 
-Laravel must be served from its `public` folder. On SiteGround every site has a `public_html` folder; replace it with a symlink:
+Laravel must be served from its `public` folder: everything else (`.env` with the database password and `APP_KEY`, `storage/logs`,
+`vendor`, …) must stay outside the web root. Pick one of the two layouts.
+
+**Option A (recommended): app next to `public_html`, symlink the web root.** One command, updates never touch it:
 
 ```bash
 cd ~/www/evaluations.yourdomain.com
@@ -44,7 +47,12 @@ mv public_html public_html.bak          # or rm -rf if empty
 ln -s "$PWD/emotion/public" public_html
 ```
 
-`public/.htaccess` (shipped) handles the rewrite to `index.php`. Site Tools → Speed → Caching: exclude the site from dynamic cache (the app is per-user, nothing to cache).
+**Option B: everything inside `public_html`, guarded by a root `.htaccess`.** Unzip the bundle directly into `public_html`
+and copy `root.htaccess` (in the bundle) to `public_html/.htaccess`. It forwards every request into `public/` and returns
+403 for the application folders and files. Verify after deploying that `https://yourdomain/.env` and `https://yourdomain/storage/logs/`
+return 403, not content. Option B depends on that one file staying in place; Option A cannot expose anything even if it is removed.
+
+In both cases `public/.htaccess` (shipped) rewrites to `index.php`. Site Tools → Speed → Caching: exclude the site from dynamic cache (pages are per-user).
 
 ## 4. Configure
 

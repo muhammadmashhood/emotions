@@ -1,0 +1,22 @@
+# Option B: the whole app lives inside public_html. Place this file as public_html/.htaccess.
+# It forwards every request into public/ and refuses direct access to anything else.
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Hard deny for sensitive paths even if something else goes wrong.
+    RewriteRule ^(\.env|\.env\..*|composer\.(json|lock)|artisan|post-deploy\.sh|cron\.txt)$ - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|deploy|docs|resources|routes|storage|tests|vendor)(/|$) - [F,L]
+
+    # Already pointing at public/ → nothing to do.
+    RewriteCond %{REQUEST_URI} ^/public/
+    RewriteRule ^ - [L]
+
+    # Everything else is served from public/ (static files directly, the rest through index.php).
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^\.(env|git|htaccess)|\.(lock|sh|md|yml|yaml|neon|xml)$">
+    Require all denied
+</FilesMatch>
