@@ -93,11 +93,38 @@ If `php` on the CLI is not 8.3 (`php -v`), use the versioned binary SiteGround p
 2. **Hospitals → New hospital → Link a form.** The webhook is registered at `https://evaluations.yourdomain.com/webhooks/typeform/{uuid}`; Typeform requires HTTPS, which Let's Encrypt provides.
 3. Submit the form in Typeform; **Admin → Deliveries** shows the request, and the evaluation appears once the next queue cron run processes it (≤ 1 min).
 
-## 8. Continuous deployment from GitHub (recommended once the site works)
+## 8. Continuous deployment from GitHub
 
-SiteGround cannot pull from GitHub, and its own Git feature needs SSH. Instead, the workflow
-`.github/workflows/deploy-siteground.yml` builds the app in GitHub Actions (Composer + Node) and uploads the result
-over **FTPS** on every push to `master` (or manually from the Actions tab). Nothing has to be installed on the server.
+SiteGround cannot pull from GitHub, so GitHub pushes to SiteGround instead: a GitHub Actions workflow builds the app
+(Composer + Node) and uploads the result. Nothing has to be installed on the server.
+
+### 8a. Over SSH (recommended — runs migrations and caches for you)
+
+Workflow: `.github/workflows/deploy-siteground-ssh.yml`, runs on every push to `master` and manually.
+
+1. Generate a deploy key on your computer: `ssh-keygen -t ed25519 -f sg_deploy -N "" -C "github-deploy"`. This gives `sg_deploy` (private) and `sg_deploy.pub` (public).
+2. Site Tools → Devs → **SSH Keys Manager** → *Import* → paste the content of `sg_deploy.pub`. Note the SSH **username**, **host** and **port** shown there (SiteGround uses port 18765).
+3. GitHub → repo → Settings → Secrets and variables → Actions → add:
+
+   | Secret | Value |
+   |---|---|
+   | `SG_SSH_HOST` | the host from SSH Keys Manager (e.g. `bilalj19.sg-host.com` or an IP) |
+   | `SG_SSH_PORT` | `18765` |
+   | `SG_SSH_USER` | the SSH username shown there |
+   | `SG_SSH_KEY` | the full content of the **private** key file `sg_deploy` |
+   | `SG_APP_DIR` | absolute app folder, e.g. `/home/customer/www/bilalj19.sg-host.com/public_html` |
+   | `SG_PHP` (optional) | PHP binary if plain `php` is old, e.g. `/usr/local/php83/bin/php` |
+
+4. Push to `master` or run the workflow from the Actions tab. It rsyncs only changed files (never `.env`, `storage/`, the root `.htaccess`)
+   and then runs `post-deploy.sh` on the server: `migrate --force`, `storage:link`, config/route/view caches, `queue:restart`.
+5. Because the caches are now built on each deploy, after editing `.env` by hand run the workflow again (or `php artisan config:cache` over SSH).
+
+With SSH available you can also run any artisan command directly (`php artisan app:create-super-admin`, `evaluations:rescore`, …);
+see the RUNBOOK.
+
+### 8b. Over FTPS (fallback for plans without SSH)
+
+Workflow: `.github/workflows/deploy-siteground.yml`, manual only (Actions → *Deploy to SiteGround (FTP fallback)* → Run workflow).
 
 1. Site Tools → Site → **FTP Accounts** → create an account. Set its *Path* to the site root (e.g. `www/bilalj19.sg-host.com`)
    so the uploads land in `public_html/`. Note the hostname shown (usually your domain or `ftp.yourdomain`), username and password.

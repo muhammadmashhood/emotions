@@ -1,0 +1,71 @@
+name: Deploy to SiteGround (SSH)
+
+# Builds the app in GitHub (composer --no-dev, npm build), rsyncs it to SiteGround over SSH and runs post-deploy.sh there
+# (migrations, caches, storage link, queue restart). Runs on every push to master, or by hand from the Actions tab.
+# Required repository secrets: SG_SSH_HOST, SG_SSH_PORT (18765), SG_SSH_USER, SG_SSH_KEY (private key), SG_APP_DIR (absolute path).
+# Optional: SG_PHP (PHP binary on the server, default "php").
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-siteground
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, gd
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Build front-end assets
+        run: npm ci && npm run build
+
+      - name: Prepare the bundle
+        run: |
+          rm -rf node_modules tests docs/screenshots docker Dockerfile docker-compose.yml release deploy/build-release.sh
+          cp deploy/siteground/root.htaccess root.htaccess
+          cp deploy/siteground/post-deploy.sh post-deploy.sh
+          cp deploy/siteground/cron.txt cron.txt
+          chmod +x post-deploy.sh
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.SG_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -p "${{ secrets.SG_SSH_PORT }}" -H "${{ secrets.SG_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Upload with rsync
+        run: |
+          rsync -az --delete \
+            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SG_SSH_PORT }}" \
+            --exclude '.git' --exclude '.github' \
+            --exclude '.env' --exclude '.env.*' \
+            --exclude 'storage/' --exclude 'bootstrap/cache/*.php' \
+            --exclude '.htaccess' --exclude 'public/storage' \
+            --exclude 'phpunit.xml' --exclude 'phpstan.neon' \
+            --exclude 'package.json' --exclude 'package-lock.json' \
+            --exclude 'vite.config.js' --exclude 'tailwind.config.js' --exclude 'postcss.config.js' \
+            --exclude 'resources/js/' --exclude 'resources/css/' \
+            ./ "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}:${{ secrets.SG_APP_DIR }}/"
+
+      - name: Run post-deploy on the server
+        run: |
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" \
+            "cd '${{ secrets.SG_APP_DIR }}' && PHP='${{ secrets.SG_PHP || 'php' }}' ./post-deploy.sh"

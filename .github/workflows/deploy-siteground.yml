@@ -1,12 +1,10 @@
-name: Deploy to SiteGround
+name: Deploy to SiteGround (FTP fallback)
 
 # Builds the app (composer --no-dev, npm build) and uploads it to SiteGround over FTPS.
-# Runs on every push to master, or by hand from the Actions tab.
+# Manual only (Actions tab) — for plans without SSH. Prefer deploy-siteground-ssh.yml.
 # Required repository secrets: SG_FTP_SERVER, SG_FTP_USERNAME, SG_FTP_PASSWORD, SG_FTP_DIR (e.g. "public_html/").
 
 on:
-  push:
-    branches: [master]
   workflow_dispatch:
 
 concurrency:
