@@ -149,6 +149,20 @@ class Mapping extends Component
         unset($section);
     }
 
+    public function setInfoKey(int $fieldId, ?string $infoKey): void
+    {
+        $this->guardEditable();
+        if (! isset($this->fieldState[$fieldId])) {
+            return;
+        }
+        $infoKey = $infoKey !== null && $infoKey !== '' ? $infoKey : null;
+        if ($infoKey !== null && ! in_array($infoKey, InfoKey::values(), true)) {
+            return;
+        }
+        $this->fieldState[$fieldId]['info_key'] = $infoKey;
+        $this->resetErrorBag();
+    }
+
     public function toggleScored(int $fieldId): void
     {
         $this->guardEditable();

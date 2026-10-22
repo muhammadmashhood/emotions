@@ -41,7 +41,7 @@ test('admin fixes the misplaced website question, renames a section, toggles sco
         ->set("sections.$arrivalIdx.name", 'Arrival')
         ->set("sections.$websiteIdx.weight", 0.5)
         ->call('toggleScored', $agentName->id)
-        ->set("fieldState.{$agentName->id}.info_key", '')
+        ->call('setInfoKey', $agentName->id, '')
         ->call('save')
         ->assertHasNoErrors()
         ->assertSet('rescoreCount', null);
@@ -97,19 +97,38 @@ test('validation rejects duplicate info keys, empty names and bad weights', func
     $component = Livewire::actingAs($this->admin)->test(Mapping::class, ['form' => $this->form]);
 
     $component
-        ->set("fieldState.{$location->id}.info_key", 'facility')
+        ->call('setInfoKey', $location->id, 'facility')
         ->call('save')
         ->assertHasErrors(["fields.{$location->id}.info_key"]);
     expect($location->fresh()->info_key)->toBe('location');
 
     $component
-        ->set("fieldState.{$location->id}.info_key", 'location')
+        ->call('setInfoKey', $location->id, 'location')
         ->set('sections.0.name', '')
         ->set('sections.1.weight', 11)
         ->call('save')
         ->assertHasErrors(['sections.0.name', 'sections.1.weight']);
 
     expect($facility->fresh()->info_key)->toBe('facility');
+});
+
+test('info keys are set explicitly per field and never leak to other fields', function () {
+    $recommend = FormField::query()->where('form_version_id', $this->version->id)->where('title', 'like', 'How likely are you to recommend%')->firstOrFail();
+    $comments = FormField::query()->where('form_version_id', $this->version->id)->where('type', 'long_text')->firstOrFail();
+
+    $component = Livewire::actingAs($this->admin)->test(Mapping::class, ['form' => $this->form])
+        ->call('setInfoKey', $recommend->id, 'recommend')
+        ->call('setInfoKey', $comments->id, '')
+        ->call('setInfoKey', $comments->id, 'not-a-key');
+
+    $state = $component->get('fieldState');
+    expect($state[$recommend->id]['info_key'])->toBe('recommend')
+        ->and($state[$comments->id]['info_key'])->toBeNull()
+        ->and(collect($state)->filter(fn ($f) => $f['info_key'] === 'recommend'))->toHaveCount(1);
+
+    $component->call('save')->assertHasNoErrors();
+    expect($recommend->fresh()->info_key)->toBe('recommend')
+        ->and(FormField::query()->where('form_version_id', $this->version->id)->where('info_key', 'recommend')->count())->toBe(1);
 });
 
 test('unscorable types cannot be scored even if toggled', function () {

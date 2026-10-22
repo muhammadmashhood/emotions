@@ -76,9 +76,9 @@
                                 </label>
                                 <div>
                                     <label class="sr-only" for="info-{{ $fieldId }}">Info</label>
-                                    <select id="info-{{ $fieldId }}" wire:model="fieldState.{{ $fieldId }}.info_key" class="field py-1 text-xs w-auto" @disabled($readOnly)>
-                                        <option value="">Info: none</option>
-                                        @foreach($infoKeys as $key)<option value="{{ $key->value }}">Info: {{ $key->label() }}</option>@endforeach
+                                    <select id="info-{{ $fieldId }}" wire:change="setInfoKey({{ $fieldId }}, $event.target.value)" class="field py-1 text-xs w-auto {{ ($fieldState[$fieldId]['info_key'] ?? null) ? 'border-accent text-accent' : '' }}" @disabled($readOnly)>
+                                        <option value="" @selected(empty($fieldState[$fieldId]['info_key']))>Info: none</option>
+                                        @foreach($infoKeys as $key)<option value="{{ $key->value }}" @selected(($fieldState[$fieldId]['info_key'] ?? null) === $key->value)>Info: {{ $key->label() }}</option>@endforeach
                                     </select>
                                     <x-input-error :messages="$errors->get('fields.'.$fieldId.'.info_key')" />
                                 </div>
