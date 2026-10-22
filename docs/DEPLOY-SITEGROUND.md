@@ -93,7 +93,31 @@ If `php` on the CLI is not 8.3 (`php -v`), use the versioned binary SiteGround p
 2. **Hospitals → New hospital → Link a form.** The webhook is registered at `https://evaluations.yourdomain.com/webhooks/typeform/{uuid}`; Typeform requires HTTPS, which Let's Encrypt provides.
 3. Submit the form in Typeform; **Admin → Deliveries** shows the request, and the evaluation appears once the next queue cron run processes it (≤ 1 min).
 
-## 8. Updating later
+## 8. Continuous deployment from GitHub (recommended once the site works)
+
+SiteGround cannot pull from GitHub, and its own Git feature needs SSH. Instead, the workflow
+`.github/workflows/deploy-siteground.yml` builds the app in GitHub Actions (Composer + Node) and uploads the result
+over **FTPS** on every push to `master` (or manually from the Actions tab). Nothing has to be installed on the server.
+
+1. Site Tools → Site → **FTP Accounts** → create an account. Set its *Path* to the site root (e.g. `www/bilalj19.sg-host.com`)
+   so the uploads land in `public_html/`. Note the hostname shown (usually your domain or `ftp.yourdomain`), username and password.
+2. GitHub → repository → Settings → Secrets and variables → Actions → **New repository secret**, four times:
+
+   | Secret | Value |
+   |---|---|
+   | `SG_FTP_SERVER` | the FTP hostname from Site Tools |
+   | `SG_FTP_USERNAME` | the FTP username (looks like `user@yourdomain`) |
+   | `SG_FTP_PASSWORD` | its password |
+   | `SG_FTP_DIR` | `public_html/` (or `emotion/` if you chose the symlink layout) |
+
+3. Push to `master` (or Actions → *Deploy to SiteGround* → *Run workflow*). The first run uploads everything (several minutes);
+   later runs upload only changed files, tracked in `.ftp-deploy-sync-state.json` on the server.
+4. The workflow never touches `.env`, `storage/` or the root `.htaccess`, so your configuration and data survive every deploy.
+5. When a release adds database migrations, run them once with a temporary cron job (Site Tools → Cron Jobs):
+   `php /home/customer/www/yourdomain/public_html/artisan migrate --force >> /home/customer/www/yourdomain/public_html/storage/logs/migrate.log 2>&1`
+   — or keep that line as a daily job; it does nothing when there is nothing to migrate.
+
+## 9. Updating by hand (alternative)
 
 ```bash
 ./deploy/build-release.sh            # locally

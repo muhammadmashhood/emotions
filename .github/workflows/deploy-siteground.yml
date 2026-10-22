@@ -1,0 +1,72 @@
+name: Deploy to SiteGround
+
+# Builds the app (composer --no-dev, npm build) and uploads it to SiteGround over FTPS.
+# Runs on every push to master, or by hand from the Actions tab.
+# Required repository secrets: SG_FTP_SERVER, SG_FTP_USERNAME, SG_FTP_PASSWORD, SG_FTP_DIR (e.g. "public_html/").
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-siteground
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, pdo_mysql, bcmath, intl, zip, gd
+          coverage: none
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --no-progress
+
+      - name: Build front-end assets
+        run: npm ci && npm run build
+
+      - name: Remove files that must not reach the server
+        run: |
+          rm -rf node_modules tests docs/screenshots .github docker Dockerfile docker-compose.yml release deploy/build-release.sh
+          cp deploy/siteground/root.htaccess root.htaccess
+          cp deploy/siteground/post-deploy.sh post-deploy.sh
+          cp deploy/siteground/cron.txt cron.txt
+
+      - name: Upload to SiteGround (FTPS)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SG_FTP_SERVER }}
+          username: ${{ secrets.SG_FTP_USERNAME }}
+          password: ${{ secrets.SG_FTP_PASSWORD }}
+          protocol: ftps
+          port: 21
+          server-dir: ${{ secrets.SG_FTP_DIR }}
+          local-dir: ./
+          state-name: .ftp-deploy-sync-state.json
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .env
+            .env.*
+            storage/**
+            bootstrap/cache/*.php
+            phpunit.xml
+            phpstan.neon
+            package.json
+            package-lock.json
+            vite.config.js
+            tailwind.config.js
+            postcss.config.js
+            resources/js/**
+            resources/css/**
