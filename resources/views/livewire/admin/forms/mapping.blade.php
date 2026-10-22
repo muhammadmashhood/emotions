@@ -20,6 +20,7 @@
         @endif
 
         @error('fields')<x-alert type="danger">{{ $message }}</x-alert>@enderror
+        <p class="text-xs text-ink-soft">Info keys feed the evaluation header, exports and the facility ranking (one question each). The <strong>Likelihood to recommend</strong> KPI may be assigned to several questions; their 0–10 scores are averaged.</p>
 
         @if($rescoreCount)
             <x-alert type="info">
@@ -78,7 +79,7 @@
                                     <label class="sr-only" for="info-{{ $fieldId }}">Info</label>
                                     <select id="info-{{ $fieldId }}" wire:change="setInfoKey({{ $fieldId }}, $event.target.value)" class="field py-1 text-xs w-auto {{ ($fieldState[$fieldId]['info_key'] ?? null) ? 'border-accent text-accent' : '' }}" @disabled($readOnly)>
                                         <option value="" @selected(empty($fieldState[$fieldId]['info_key']))>Info: none</option>
-                                        @foreach($infoKeys as $key)<option value="{{ $key->value }}" @selected(($fieldState[$fieldId]['info_key'] ?? null) === $key->value)>Info: {{ $key->label() }}</option>@endforeach
+                                        @foreach($infoKeys as $key)<option value="{{ $key->value }}" @selected(($fieldState[$fieldId]['info_key'] ?? null) === $key->value)>{{ $key->allowsMultiple() ? 'KPI' : 'Info' }}: {{ $key->label() }}</option>@endforeach
                                     </select>
                                     <x-input-error :messages="$errors->get('fields.'.$fieldId.'.info_key')" />
                                 </div>

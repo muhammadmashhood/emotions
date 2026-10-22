@@ -1,5 +1,7 @@
 <?php
 
+use App\Domain\Dashboard\DashboardFilters;
+use App\Domain\Dashboard\DashboardQuery;
 use App\Domain\Forms\FormVersioner;
 use App\Domain\Submissions\SubmissionIngestor;
 use App\Domain\Typeform\WebhookSignature;
@@ -7,6 +9,7 @@ use App\Enums\Rag;
 use App\Enums\SubmissionSource;
 use App\Enums\SubmissionStatus;
 use App\Models\Form;
+use App\Models\FormField;
 use App\Models\Hospital;
 use App\Models\Submission;
 use App\Models\WebhookDelivery;
@@ -81,6 +84,19 @@ test('posting the real webhook fixture creates one scored evaluation with the ex
     expect($na->points)->toBeNull()->and($na->max_points)->toBeNull();
     $file = $submission->answers()->where('answer_type', 'file_url')->firstOrFail();
     expect($file->value_text)->toBe('receipt.jpg')->and($file->value_json['url'])->toContain('api.typeform.com');
+});
+
+test('several recommend questions are averaged into one info value and the KPI', function () {
+    // mark the 1–5 star rating as a second "recommend" question: rating 4 → 7.5 on 0–10, NPS 9 → average 8.25
+    FormField::query()->where('form_version_id', $this->v1->id)->where('title', 'Overall rating of your visit')->update(['info_key' => 'recommend']);
+
+    deliver($this, $this->form, $this->raw);
+    $submission = Submission::query()->firstOrFail();
+    expect($submission->info['recommend'])->toBe('6.5'); // raw values averaged per evaluation: (9 + 4) / 2
+
+    $submission->update(['submitted_at' => now()->subDay()]);
+    $kpis = (new DashboardQuery(superAdmin()))->kpis($this->form->hospital, DashboardFilters::fromRequest('90d'));
+    expect($kpis['nps_avg'])->toBe(8.3)->and($kpis['nps_count'])->toBe(2); // KPI normalises each answer to 0–10 first
 });
 
 test('duplicate token → one submission, delivery marked duplicate', function () {

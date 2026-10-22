@@ -129,6 +129,11 @@ test('info keys are set explicitly per field and never leak to other fields', fu
     $component->call('save')->assertHasNoErrors();
     expect($recommend->fresh()->info_key)->toBe('recommend')
         ->and(FormField::query()->where('form_version_id', $this->version->id)->where('info_key', 'recommend')->count())->toBe(1);
+
+    // the KPI role may be shared by several questions; descriptive keys may not
+    $rating = FormField::query()->where('form_version_id', $this->version->id)->where('title', 'Overall rating of your visit')->firstOrFail();
+    $component->call('setInfoKey', $rating->id, 'recommend')->call('save')->assertHasNoErrors();
+    expect(FormField::query()->where('form_version_id', $this->version->id)->where('info_key', 'recommend')->count())->toBe(2);
 });
 
 test('unscorable types cannot be scored even if toggled', function () {

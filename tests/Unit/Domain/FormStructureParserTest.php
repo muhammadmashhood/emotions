@@ -111,13 +111,15 @@ test('scale and yes/no questions never become info fields, except the recommend 
     $def['fields'][] = ['id' => 'cleanF', 'title' => 'The healthcare facility was clean', 'ref' => 'r-clean', 'properties' => ['steps' => 11], 'type' => 'opinion_scale'];
     $def['fields'][] = ['id' => 'recF', 'title' => 'How likely is that you would recommend this hospital/clinic?', 'ref' => 'r-rec', 'properties' => ['steps' => 11], 'type' => 'opinion_scale'];
     $def['fields'][] = ['id' => 'locYN', 'title' => 'Location was convenient?', 'ref' => 'r-yn', 'properties' => [], 'type' => 'yes_no'];
+    $def['fields'][] = ['id' => 'rec2', 'title' => 'Would you recommend the pharmacy?', 'ref' => 'r-rec2', 'properties' => ['steps' => 5, 'start_at_one' => true], 'type' => 'opinion_scale'];
 
     $byTitle = collect($parser()->parse($def)->allFields())->keyBy('title');
     expect($byTitle['The healthcare facility was clean']->infoKey)->toBeNull()
         ->and($byTitle['Facility']->infoKey)->toBe('facility')
         ->and($byTitle['Location was convenient?']->infoKey)->toBeNull()
         ->and($byTitle['How likely is that you would recommend this hospital/clinic?']->infoKey)->toBe('recommend')
-        ->and($byTitle['How likely is that you would recommend this hospital/clinic?']->isScored)->toBeTrue();
+        ->and($byTitle['How likely is that you would recommend this hospital/clinic?']->isScored)->toBeTrue()
+        ->and($byTitle['Would you recommend the pharmacy?']->infoKey)->toBe('recommend'); // the KPI role may repeat
 });
 
 test('section names are cleaned', function (string $input, string $expected) {

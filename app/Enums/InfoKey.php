@@ -25,6 +25,12 @@ enum InfoKey: string
         };
     }
 
+    /** Numeric KPI roles may be carried by several questions; their values are averaged. */
+    public function allowsMultiple(): bool
+    {
+        return $this === self::Recommend;
+    }
+
     /** Keys shown as header information on an evaluation (the KPI role is not display info). */
     public function isDisplayInfo(): bool
     {

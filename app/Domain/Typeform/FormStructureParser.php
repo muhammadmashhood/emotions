@@ -190,8 +190,7 @@ class FormStructureParser
             foreach ($section->fields as $i => $field) {
                 if (in_array($field->type, self::SCALE_TYPES, true)) {
                     // Scale questions are scored, never descriptive info — except the "likelihood to recommend" KPI role.
-                    if (! in_array('recommend', $taken, true) && str_contains(mb_strtolower($field->title), 'recommend')) {
-                        $taken[] = 'recommend';
+                    if (str_contains(mb_strtolower($field->title), 'recommend')) {
                         $section->fields[$i] = $field->withInfoKey('recommend');
                     }
 

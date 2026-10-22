@@ -177,7 +177,7 @@ class MappingEditor
 
                 continue;
             }
-            if (isset($seenKeys[$key])) {
+            if (isset($seenKeys[$key]) && ! InfoKey::from($key)->allowsMultiple()) {
                 $errors["fields.$fid.info_key"] = 'Only one question can provide "'.InfoKey::from($key)->label().'".';
             }
             $seenKeys[$key] = true;
