@@ -67,7 +67,7 @@ class Dashboard extends Component
             'trend' => $query->trend($this->hospital, $filters),
             'sections' => $selectedForm ? $query->sectionAverages($selectedForm, $filters) : null,
             'weakest' => $selectedForm ? $query->weakestQuestions($selectedForm, $filters) : null,
-            'compliance' => $selectedForm ? $query->yesNoCompliance($selectedForm, $filters) : null,
+            'strongest' => $selectedForm ? $query->strongestQuestions($selectedForm, $filters) : null,
             'recent' => $query->recent($this->hospital, $filters),
             'distribution' => $query->distribution($this->hospital, $filters),
             'kpis' => $query->kpis($this->hospital, $filters),

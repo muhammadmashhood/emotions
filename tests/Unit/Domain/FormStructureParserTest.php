@@ -99,10 +99,25 @@ test('info keys are detected from titles, first match wins per key', function ()
         'visit_date' => 'Vsite Date',
         'booking_method' => 'Appointment Booking method',
         'doctor' => 'Name of the Doctor',
+        'recommend' => 'How likely are you to recommend this hospital to a friend?',
     ]);
     // "Additional Comments" repeats; none of them carry an info key, and each has a unique id
     $ids = $fields->pluck('id');
     expect($ids->unique()->count())->toBe($ids->count());
+});
+
+test('scale and yes/no questions never become info fields, except the recommend KPI role', function () use ($parser) {
+    $def = fixture('form_no_statements.json');
+    $def['fields'][] = ['id' => 'cleanF', 'title' => 'The healthcare facility was clean', 'ref' => 'r-clean', 'properties' => ['steps' => 11], 'type' => 'opinion_scale'];
+    $def['fields'][] = ['id' => 'recF', 'title' => 'How likely is that you would recommend this hospital/clinic?', 'ref' => 'r-rec', 'properties' => ['steps' => 11], 'type' => 'opinion_scale'];
+    $def['fields'][] = ['id' => 'locYN', 'title' => 'Location was convenient?', 'ref' => 'r-yn', 'properties' => [], 'type' => 'yes_no'];
+
+    $byTitle = collect($parser()->parse($def)->allFields())->keyBy('title');
+    expect($byTitle['The healthcare facility was clean']->infoKey)->toBeNull()
+        ->and($byTitle['Facility']->infoKey)->toBe('facility')
+        ->and($byTitle['Location was convenient?']->infoKey)->toBeNull()
+        ->and($byTitle['How likely is that you would recommend this hospital/clinic?']->infoKey)->toBe('recommend')
+        ->and($byTitle['How likely is that you would recommend this hospital/clinic?']->isScored)->toBeTrue();
 });
 
 test('section names are cleaned', function (string $input, string $expected) {

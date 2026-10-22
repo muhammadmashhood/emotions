@@ -8,6 +8,7 @@ use App\Domain\Dashboard\DashboardQuery;
 use App\Domain\Scoring\Rescorer;
 use App\Enums\SubmissionStatus;
 use App\Models\Answer;
+use App\Models\FormField;
 use App\Models\Submission;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
@@ -91,7 +92,7 @@ class Show extends Component
                     $scored[] = ['title' => $row['field']->title, 'section' => $block['section']->name, 'points' => $answer->points, 'max' => $answer->max_points, 'ratio' => $answer->points / $answer->max_points, 'value' => $answer->value_text];
                 } else {
                     $unscored++;
-                    if ($row['field']->type === 'long_text' && trim((string) $answer->value_text) !== '') {
+                    if (self::isCommentField($row['field']) && trim((string) $answer->value_text) !== '') {
                         $comments[] = ['section' => $block['section']->name, 'text' => $answer->value_text];
                     }
                 }
@@ -116,6 +117,18 @@ class Show extends Component
             'comments' => $comments,
             'duration_minutes' => $landed && $submitted ? max(0, (int) round($landed->diffInMinutes($submitted))) : null,
         ];
+    }
+
+    /**
+     * Free-text questions that ask for remarks (not descriptive info such as doctor name or speciality).
+     */
+    public static function isCommentField(FormField $field): bool
+    {
+        if ($field->info_key !== null || $field->type !== 'long_text') {
+            return false;
+        }
+
+        return (bool) preg_match('/comment|remark|feedback|suggest|observ|note|describe|explain|why|improve|experience/i', $field->title);
     }
 
     private function review(SubmissionStatus $status, string $action, AuditLogger $audit): void
@@ -160,12 +173,14 @@ class Show extends Component
         });
 
         $knownFieldIds = $this->evaluation->formVersion->fields()->pluck('typeform_field_id')->all();
+        $scorableSectionIds = $this->evaluation->formVersion->fields()->reorder()->where('is_scored', true)->distinct()->pluck('section_id')->map(fn ($id) => (int) $id)->all();
         $orphanAnswers = $this->evaluation->answers->reject(fn ($a) => in_array($a->typeform_field_id, $knownFieldIds, true))->values();
 
         return view('livewire.hospital.evaluations.show', [
             'sections' => $sections,
             'orphanAnswers' => $orphanAnswers,
             'benchmark' => $this->benchmark($user),
+            'journeyScores' => $this->evaluation->sectionScores->filter(fn ($s) => in_array((int) $s->section_id, $scorableSectionIds, true))->values(),
             'insights' => $this->insights($sections),
             'isAdmin' => $user->isSuperAdmin(),
             'rawJson' => $user->isSuperAdmin() ? json_encode($this->evaluation->raw, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null,

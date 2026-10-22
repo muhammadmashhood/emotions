@@ -50,6 +50,7 @@ test('posting the real webhook fixture creates one scored evaluation with the ex
             'booking_method' => 'Phone call',
             'doctor' => 'Dr. Farhan Siddiqui',
             'branch' => 'Main campus',
+            'recommend' => '9',
         ])
         ->and($submission->answers()->count())->toBe(45)
         ->and($submission->raw['calculated'])->toBe(['score' => 2]);

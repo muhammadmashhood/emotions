@@ -17,6 +17,12 @@ use Illuminate\Support\Facades\DB;
  */
 class DashboardQuery
 {
+    /**
+     * How an evaluation is attributed to a facility: the resolved branch, else the "facility" info field,
+     * else the "location" info field (hospital groups often identify the site by city).
+     */
+    public const FACILITY_EXPR = "COALESCE(branches.name, NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility')), 'null'), NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.location')), 'null'), 'Unknown facility')";
+
     public function __construct(private readonly User $viewer) {}
 
     /**
@@ -168,7 +174,25 @@ class DashboardQuery
      *
      * @return list<array{field_id: string, title: string, section: string|null, avg_pct: float, count: int}>
      */
-    public function weakestQuestions(Form $form, DashboardFilters $filters, int $limit = 10): array
+    public function weakestQuestions(Form $form, DashboardFilters $filters, int $limit = 5): array
+    {
+        return $this->rankedQuestions($form, $filters, $limit, 'asc');
+    }
+
+    /**
+     * The scored questions with the highest average points / max_points.
+     *
+     * @return list<array{field_id: string, title: string, section: string|null, avg_pct: float, count: int}>
+     */
+    public function strongestQuestions(Form $form, DashboardFilters $filters, int $limit = 5): array
+    {
+        return $this->rankedQuestions($form, $filters, $limit, 'desc');
+    }
+
+    /**
+     * @return list<array{field_id: string, title: string, section: string|null, avg_pct: float, count: int}>
+     */
+    private function rankedQuestions(Form $form, DashboardFilters $filters, int $limit, string $direction): array
     {
         $rows = $this->base($form->hospital, $filters->withForm($form->id))
             ->join('answers', 'answers.submission_id', '=', 'submissions.id')
@@ -189,7 +213,7 @@ class DashboardQuery
                 'avg_pct' => round(100 * (float) $r->points / (float) $r->max_points, 1),
                 'count' => (int) $r->cnt,
             ])
-            ->sortBy([['avg_pct', 'asc'], ['count', 'desc']])
+            ->sortBy([['avg_pct', $direction], ['count', 'desc']])
             ->take($limit)
             ->values()
             ->all();
@@ -279,13 +303,15 @@ class DashboardQuery
      */
     public function kpis(?Hospital $hospital, DashboardFilters $filters): array
     {
+        // NPS-type questions, or any scale question the admin marked as "Likelihood to recommend"; normalised to 0–10.
         $nps = $this->base($hospital, $filters)
             ->join('answers', 'answers.submission_id', '=', 'submissions.id')
             ->join('form_fields', 'form_fields.id', '=', 'answers.form_field_id')
-            ->where('form_fields.type', 'nps')
+            ->where(fn ($q) => $q->where('form_fields.type', 'nps')->orWhere('form_fields.info_key', 'recommend'))
             ->whereNotNull('answers.value_number')
+            ->whereNotNull('form_fields.scale_max')
             ->toBase()
-            ->selectRaw('AVG(answers.value_number) as avg, COUNT(*) as cnt')
+            ->selectRaw('AVG((answers.value_number - COALESCE(form_fields.scale_min, 0)) / NULLIF(form_fields.scale_max - COALESCE(form_fields.scale_min, 0), 0) * 10) as avg, COUNT(*) as cnt')
             ->first();
 
         $yes = $this->base($hospital, $filters)
@@ -299,8 +325,9 @@ class DashboardQuery
             ->first();
 
         $facilities = $this->base($hospital, $filters)
+            ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
             ->toBase()
-            ->selectRaw("COUNT(DISTINCT JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility'))) as cnt")
+            ->selectRaw('COUNT(DISTINCT '.self::FACILITY_EXPR.') as cnt')
             ->value('cnt');
 
         $yesTotal = (int) ($yes->total ?? 0);
@@ -322,13 +349,14 @@ class DashboardQuery
     public function facilityRanking(?Hospital $hospital, DashboardFilters $filters, int $limit = 5): array
     {
         $rows = $this->base($hospital, $filters)
+            ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
             ->whereNotNull('submissions.overall_pct')
             ->toBase()
-            ->selectRaw("COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility')), 'null'), 'Unknown facility') as name, AVG(submissions.overall_pct) as avg, COUNT(*) as cnt")
-            ->groupBy('name')
+            ->selectRaw(self::FACILITY_EXPR.' as facility_name, AVG(submissions.overall_pct) as avg, COUNT(*) as cnt')
+            ->groupBy('facility_name')
             ->orderByDesc('avg')
             ->get()
-            ->map(fn ($r) => ['name' => (string) $r->name, 'avg' => round((float) $r->avg, 1), 'count' => (int) $r->cnt])
+            ->map(fn ($r) => ['name' => (string) $r->facility_name, 'avg' => round((float) $r->avg, 1), 'count' => (int) $r->cnt])
             ->values();
 
         if ($rows->count() <= $limit * 2) {
@@ -345,12 +373,13 @@ class DashboardQuery
      */
     public function heatmap(?Hospital $hospital, DashboardFilters $filters, ?Form $form, int $maxRows = 8): array
     {
-        $facilityExpr = "COALESCE(NULLIF(JSON_UNQUOTE(JSON_EXTRACT(submissions.info, '$.facility')), 'null'), 'Unknown facility')";
+        $facilityExpr = self::FACILITY_EXPR;
 
         $facilities = $this->base($hospital, $filters)
+            ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
             ->toBase()
-            ->selectRaw("$facilityExpr as name, COUNT(*) as cnt")
-            ->groupBy('name')
+            ->selectRaw("$facilityExpr as facility_name, COUNT(*) as cnt")
+            ->groupBy('facility_name')
             ->orderByDesc('cnt')
             ->limit($maxRows)
             ->get();
@@ -358,10 +387,11 @@ class DashboardQuery
         if ($facilities->isEmpty()) {
             return ['columns' => [], 'rows' => []];
         }
-        $names = $facilities->pluck('name')->map(fn ($n) => (string) $n)->all();
+        $names = $facilities->pluck('facility_name')->map(fn ($n) => (string) $n)->all();
 
         if ($form !== null) {
             $cells = $this->base($hospital, $filters->withForm($form->id))
+                ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
                 ->join('submission_section_scores as sss', 'sss.submission_id', '=', 'submissions.id')
                 ->whereNotNull('sss.pct')
                 ->whereRaw("$facilityExpr IN (".implode(',', array_fill(0, count($names), '?')).')', $names)
@@ -373,6 +403,7 @@ class DashboardQuery
             $columns = $cells->pluck('col_name')->unique()->sortBy(fn ($c) => $order[$c] ?? 999)->values()->map(fn ($c) => (string) $c)->all();
         } else {
             $cells = $this->base($hospital, $filters)
+                ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
                 ->join('forms', 'forms.id', '=', 'submissions.form_id')
                 ->whereNotNull('submissions.overall_pct')
                 ->whereRaw("$facilityExpr IN (".implode(',', array_fill(0, count($names), '?')).')', $names)
@@ -392,9 +423,9 @@ class DashboardQuery
         foreach ($facilities as $f) {
             $cellsForRow = [];
             foreach ($columns as $col) {
-                $cellsForRow[$col] = $lookup[(string) $f->name][$col] ?? null;
+                $cellsForRow[$col] = $lookup[(string) $f->facility_name][$col] ?? null;
             }
-            $rows[] = ['label' => (string) $f->name, 'count' => (int) $f->cnt, 'cells' => $cellsForRow];
+            $rows[] = ['label' => (string) $f->facility_name, 'count' => (int) $f->cnt, 'cells' => $cellsForRow];
         }
 
         return ['columns' => $columns, 'rows' => $rows];

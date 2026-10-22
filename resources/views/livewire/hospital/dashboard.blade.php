@@ -31,7 +31,7 @@
                        :note="$headline['previous_count'] === 0 ? 'No evaluations in the previous period' : null" />
                 <x-kpi label="Evaluations" :value="number_format($headline['count'])" :note="$headline['previous_count'].' in the previous period'" />
                 <x-kpi label="Likelihood to recommend" :value="$kpis['nps_avg'] === null ? '–' : number_format($kpis['nps_avg'], 1)" :unit="$kpis['nps_avg'] === null ? null : '/10'"
-                       :note="$kpis['nps_count'] > 0 ? $kpis['nps_count'].' answers' : 'No recommendation question answered'" />
+                       :note="$kpis['nps_count'] > 0 ? $kpis['nps_count'].' answers, scaled to 0–10' : 'Mark the “recommend” question in the mapping editor'" />
                 <x-kpi label="Critical items passed" :value="$kpis['yes_pct'] === null ? '–' : number_format($kpis['yes_pct'], 0)" :unit="$kpis['yes_pct'] === null ? null : '%'"
                        :tone="$ragOf($kpis['yes_pct'])?->value" :note="$kpis['yes_total'] > 0 ? $kpis['yes_total'].' yes/no checks' : 'No yes/no checks answered'" />
                 <x-kpi label="Facilities evaluated" :value="number_format($kpis['facilities'])" :note="$distribution['red'] > 0 ? $distribution['red'].' red '.Str::plural('evaluation', $distribution['red']).' need attention' : 'No red evaluations'" />
@@ -128,7 +128,7 @@
 
             {{-- Facility ranking · heat-map --}}
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <x-card title="Facility ranking" :subtitle="$ranking['bottom'] === [] ? 'All '.$ranking['total'].' facilities, best first' : 'Top and bottom 5 of '.$ranking['total'].' facilities'" class="xl:col-span-5">
+                <x-card title="Facility / branch ranking" :subtitle="($ranking['bottom'] === [] ? 'All '.$ranking['total'].' facilities, best first' : 'Top and bottom 5 of '.$ranking['total'].' facilities').' · by branch, facility or location'" class="xl:col-span-5">
                     @if($ranking['top'] === [])
                         <p class="text-sm text-ink-soft">No scored evaluations in this period.</p>
                     @else
@@ -191,37 +191,39 @@
 
             {{-- Question-level · live feed --}}
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-4">
-                <x-card title="Weakest questions" subtitle="Lowest average score, scored questions only" class="xl:col-span-4">
+                <x-card title="Areas of concern" subtitle="The five lowest-scoring questions" class="xl:col-span-4">
                     @if($selectedForm === null)
-                        <p class="text-sm text-ink-soft">Pick a survey above to see the lowest-scoring questions.</p>
+                        <p class="text-sm text-ink-soft">Pick a survey above to see the questions that need attention.</p>
                     @elseif(empty($weakest))
                         <p class="text-sm text-ink-soft">No scored answers in this period.</p>
                     @else
                         <ol class="divide-y divide-line/70 text-sm">
                             @foreach($weakest as $q)
-                                <li class="py-2 flex justify-between gap-3">
-                                    <span class="min-w-0"><span class="font-medium block truncate" title="{{ $q['title'] }}">{{ $q['title'] }}</span>@if($q['section'])<span class="block text-xs text-ink-soft">{{ $q['section'] }}</span>@endif</span>
-                                    <span class="tabular-nums whitespace-nowrap {{ $ragText($q['avg_pct']) }}">{{ number_format($q['avg_pct'], 0) }}% <span class="text-ink-soft text-xs">({{ $q['count'] }})</span></span>
+                                <li class="py-2.5 flex items-start gap-3">
+                                    <span class="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-rag-red/10 text-rag-red text-xs font-semibold flex items-center justify-center" aria-hidden="true">{{ $loop->iteration }}</span>
+                                    <span class="min-w-0 flex-1"><span class="font-medium block" title="{{ $q['title'] }}">{{ $q['title'] }}</span>@if($q['section'])<span class="block text-xs text-ink-soft">{{ $q['section'] }} · {{ $q['count'] }} {{ Str::plural('answer', $q['count']) }}</span>@endif</span>
+                                    <span class="tabular-nums whitespace-nowrap font-semibold {{ $ragText($q['avg_pct']) }}">{{ number_format($q['avg_pct'], 0) }}%</span>
                                 </li>
                             @endforeach
                         </ol>
                     @endif
                 </x-card>
 
-                <x-card title="Yes/No compliance" subtitle="% Yes among Yes/No answers" class="xl:col-span-4">
+                <x-card title="Areas of strength" subtitle="The five highest-scoring questions" class="xl:col-span-4">
                     @if($selectedForm === null)
-                        <p class="text-sm text-ink-soft">Pick a survey above to see compliance per question.</p>
-                    @elseif(empty($compliance))
-                        <p class="text-sm text-ink-soft">No yes/no answers in this period.</p>
+                        <p class="text-sm text-ink-soft">Pick a survey above to see what is going well.</p>
+                    @elseif(empty($strongest))
+                        <p class="text-sm text-ink-soft">No scored answers in this period.</p>
                     @else
-                        <ul class="space-y-2.5 text-sm">
-                            @foreach($compliance as $c)
-                                <li>
-                                    <div class="flex justify-between gap-3 mb-1"><span class="font-medium truncate" title="{{ $c['title'] }}">{{ $c['title'] }}</span><span class="tabular-nums whitespace-nowrap {{ $ragText($c['pct_yes']) }}">{{ number_format($c['pct_yes'], 0) }}% <span class="text-ink-soft text-xs">({{ $c['yes'] }}/{{ $c['yes'] + $c['no'] }})</span></span></div>
-                                    <div class="h-1.5 rounded-full bg-paper overflow-hidden"><div class="h-full rounded-full {{ $ragBg($c['pct_yes']) }}" style="width: {{ $c['pct_yes'] }}%"></div></div>
+                        <ol class="divide-y divide-line/70 text-sm">
+                            @foreach($strongest as $q)
+                                <li class="py-2.5 flex items-start gap-3">
+                                    <span class="mt-0.5 h-6 w-6 shrink-0 rounded-full bg-rag-green/10 text-rag-green text-xs font-semibold flex items-center justify-center" aria-hidden="true">{{ $loop->iteration }}</span>
+                                    <span class="min-w-0 flex-1"><span class="font-medium block" title="{{ $q['title'] }}">{{ $q['title'] }}</span>@if($q['section'])<span class="block text-xs text-ink-soft">{{ $q['section'] }} · {{ $q['count'] }} {{ Str::plural('answer', $q['count']) }}</span>@endif</span>
+                                    <span class="tabular-nums whitespace-nowrap font-semibold {{ $ragText($q['avg_pct']) }}">{{ number_format($q['avg_pct'], 0) }}%</span>
                                 </li>
                             @endforeach
-                        </ul>
+                        </ol>
                     @endif
                 </x-card>
 

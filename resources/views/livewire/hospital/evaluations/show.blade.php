@@ -6,10 +6,10 @@
         $ragText = fn ($pct) => match ($ragOf($pct)) { \App\Enums\Rag::Green => 'text-rag-green', \App\Enums\Rag::Amber => 'text-rag-amber', \App\Enums\Rag::Red => 'text-rag-red', default => 'text-ink-soft' };
         $ragStroke = fn ($pct) => match ($ragOf($pct)) { \App\Enums\Rag::Green => '#2F855A', \App\Enums\Rag::Amber => '#B7791F', \App\Enums\Rag::Red => '#B83A33', default => '#A9B6BD' };
         $ragBg = fn ($pct) => match ($ragOf($pct)) { \App\Enums\Rag::Green => 'bg-rag-green', \App\Enums\Rag::Amber => 'bg-rag-amber', \App\Enums\Rag::Red => 'bg-rag-red', default => 'bg-rag-neutral/40' };
-        $answered = $e->sectionScores->filter(fn ($s) => $s->pct !== null)->count();
+        $answered = $journeyScores->filter(fn ($s) => $s->pct !== null)->count();
         $circumference = 2 * M_PI * 52;
         $delta = $e->overall_pct !== null && $benchmark['overall_avg'] !== null ? round($e->overall_pct - $benchmark['overall_avg'], 1) : null;
-        $answeredScores = $e->sectionScores->filter(fn ($s) => $s->pct !== null)->values();
+        $answeredScores = $journeyScores->filter(fn ($s) => $s->pct !== null)->values();
     @endphp
 
     <x-page-header :title="($e->infoValue('facility') ?? $e->form->title)" :subtitle="$e->form->title.' · '.($e->submitted_at?->format('d M Y, H:i') ?? 'in progress').($e->infoValue('location') ? ' · '.$e->infoValue('location') : '')">
@@ -50,12 +50,11 @@
                         @if($benchmark['percentile'] !== null)
                             <div class="text-sm text-ink-soft">Better than {{ $benchmark['percentile'] }}% of {{ $benchmark['count'] }} evaluations in the last 12 months</div>
                         @endif
-                        <div class="text-sm text-ink-soft">{{ $e->points !== null ? number_format($e->points, 0).' / '.number_format($e->max_points, 0).' points' : 'No scored answers' }} · {{ $answered }} of {{ $e->sectionScores->count() }} sections answered</div>
+                        <div class="text-sm text-ink-soft">{{ $e->points !== null ? number_format($e->points, 0).' / '.number_format($e->max_points, 0).' points' : 'No scored answers' }} · {{ $answered }} of {{ $journeyScores->count() }} scored sections answered</div>
                         @if($isAdmin)
                             <div class="pt-1 flex flex-wrap gap-1.5">
                                 <x-badge :variant="match ($e->status) { \App\Enums\SubmissionStatus::Approved => 'green', \App\Enums\SubmissionStatus::PendingReview => 'amber', default => 'red' }">{{ $e->status->label() }}</x-badge>
                                 @if($e->is_partial)<x-badge variant="amber">Partial</x-badge>@endif
-                                <x-badge>{{ $e->source->value }}</x-badge>
                             </div>
                         @endif
                     </div>
@@ -64,7 +63,7 @@
                 <dl class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-3 text-sm">
                     @foreach(\App\Enums\InfoKey::cases() as $key)
                         @php $val = $key === \App\Enums\InfoKey::Branch && $e->branch ? $e->branch->name : $e->infoValue($key->value); @endphp
-                        @if($val !== null)
+                        @if($val !== null && $key->isDisplayInfo())
                             <div class="min-w-0"><dt class="eyebrow">{{ $key->label() }}</dt><dd class="font-medium truncate" title="{{ $val }}">{{ $val }}</dd></div>
                         @endif
                     @endforeach
@@ -87,8 +86,8 @@
         </div>
 
         {{-- Journey --}}
-        <x-card title="Journey" subtitle="Score per section in form order — click a tile to open the section">
-            <x-journey-strip :scores="$e->sectionScores" :green="$green" :amber="$amber" />
+        <x-card title="Journey" subtitle="Score per scored section in form order — click a tile to open the section">
+            <x-journey-strip :scores="$journeyScores" :green="$green" :amber="$amber" />
         </x-card>
 
         {{-- Radar · vs average · answer outcomes --}}

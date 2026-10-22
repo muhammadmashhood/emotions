@@ -4,6 +4,7 @@ namespace App\Domain\Scoring;
 
 use App\Domain\Audit\AuditLogger;
 use App\Domain\Submissions\BranchResolver;
+use App\Domain\Submissions\InfoExtractor;
 use App\Domain\Submissions\SubmissionScorer;
 use App\Domain\Typeform\AnswerNormalizer;
 use App\Models\Form;
@@ -34,6 +35,7 @@ class Rescorer
         $mapping ??= ScoringMapping::fromVersion($version);
         $hidden = is_array($submission->raw['hidden'] ?? null) ? $submission->raw['hidden'] : [];
         $submission->branch_id = $this->branches->resolve($submission->form, $mapping, $answers, $hidden);
+        $submission->info = InfoExtractor::extract($mapping, $answers, $hidden);
         $this->scorer->scoreAndPersist($submission, $version, $answers, $mapping);
     }
 

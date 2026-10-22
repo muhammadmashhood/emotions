@@ -31,8 +31,9 @@ test('dashboard renders all widgets for a hospital user with a single form selec
         ->set('form', $this->form->uuid)
         ->assertSee('Phone booking')
         ->assertSee('Waiting Area')
-        ->assertSee('Were visible safety hazards present?')
-        ->assertSee('Was the call answered within 3 rings?')
+        ->assertSee('Areas of concern')
+        ->assertSee('Areas of strength')
+        ->assertSee('Facility / branch ranking')
         ->assertSee('Ittefaq Hospital')
         ->assertDontSee('Viewing as admin');
 });

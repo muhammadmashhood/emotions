@@ -7,7 +7,6 @@ use App\Domain\Scoring\ScoringMapping;
 use App\Domain\Typeform\AnswerNormalizer;
 use App\Domain\Typeform\Data\NormalizedAnswer;
 use App\Domain\Typeform\Exceptions\TypeformException;
-use App\Enums\InfoKey;
 use App\Enums\SubmissionSource;
 use App\Enums\SubmissionStatus;
 use App\Models\Form;
@@ -59,7 +58,7 @@ class SubmissionIngestor
             $version = $this->resolveVersion($form, $answers);
             $mapping = ScoringMapping::fromVersion($version);
             $hidden = is_array($response['hidden'] ?? null) ? $response['hidden'] : [];
-            $info = $this->extractInfo($mapping, $answers, $hidden);
+            $info = InfoExtractor::extract($mapping, $answers, $hidden);
 
             $hospital = $form->hospital;
             $status = $hospital->require_review ? SubmissionStatus::PendingReview : SubmissionStatus::Approved;
@@ -132,29 +131,6 @@ class SubmissionIngestor
         }
 
         return $new ?? $version;
-    }
-
-    /**
-     * @param  list<NormalizedAnswer>  $answers
-     * @param  array<string, mixed>  $hidden
-     * @return array<string, string>
-     */
-    private function extractInfo(ScoringMapping $mapping, array $answers, array $hidden): array
-    {
-        $info = [];
-        foreach ($answers as $answer) {
-            $field = $mapping->field($answer->fieldId);
-            if ($field?->infoKey !== null && $answer->valueText !== null && $answer->valueText !== '') {
-                $info[$field->infoKey] = $answer->valueText;
-            }
-        }
-        foreach (InfoKey::values() as $key) {
-            if (! isset($info[$key]) && isset($hidden[$key]) && is_scalar($hidden[$key]) && (string) $hidden[$key] !== '') {
-                $info[$key] = (string) $hidden[$key];
-            }
-        }
-
-        return $info;
     }
 
     private function timestamp(mixed $value): ?Carbon

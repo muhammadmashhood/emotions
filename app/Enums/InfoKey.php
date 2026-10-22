@@ -10,6 +10,7 @@ enum InfoKey: string
     case Doctor = 'doctor';
     case BookingMethod = 'booking_method';
     case Branch = 'branch';
+    case Recommend = 'recommend';
 
     public function label(): string
     {
@@ -20,7 +21,14 @@ enum InfoKey: string
             self::Doctor => 'Doctor',
             self::BookingMethod => 'Booking method',
             self::Branch => 'Branch',
+            self::Recommend => 'Likelihood to recommend',
         };
+    }
+
+    /** Keys shown as header information on an evaluation (the KPI role is not display info). */
+    public function isDisplayInfo(): bool
+    {
+        return $this !== self::Recommend;
     }
 
     /** @return list<string> */

@@ -5,6 +5,7 @@ use App\Domain\Dashboard\DashboardQuery;
 use App\Domain\Forms\FormVersioner;
 use App\Enums\Rag;
 use App\Models\Answer;
+use App\Models\Branch;
 use App\Models\Form;
 use App\Models\FormField;
 use App\Models\FormVersion;
@@ -146,6 +147,34 @@ test('kpis: likelihood to recommend, critical items passed and facilities', func
         Answer::factory()->create(['submission_id' => $s->id, 'typeform_field_id' => $nps->typeform_field_id, 'form_field_id' => $nps->id, 'value_number' => 8, 'points' => 8, 'max_points' => 10]);
     }
     expect($this->query->kpis($this->hospital, $this->filters)['nps_avg'])->toBe(8.0);
+
+    // a 1–5 "recommend" scale marked by the admin is normalised to 0–10: 5 → 10, 3 → 5
+    $this->stars->update(['info_key' => 'recommend']);
+    Answer::query()->where('form_field_id', $this->stars->id)->delete();
+    foreach ([[5, '2026-06-10'], [3, '2026-06-03']] as [$val, $date]) {
+        $sub = Submission::query()->where('form_id', $this->form->id)->whereDate('submitted_at', $date)->firstOrFail();
+        Answer::factory()->create(['submission_id' => $sub->id, 'typeform_field_id' => $this->stars->typeform_field_id, 'form_field_id' => $this->stars->id, 'value_number' => $val, 'points' => $val - 1, 'max_points' => 4]);
+    }
+    // three NPS answers of 8 plus 10 and 5 → (8+8+8+10+5)/5 = 7.8
+    expect($this->query->kpis($this->hospital, $this->filters)['nps_avg'])->toBe(7.8);
+});
+
+test('facility ranking falls back to branch and location when no facility is known', function () {
+    $sub = Submission::query()->where('form_id', $this->form->id)->whereDate('submitted_at', '2026-06-10')->firstOrFail();
+    $sub->update(['info' => ['location' => 'Dubai']]);
+    expect(collect($this->query->facilityRanking($this->hospital, $this->filters)['top'])->pluck('name')->all())->toContain('Dubai');
+
+    $branch = Branch::factory()->create(['hospital_id' => $this->hospital->id, 'name' => 'North wing']);
+    $sub->update(['branch_id' => $branch->id]);
+    $names = collect($this->query->facilityRanking($this->hospital, $this->filters)['top'])->pluck('name')->all();
+    expect($names)->toContain('North wing')->not->toContain('Dubai');
+    expect($this->query->kpis($this->hospital, $this->filters)['facilities'])->toBe(4);
+    expect(collect($this->query->heatmap($this->hospital, $this->filters, null)['rows'])->pluck('label')->all())->toContain('North wing');
+});
+
+test('strongest questions mirror the weakest', function () {
+    $strongest = $this->query->strongestQuestions($this->form, $this->filters);
+    expect(collect($strongest)->pluck('avg_pct', 'title')->all())->toBe(['Would you come back?' => 66.7, 'Stars' => 58.3, 'Clean?' => 50.0]);
 });
 
 test('facility ranking and heat-map', function () {

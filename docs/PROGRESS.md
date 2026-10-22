@@ -107,3 +107,9 @@ docker compose up -d --build   # then open http://localhost:8080/login
 ## Post-M8 — Dashboard redesign
 
 **Built (owner request):** sidebar shell with role-based navigation, "Patient Experience — Mystery Shopping Dashboard" with KPI tiles (overall score + delta, evaluations, likelihood to recommend from NPS questions, critical items passed, facilities evaluated), trend line (one series per survey), outcome donut, score by section/survey bars, facility ranking (top/bottom), touchpoint heat-map (facilities × sections or surveys), weakest questions, yes/no compliance, live feed. Evaluation page with score ring hero, info grid, gradient journey tiles and section cards with per-answer point pills. New `DashboardQuery::kpis()`, `facilityRanking()`, `heatmap()` with tests. Screenshots in `docs/screenshots/`.
+
+## Post-M8 — Stakeholder feedback round 1 (2026-10-22)
+
+**Built:** `recommend` info role + KPI normalisation; info detection restricted to descriptive questions; facility attribution fallback (branch → facility → location) in ranking, heat-map and KPI; "Areas of concern" / "Areas of strength" (five each) replacing weakest questions / yes-no compliance; journey and radar limited to scored sections; source badge removed; recalculate re-extracts info and branch. Tests: parser roles, KPI normalisation, ranking fallback, strongest questions.
+
+**Verify:** `./vendor/bin/pest tests/Unit/Domain/FormStructureParserTest.php tests/Feature/Dashboard`. On production: open the form's mapping editor, set *Info: Likelihood to recommend* on the recommend question, clear the info key from "The healthcare facility was clean", save, then Recalculate scores.

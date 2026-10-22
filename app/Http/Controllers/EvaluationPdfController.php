@@ -34,7 +34,10 @@ class EvaluationPdfController extends Controller
             return ['section' => $section, 'score' => $scores->get($section->id), 'rows' => $rows];
         });
 
-        $pdf = Pdf::loadView('pdf.evaluation', ['e' => $evaluation, 'sections' => $sections])->setPaper('a4');
+        $scorable = $evaluation->formVersion->fields()->reorder()->where('is_scored', true)->distinct()->pluck('section_id')->map(fn ($id) => (int) $id)->all();
+        $journey = $evaluation->sectionScores->filter(fn ($s) => in_array((int) $s->section_id, $scorable, true))->values();
+
+        $pdf = Pdf::loadView('pdf.evaluation', ['e' => $evaluation, 'sections' => $sections, 'journey' => $journey])->setPaper('a4');
 
         $name = 'evaluation-'.($evaluation->submitted_at?->format('Ymd') ?? 'partial').'-'.substr($evaluation->uuid, 0, 8).'.pdf';
 

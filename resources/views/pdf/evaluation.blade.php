@@ -40,7 +40,7 @@
         <table class="meta" style="margin-top:6px">
             <tr>
                 @foreach(\App\Enums\InfoKey::cases() as $key)
-                    @if($e->infoValue($key->value) !== null)
+                    @if($e->infoValue($key->value) !== null && $key->isDisplayInfo())
                         <td><span class="muted">{{ $key->label() }}</span><br><strong>{{ $e->infoValue($key->value) }}</strong></td>
                     @endif
                 @endforeach
@@ -54,7 +54,7 @@
 </tr></table>
 
 <table class="journey"><tr>
-    @foreach($e->sectionScores as $s)
+    @foreach($journey as $s)
         <td>
             <div><strong>{{ $s->pct === null ? '–' : number_format((float) $s->pct, 0).'%' }}</strong></div>
             <div class="bar-wrap"><div class="bar bg-{{ $ragClass($s->pct) }}" style="height: {{ $s->pct === null ? 0 : max(3, (float) $s->pct) }}%"></div></div>
