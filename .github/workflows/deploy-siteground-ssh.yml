@@ -90,7 +90,8 @@ jobs:
           APP='${{ secrets.SG_APP_DIR }}'
           $SSH "cd '$APP' && mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chmod -R u+rwX storage bootstrap/cache && echo 'storage OK'"
           # Web-root guard for the all-in-public_html layout: installed only when absent, never overwritten.
-          $SSH "cd '$APP' && if [ ! -f .htaccess ]; then cp root.htaccess .htaccess && echo 'root .htaccess installed'; else echo '.htaccess present (kept)'; fi"
+          # Installed when absent; refreshed when the existing file is still our stock guard (custom edits are kept).
+          $SSH "cd '$APP' && if [ ! -f .htaccess ] || grep -q 'Option B: the whole app lives inside public_html' .htaccess; then cp root.htaccess .htaccess && echo 'root .htaccess installed/refreshed'; else echo 'custom .htaccess present (kept)'; fi"
           if ! $SSH "test -f '$APP/.env'"; then
             echo "::error title=.env missing::No .env in $APP. Copy .env.siteground.example to .env on the server, fill in APP_URL, DB_* and MAIL_*, run 'php artisan key:generate --force' (or reuse the old APP_KEY), then re-run this workflow."
             exit 1
