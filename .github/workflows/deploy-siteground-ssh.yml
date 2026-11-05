@@ -84,6 +84,17 @@ jobs:
           scp -i ~/.ssh/deploy_key -P ${{ secrets.SG_SSH_PORT }} /tmp/release.tgz "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}:$APP/release.tgz"
           $SSH "cd '$APP' && ls -lh release.tgz && rm -rf vendor public/build && tar xzf release.tgz && rm -f release.tgz && ls -la | head -40 && echo 'extracted OK'"
 
+      - name: Prepare server state (storage folders, .env check)
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SG_SSH_PORT }} ${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}"
+          APP='${{ secrets.SG_APP_DIR }}'
+          $SSH "cd '$APP' && mkdir -p storage/app/public storage/framework/cache/data storage/framework/sessions storage/framework/views storage/logs bootstrap/cache && chmod -R u+rwX storage bootstrap/cache && echo 'storage OK'"
+          if ! $SSH "test -f '$APP/.env'"; then
+            echo "::error title=.env missing::No .env in $APP. Copy .env.siteground.example to .env on the server, fill in APP_URL, DB_* and MAIL_*, run 'php artisan key:generate --force' (or reuse the old APP_KEY), then re-run this workflow."
+            exit 1
+          fi
+          $SSH "cd '$APP' && grep -E '^(APP_URL|DB_DATABASE|QUEUE_CONNECTION)=' .env | sed 's/=.*/=…/' "
+
       - name: Run post-deploy on the server
         run: |
           ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" \
