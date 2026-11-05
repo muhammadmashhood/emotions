@@ -1,6 +1,6 @@
 name: Deploy to SiteGround (SSH)
 
-# Builds the app in GitHub (composer --no-dev, npm build), rsyncs it to SiteGround over SSH and runs post-deploy.sh there
+# Builds the app in GitHub (composer --no-dev, npm build), uploads it to SiteGround as a tar stream over SSH and runs post-deploy.sh there
 # (migrations, caches, storage link, queue restart). Runs on every push to master, or by hand from the Actions tab.
 # Required repository secrets: SG_SSH_HOST, SG_SSH_PORT (18765), SG_SSH_USER, SG_SSH_KEY (private key), SG_APP_DIR (absolute path).
 # Optional: SG_PHP (PHP binary on the server, default "php").
@@ -51,19 +51,30 @@ jobs:
           chmod 600 ~/.ssh/deploy_key
           ssh-keyscan -p "${{ secrets.SG_SSH_PORT }}" -H "${{ secrets.SG_SSH_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
 
-      - name: Upload with rsync
+      - name: Check the remote shell
         run: |
-          rsync -az --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${{ secrets.SG_SSH_PORT }}" \
-            --exclude '.git' --exclude '.github' \
-            --exclude '.env' --exclude '.env.*' \
-            --exclude 'storage/' --exclude 'bootstrap/cache/*.php' \
-            --exclude '.htaccess' --exclude 'public/storage' \
-            --exclude 'phpunit.xml' --exclude 'phpstan.neon' \
-            --exclude 'package.json' --exclude 'package-lock.json' \
-            --exclude 'vite.config.js' --exclude 'tailwind.config.js' --exclude 'postcss.config.js' \
-            --exclude 'resources/js/' --exclude 'resources/css/' \
-            ./ "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}:${{ secrets.SG_APP_DIR }}/"
+          echo "Remote login output (should be empty; banners break some tools):"
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" "true" | sed 's/^/  > /'
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" "test -d '${{ secrets.SG_APP_DIR }}' && echo 'app dir OK' || (echo 'app dir missing: ${{ secrets.SG_APP_DIR }}' && exit 1)"
+
+      - name: Upload as a tar stream over SSH
+        # tar over a one-way pipe is unaffected by login banners (unlike rsync). The app's own state is never touched:
+        # .env, storage/, the root .htaccess and public/storage are excluded from the archive, and only vendor/ and
+        # public/build/ are replaced wholesale so stale files from previous releases cannot linger there.
+        run: |
+          tar czf /tmp/release.tgz \
+            --exclude='./.git' --exclude='./.github' \
+            --exclude='./.env' --exclude='./.env.*' \
+            --exclude='./storage' --exclude='./bootstrap/cache/*.php' \
+            --exclude='./.htaccess' --exclude='./public/storage' \
+            --exclude='./phpunit.xml' --exclude='./phpstan.neon' \
+            --exclude='./package.json' --exclude='./package-lock.json' \
+            --exclude='./vite.config.js' --exclude='./tailwind.config.js' --exclude='./postcss.config.js' \
+            --exclude='./resources/js' --exclude='./resources/css' \
+            .
+          ls -lh /tmp/release.tgz
+          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" \
+            "cd '${{ secrets.SG_APP_DIR }}' && rm -rf vendor public/build && tar xzf - && echo 'extracted'" < /tmp/release.tgz
 
       - name: Run post-deploy on the server
         run: |

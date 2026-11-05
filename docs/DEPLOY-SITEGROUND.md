@@ -115,7 +115,7 @@ Workflow: `.github/workflows/deploy-siteground-ssh.yml`, runs on every push to `
    | `SG_APP_DIR` | absolute app folder, e.g. `/home/customer/www/bilalj19.sg-host.com/public_html` |
    | `SG_PHP` (optional) | PHP binary if plain `php` is old, e.g. `/usr/local/php83/bin/php` |
 
-4. Push to `master` or run the workflow from the Actions tab. It rsyncs only changed files (never `.env`, `storage/`, the root `.htaccess`)
+4. Push to `master` or run the workflow from the Actions tab. It streams the built app as a tar archive over SSH (never touching `.env`, `storage/`, the root `.htaccess`; `vendor/` and `public/build/` are replaced wholesale)
    and then runs `post-deploy.sh` on the server: `migrate --force`, `storage:link`, config/route/view caches, `queue:restart`.
 5. Because the caches are now built on each deploy, after editing `.env` by hand run the workflow again (or `php artisan config:cache` over SSH).
 
