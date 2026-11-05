@@ -57,10 +57,7 @@ jobs:
           ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" "true" | sed 's/^/  > /'
           ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" "test -d '${{ secrets.SG_APP_DIR }}' && echo 'app dir OK' || (echo 'app dir missing: ${{ secrets.SG_APP_DIR }}' && exit 1)"
 
-      - name: Upload as a tar stream over SSH
-        # tar over a one-way pipe is unaffected by login banners (unlike rsync). The app's own state is never touched:
-        # .env, storage/, the root .htaccess and public/storage are excluded from the archive, and only vendor/ and
-        # public/build/ are replaced wholesale so stale files from previous releases cannot linger there.
+      - name: Build the release archive
         run: |
           tar czf /tmp/release.tgz \
             --exclude='./.git' --exclude='./.github' \
@@ -73,8 +70,19 @@ jobs:
             --exclude='./resources/js' --exclude='./resources/css' \
             .
           ls -lh /tmp/release.tgz
-          ssh -i ~/.ssh/deploy_key -p "${{ secrets.SG_SSH_PORT }}" "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}" \
-            "cd '${{ secrets.SG_APP_DIR }}' && rm -rf vendor public/build && tar xzf - && echo 'extracted'" < /tmp/release.tgz
+
+      - name: Upload the archive (SFTP) and extract it on the server
+        # The archive is copied with scp's SFTP mode (immune to login banners), then unpacked in place.
+        # .env, storage/, the root .htaccess and public/storage are not in the archive; vendor/ and public/build/
+        # are replaced wholesale so stale files from earlier releases cannot linger.
+        run: |
+          SSH="ssh -i ~/.ssh/deploy_key -p ${{ secrets.SG_SSH_PORT }} ${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}"
+          APP='${{ secrets.SG_APP_DIR }}'
+          echo "::group::Remote environment"
+          $SSH "cd '$APP' && pwd && (tar --version | head -1) && df -h . | tail -1 && ls -la | head -20"
+          echo "::endgroup::"
+          scp -i ~/.ssh/deploy_key -P ${{ secrets.SG_SSH_PORT }} /tmp/release.tgz "${{ secrets.SG_SSH_USER }}@${{ secrets.SG_SSH_HOST }}:$APP/release.tgz"
+          $SSH "cd '$APP' && ls -lh release.tgz && rm -rf vendor public/build && tar xzf release.tgz && rm -f release.tgz && ls -la | head -40 && echo 'extracted OK'"
 
       - name: Run post-deploy on the server
         run: |
