@@ -43,10 +43,10 @@ test('branch from a hidden field is created on first sight and shown as a filter
 
     $viewer = viewer($this->hospital);
     Livewire::actingAs($viewer)->test(Dashboard::class)
-        ->assertSee('All branches')
-        ->assertSee('1 evaluation')
+        ->assertSee('All facilities')
+        ->assertSee('1 visit')
         ->set('branch', (string) $branch->id)
-        ->assertSee('1 evaluation')
+        ->assertSee('1 visit')
         ->set('branch', (string) Branch::factory()->create(['hospital_id' => $this->hospital->id])->id)
         ->assertSee('No evaluations yet');
 

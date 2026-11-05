@@ -1,15 +1,13 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h1 class="text-xl font-semibold text-ink">Profile</h1>
-    </x-slot>
-
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div class="panel p-6">
-            <livewire:profile.update-profile-information-form />
+    <x-ui.page>
+        <x-ui.header title="Your profile" eyebrow="Account" subtitle="Your name, email address and password." />
+        <div class="max-w-3xl flex flex-col gap-5">
+            <div class="panel p-6">
+                <livewire:profile.update-profile-information-form />
+            </div>
+            <div class="panel p-6">
+                <livewire:profile.update-password-form />
+            </div>
         </div>
-
-        <div class="panel p-6">
-            <livewire:profile.update-password-form />
-        </div>
-    </div>
+    </x-ui.page>
 </x-app-layout>

@@ -24,9 +24,9 @@ enum Rag: string
     public function color(): string
     {
         return match ($this) {
-            self::Green => '#2F855A',
-            self::Amber => '#B7791F',
-            self::Red => '#B83A33',
+            self::Green => '#C2B700',
+            self::Amber => '#E3A048',
+            self::Red => '#F44336',
         };
     }
 

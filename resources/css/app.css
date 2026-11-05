@@ -2,43 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * eMotion design system (eMotion Admin + eMotion Dashboard designs): Poppins,
+ * warm neutrals, plum ink (#2B1F26), violet accent, olive / amber / red score bands.
+ * Colour tokens are "R G B" triplets so Tailwind opacity modifiers keep working.
+ */
 @layer base {
-    /* Colour tokens as "R G B" triplets so Tailwind opacity modifiers keep working. */
     :root {
-        --font-sans: "Public Sans";
-        --c-ink: 18 58 74;          /* #123A4A */
-        --c-ink-soft: 78 104 117;   /* #4E6875 */
-        --c-paper: 247 249 250;     /* #F7F9FA */
-        --c-line: 220 227 231;      /* #DCE3E7 */
-        --c-accent: 36 87 245;      /* #2457F5 */
-        --c-accent-soft: 234 240 255;
-        --c-accent-deep: 26 63 191;
-        --c-rag-green: 47 133 90;   /* #2F855A */
-        --c-rag-amber: 183 121 31;  /* #B7791F */
-        --c-rag-red: 184 58 51;     /* #B83A33 */
-        --c-rag-neutral: 169 182 189;
-    }
-
-    /* eMotion Admin design: warm neutrals, plum ink, violet accent, Poppins. */
-    .theme-admin {
         --font-sans: "Poppins";
-        --c-ink: 43 31 38;          /* #2B1F26 */
+        --c-ink: 43 31 38;          /* #2B1F26 brown */
         --c-ink-soft: 110 102 107;  /* #6E666B */
         --c-paper: 246 245 243;     /* #F6F5F3 */
         --c-line: 236 233 231;      /* #ECE9E7 */
-        --c-accent: 91 86 185;      /* #5B56B9 */
+        --c-accent: 91 86 185;      /* #5B56B9 blue dark */
         --c-accent-soft: 241 240 254;
         --c-accent-deep: 72 67 154;
-        --c-rag-green: 95 90 0;     /* #5F5A00 */
-        --c-rag-amber: 138 90 14;   /* #8A5A0E */
-        --c-rag-red: 183 50 40;     /* #B73228 */
-        --c-rag-neutral: 197 191 194;
-        font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-        color: rgb(var(--c-ink));
+        /* Score bands as bar / dot colours; text uses the em-ok / em-warn / em-bad tokens. */
+        --c-rag-green: 194 183 0;   /* #C2B700 Good */
+        --c-rag-amber: 227 160 72;  /* #E3A048 Watch */
+        --c-rag-red: 244 67 54;     /* #F44336 Poor */
+        --c-rag-neutral: 217 211 217;
     }
 
     body {
-        @apply bg-paper text-ink antialiased;
+        @apply bg-paper text-ink antialiased text-[13px] leading-[1.45];
+        font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     }
 
     *:focus-visible {
@@ -56,114 +44,80 @@
 
 @layer components {
     .panel {
-        @apply bg-white border border-line/80 rounded-2xl shadow-card;
+        @apply bg-white border border-em-line rounded-2xl;
     }
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition;
+        @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-4 py-[9px] text-[13px] font-medium transition-colors;
     }
     .btn-primary {
-        @apply btn bg-accent text-white hover:bg-accent-deep shadow-glow disabled:opacity-50 disabled:shadow-none;
+        @apply btn bg-em-ink border border-em-ink text-white hover:bg-black disabled:bg-[#A9A2A6] disabled:border-[#A9A2A6];
     }
     .btn-secondary {
-        @apply btn bg-white border border-line text-ink hover:border-ink/30 hover:bg-paper disabled:opacity-50;
+        @apply btn bg-white border border-em-field text-em-ink hover:border-em-hover disabled:opacity-50;
     }
     .btn-danger {
-        @apply btn bg-rag-red text-white hover:bg-rag-red/90 disabled:opacity-50;
+        @apply btn bg-white border border-em-field text-em-bad hover:border-em-bad/50 disabled:opacity-50;
     }
-    .field {
-        @apply block w-full rounded-xl border-line bg-white text-ink shadow-sm focus:border-accent focus:ring-accent text-sm;
-    }
-    .label {
-        @apply block text-xs font-semibold uppercase tracking-wide text-ink-soft mb-1;
-    }
-    .table-base {
-        @apply min-w-full divide-y divide-line text-sm;
-    }
-    .table-base thead th {
-        @apply px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-soft bg-paper/70;
-    }
-    .table-base tbody td {
-        @apply px-3 py-2.5 align-top;
-    }
-    .table-base tbody tr {
-        @apply border-t border-line/70 hover:bg-paper/60 transition-colors;
-    }
-    .kpi-value {
-        @apply text-4xl font-semibold tracking-tight text-ink;
-    }
-    .eyebrow {
-        @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-soft;
-    }
-    .nav-item {
-        @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition;
-    }
-    .nav-item-active {
-        @apply bg-accent text-white shadow-glow hover:bg-accent;
-    }
-}
-
-/* Admin design overrides: same class names, the design's shapes and colours. */
-@layer components {
-    .theme-admin .panel {
-        @apply bg-white border border-adm-line rounded-2xl shadow-none;
-    }
-    .theme-admin .btn {
-        @apply rounded-[10px] px-4 py-[9px] text-[13px] font-medium;
-    }
-    .theme-admin .btn-primary {
-        @apply bg-adm-ink border border-adm-ink text-white shadow-none hover:bg-black disabled:bg-[#A9A2A6] disabled:border-[#A9A2A6] disabled:opacity-100;
-    }
-    .theme-admin .btn-secondary {
-        @apply bg-white border border-adm-field text-adm-ink hover:border-adm-hover hover:bg-white;
-    }
-    .theme-admin .btn-sm {
+    .btn-sm {
         @apply px-3 py-1.5 text-[12.5px] rounded-[9px];
     }
-    .theme-admin .btn-danger {
-        @apply bg-white border border-adm-field text-adm-bad hover:border-adm-bad/50;
+    .field {
+        @apply block w-full rounded-[10px] border-em-field bg-white text-ink text-[13px] focus:border-em-accent focus:ring-em-accent/30;
     }
-    .theme-admin .field {
-        @apply rounded-[10px] border-adm-field text-[13px] shadow-none focus:border-adm-accent focus:ring-adm-accent/30;
+    .label {
+        @apply block text-[12.5px] font-medium text-em-ink mb-1.5;
     }
-    .theme-admin .label {
-        @apply text-[12.5px] font-medium normal-case tracking-normal text-adm-ink mb-1.5;
+    .eyebrow {
+        @apply text-[10.5px] uppercase tracking-[0.08em] text-em-mute;
     }
-    .theme-admin .eyebrow {
-        @apply text-[10.5px] font-normal tracking-[0.08em] text-adm-mute;
+    .table-base {
+        @apply min-w-full divide-y divide-em-line text-[13px];
     }
-    .theme-admin .table-base {
-        @apply text-[13px] divide-adm-line;
+    .table-base thead th {
+        @apply px-5 py-3.5 text-left text-[10.5px] font-normal uppercase tracking-[0.08em] text-em-mute bg-white;
     }
-    .theme-admin .table-base thead th {
-        @apply px-5 py-3.5 text-[10.5px] font-normal tracking-[0.08em] text-adm-mute bg-white;
-    }
-    .theme-admin .table-base tbody td {
+    .table-base tbody td {
         @apply px-5 py-3.5 align-middle;
     }
-    .theme-admin .table-base tbody tr {
-        @apply border-adm-line hover:bg-[#FCFBFA];
+    .table-base tbody tr {
+        @apply border-t border-em-line hover:bg-[#FCFBFA] transition-colors;
     }
-    .theme-admin a.link {
-        @apply text-adm-accent no-underline hover:underline;
+    .kpi-value {
+        @apply text-[28px] font-semibold tracking-[-0.02em] text-ink;
     }
-    .theme-admin *:focus-visible {
-        @apply ring-adm-accent ring-offset-adm-bg;
+    .em-nav-item {
+        @apply w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-[10px] text-[13px] text-em-soft border border-transparent hover:bg-white transition-colors;
     }
-
-    .adm-nav-item {
-        @apply w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-[10px] text-[13px] text-adm-soft border border-transparent hover:bg-white transition-colors;
+    .em-nav-item-active {
+        @apply bg-white text-em-ink border-em-line font-semibold;
     }
-    .adm-nav-item-active {
-        @apply bg-white text-adm-ink border-adm-line font-semibold;
-    }
-    .adm-pill {
+    .em-pill {
         @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap;
+    }
+    /* Dark sign-in screens: the same controls, restyled inside .auth-dark. */
+    .auth-dark .field {
+        @apply border-white/20 bg-white/[0.06] px-[13px] py-[11px] text-white placeholder:text-white/40 focus:border-[#A8A4F7] focus:ring-[#A8A4F7]/30;
+    }
+    .auth-dark .label {
+        @apply text-xs text-[#E6E1E4];
+    }
+    .auth-dark .btn-primary {
+        @apply w-full py-3 text-[13.5px] font-semibold bg-white border-white text-em-ink hover:bg-em-accent-soft;
+    }
+    .auth-dark .btn-secondary {
+        @apply bg-transparent border-white/25 text-white hover:border-white/50;
+    }
+    .auth-dark a.auth-link {
+        @apply text-[#C9C6FA] hover:text-white;
+    }
+    .auth-dark *:focus-visible {
+        @apply ring-[#A8A4F7] ring-offset-em-ink;
     }
 }
 
 @media print {
     .no-print { display: none !important; }
     body { background: white; }
-    .panel { break-inside: avoid; box-shadow: none; }
+    .panel { break-inside: avoid; }
     main { margin-left: 0 !important; }
 }

@@ -1,15 +1,15 @@
-<x-admin.page>
-    <x-admin.header :title="$hospital->name" :back="route('admin.hospitals.index')" back-label="Hospitals"
+<x-ui.page>
+    <x-ui.header :title="$hospital->name" :back="route('admin.hospitals.index')" back-label="Hospitals"
         :subtitle="($hospital->is_active ? 'Active account' : 'Inactive · its users cannot log in').' · since '.($hospital->created_at?->format('d M Y') ?? '—').($hospital->require_review ? ' · review required' : '')">
-        <x-slot name="leading"><x-admin.avatar :name="$hospital->name" :logo="$hospital->logo_path" :seed="$hospital->uuid" size="lg" /></x-slot>
+        <x-slot name="leading"><x-ui.avatar :name="$hospital->name" :logo="$hospital->logo_path" :seed="$hospital->uuid" size="lg" /></x-slot>
         <x-slot name="actions">
             <a href="{{ route('hospitals.dashboard', $hospital) }}" wire:navigate class="btn btn-secondary">Open dashboard</a>
             <a href="{{ route('admin.hospitals.forms.link', $hospital) }}" wire:navigate class="btn btn-primary">Link a form</a>
         </x-slot>
-    </x-admin.header>
+    </x-ui.header>
 
-    <x-admin.flash />
-    <x-admin.tabs :current="$tab" :tabs="[
+    <x-ui.flash />
+    <x-ui.tabs :current="$tab" :tabs="[
         'overview' => 'Overview',
         'facilities' => ['label' => 'Facilities', 'count' => $hospital->branches_count],
         'forms' => ['label' => 'Forms', 'count' => $hospital->forms_count],
@@ -20,45 +20,47 @@
     @if($tab === 'overview')
         @php $attention = ($pendingCount > 0 ? 1 : 0) + $reviewForms->count() + $webhookForms->count() + ($hospital->forms_count === 0 ? 1 : 0); @endphp
         <div class="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
-            <x-admin.kpi label="Facilities" :value="$hospital->branches_count" />
-            <x-admin.kpi label="Linked forms" :value="$hospital->forms_count" />
-            <x-admin.kpi label="Users" :value="$hospital->users_count" />
-            <x-admin.kpi label="Evaluations" :value="number_format($hospital->submissions_count)" />
+            <x-ui.kpi label="Facilities" :value="$hospital->branches_count" />
+            <x-ui.kpi label="Linked forms" :value="$hospital->forms_count" />
+            <x-ui.kpi label="Users" :value="$hospital->users_count" />
+            <x-ui.kpi label="Evaluations" :value="number_format($hospital->submissions_count)" />
         </div>
 
-        <x-admin.card title="Setup & attention">
+        <x-ui.card title="Setup & attention">
             @if($attention === 0)
-                <p class="px-[22px] py-5 text-[13px] text-adm-soft">Nothing needs attention. Webhooks are active, mappings are reviewed and the queue is empty.</p>
+                <p class="px-[22px] py-5 text-[13px] text-em-soft">Nothing needs attention. Webhooks are active, mappings are reviewed and the queue is empty.</p>
             @else
-                <ul class="divide-y divide-adm-line">
+                <ul class="divide-y divide-em-line">
                     @if($pendingCount > 0)
-                        <x-admin.attention tone="info" tag="Review" :title="$pendingCount.' '.Str::plural('response', $pendingCount).' waiting for review'" detail="Every Typeform response is checked before it reaches a dashboard">
+                        <x-ui.attention tone="info" tag="Review" :title="$pendingCount.' '.Str::plural('response', $pendingCount).' waiting for review'" detail="Every Typeform response is checked before it reaches a dashboard">
                             <x-slot name="action"><a href="{{ route('admin.review', ['hospital' => $hospital->uuid]) }}" wire:navigate class="btn btn-secondary btn-sm">Open queue</a></x-slot>
-                        </x-admin.attention>
+                        </x-ui.attention>
                     @endif
                     @foreach($reviewForms as $form)
-                        <x-admin.attention tone="warn" tag="Mapping review" wire:key="rv-{{ $form->id }}" :title="$form->title.' · v'.$form->currentVersion?->version_number" detail="The Typeform changed. Check the new questions and scored flags">
+                        <x-ui.attention tone="warn" tag="Mapping review" wire:key="rv-{{ $form->id }}" :title="$form->title.' · v'.$form->currentVersion?->version_number" detail="The Typeform changed. Check the new questions and scored flags">
                             <x-slot name="action"><a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn btn-secondary btn-sm">Review mapping</a></x-slot>
-                        </x-admin.attention>
+                        </x-ui.attention>
                     @endforeach
                     @foreach($webhookForms as $form)
-                        <x-admin.attention tone="bad" :tag="'Webhook '.$form->webhook_status->label()" wire:key="wh-{{ $form->id }}" :title="$form->title" :detail="$form->webhook_last_error ? Str::limit($form->webhook_last_error, 140) : 'New responses are not arriving'">
+                        <x-ui.attention tone="bad" :tag="'Webhook '.$form->webhook_status->label()" wire:key="wh-{{ $form->id }}" :title="$form->title" :detail="$form->webhook_last_error ? Str::limit($form->webhook_last_error, 140) : 'New responses are not arriving'">
                             <x-slot name="action"><a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="btn btn-secondary btn-sm">Open form</a></x-slot>
-                        </x-admin.attention>
+                        </x-ui.attention>
                     @endforeach
                     @if($hospital->forms_count === 0)
-                        <x-admin.attention tone="muted" tag="No form" :title="$hospital->name" detail="No Typeform linked, so no evaluations arrive">
+                        <x-ui.attention tone="muted" tag="No form" :title="$hospital->name" detail="No Typeform linked, so no evaluations arrive">
                             <x-slot name="action"><a href="{{ route('admin.hospitals.forms.link', $hospital) }}" wire:navigate class="btn btn-secondary btn-sm">Link a form</a></x-slot>
-                        </x-admin.attention>
+                        </x-ui.attention>
                     @endif
                 </ul>
             @endif
-        </x-admin.card>
+        </x-ui.card>
+
+        <livewire:hospital.mini-dashboard :hospital="$hospital" wire:key="mini-{{ $hospital->id }}" />
     @elseif($tab === 'facilities')
         @if($branches->isEmpty())
-            <div class="bg-white border border-adm-line rounded-2xl p-10 text-center">
+            <div class="bg-white border border-em-line rounded-2xl p-10 text-center">
                 <p class="font-medium">No facilities yet</p>
-                <p class="text-[13px] text-adm-soft mt-1">Facilities are created from the branch question of each linked form. Set the branch source on a form to start grouping evaluations.</p>
+                <p class="text-[13px] text-em-soft mt-1">Facilities are created from the branch question of each linked form. Set the branch source on a form to start grouping evaluations.</p>
             </div>
         @else
             <div class="panel overflow-x-auto">
@@ -68,10 +70,10 @@
                     @foreach($branches as $branch)
                         <tr wire:key="b-{{ $branch->id }}">
                             <td class="font-medium">{{ $branch->name }}</td>
-                            <td class="text-adm-soft">{{ $branch->code ?? '—' }}</td>
-                            <td>@if($branch->is_active)<x-admin.pill tone="ok">Active</x-admin.pill>@else<x-admin.pill>Inactive</x-admin.pill>@endif</td>
+                            <td class="text-em-soft">{{ $branch->code ?? '—' }}</td>
+                            <td>@if($branch->is_active)<x-ui.pill tone="ok">Active</x-ui.pill>@else<x-ui.pill>Inactive</x-ui.pill>@endif</td>
                             <td class="tabular-nums">{{ $branch->submissions_count }}</td>
-                            <td class="text-adm-soft">{{ $branch->submissions_max_submitted_at ? \Illuminate\Support\Carbon::parse($branch->submissions_max_submitted_at)->diffForHumans() : '—' }}</td>
+                            <td class="text-em-soft">{{ $branch->submissions_max_submitted_at ? \Illuminate\Support\Carbon::parse($branch->submissions_max_submitted_at)->diffForHumans() : '—' }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -80,9 +82,9 @@
         @endif
     @elseif($tab === 'forms')
         @if($forms->isEmpty())
-            <div class="bg-white border border-adm-line rounded-2xl p-10 text-center">
+            <div class="bg-white border border-em-line rounded-2xl p-10 text-center">
                 <p class="font-medium">No forms linked</p>
-                <p class="text-[13px] text-adm-soft mt-1">Link a Typeform survey to start receiving evaluations for this hospital.</p>
+                <p class="text-[13px] text-em-soft mt-1">Link a Typeform survey to start receiving evaluations for this hospital.</p>
                 <a href="{{ route('admin.hospitals.forms.link', $hospital) }}" wire:navigate class="btn btn-primary mt-4">Link a form</a>
             </div>
         @else
@@ -93,18 +95,18 @@
                     @foreach($forms as $form)
                         <tr wire:key="f-{{ $form->id }}" class="{{ $form->isActive() ? '' : 'opacity-60' }}">
                             <td>
-                                <a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="font-medium hover:text-adm-accent">{{ $form->title }}</a>
-                                <div class="text-xs text-adm-soft">Typeform {{ $form->typeform_form_id }}@unless($form->isActive()) · unlinked @endunless</div>
+                                <a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="font-medium hover:text-em-accent">{{ $form->title }}</a>
+                                <div class="text-xs text-em-soft">Typeform {{ $form->typeform_form_id }}@unless($form->isActive()) · unlinked @endunless</div>
                             </td>
-                            <td class="whitespace-nowrap">v{{ $form->currentVersion?->version_number ?? '–' }} @if($form->currentVersion?->needs_review)<x-admin.pill tone="warn">Needs review</x-admin.pill>@endif</td>
+                            <td class="whitespace-nowrap">v{{ $form->currentVersion?->version_number ?? '–' }} @if($form->currentVersion?->needs_review)<x-ui.pill tone="warn">Needs review</x-ui.pill>@endif</td>
                             <td>
-                                @if(! $form->isActive())<x-admin.pill>{{ $form->webhook_status->label() }}</x-admin.pill>
-                                @elseif($form->webhook_status === \App\Enums\WebhookStatus::Active)<x-admin.pill tone="ok">Active</x-admin.pill>
-                                @else<x-admin.pill tone="bad">{{ $form->webhook_status->label() }}</x-admin.pill>@endif
+                                @if(! $form->isActive())<x-ui.pill>{{ $form->webhook_status->label() }}</x-ui.pill>
+                                @elseif($form->webhook_status === \App\Enums\WebhookStatus::Active)<x-ui.pill tone="ok">Active</x-ui.pill>
+                                @else<x-ui.pill tone="bad">{{ $form->webhook_status->label() }}</x-ui.pill>@endif
                             </td>
                             <td class="tabular-nums">{{ $form->submissions_count }}</td>
-                            <td class="text-adm-soft">{{ $form->last_synced_at?->diffForHumans() ?? '–' }}</td>
-                            <td class="text-right"><a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="text-adm-accent hover:underline whitespace-nowrap">Mapping →</a></td>
+                            <td class="text-em-soft">{{ $form->last_synced_at?->diffForHumans() ?? '–' }}</td>
+                            <td class="text-right"><a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="text-em-accent hover:underline whitespace-nowrap">Mapping →</a></td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -148,4 +150,4 @@
             <div class="flex justify-end"><button type="submit" class="btn-primary">Save settings</button></div>
         </form>
     @endif
-</x-admin.page>
+</x-ui.page>

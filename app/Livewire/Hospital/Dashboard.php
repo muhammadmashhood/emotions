@@ -38,15 +38,6 @@ class Dashboard extends Component
         }
     }
 
-    public function setPeriod(string $period): void
-    {
-        $this->period = $period;
-        if ($period !== 'custom') {
-            $this->from = '';
-            $this->to = '';
-        }
-    }
-
     public function render(): View
     {
         /** @var User $user */
@@ -64,7 +55,9 @@ class Dashboard extends Component
             'branches' => $this->availableBranches($this->hospital),
             'selectedForm' => $selectedForm,
             'headline' => $query->headline($this->hospital, $filters),
-            'trend' => $query->trend($this->hospital, $filters),
+            'trend' => $trend = $query->trend($this->hospital, $filters),
+            'overall' => self::combine($trend),
+            'previous' => self::combine($query->trend($this->hospital, $filters->previous())),
             'sections' => $selectedForm ? $query->sectionAverages($selectedForm, $filters) : null,
             'weakest' => $selectedForm ? $query->weakestQuestions($selectedForm, $filters) : null,
             'strongest' => $selectedForm ? $query->strongestQuestions($selectedForm, $filters) : null,
@@ -76,5 +69,32 @@ class Dashboard extends Component
             'ragGreen' => $selectedForm?->settings->ragGreenMin ?? 80,
             'ragAmber' => $selectedForm?->settings->ragAmberMin ?? 60,
         ]);
+    }
+
+    /**
+     * Collapse the per-survey trend series into one evaluation-weighted line.
+     *
+     * @param  array{labels: list<string>, series: list<array{data: list<float|null>, counts: list<int>}>}  $trend
+     * @return array{data: list<float|null>, counts: list<int>}
+     */
+    public static function combine(array $trend): array
+    {
+        $data = [];
+        $counts = [];
+        foreach (array_keys($trend['labels']) as $i) {
+            $n = 0;
+            $sum = 0.0;
+            foreach ($trend['series'] as $series) {
+                $count = $series['counts'][$i] ?? 0;
+                if ($count > 0 && $series['data'][$i] !== null) {
+                    $n += $count;
+                    $sum += $series['data'][$i] * $count;
+                }
+            }
+            $data[] = $n > 0 ? round($sum / $n, 1) : null;
+            $counts[] = $n;
+        }
+
+        return ['data' => $data, 'counts' => $counts];
     }
 }

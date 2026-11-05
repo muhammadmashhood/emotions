@@ -3,5 +3,5 @@
 @if($at)
     <time datetime="{{ $at->toIso8601String() }}" title="{{ $at->format('d M Y H:i:s') }}" {{ $attributes }}>{{ $at->isToday() ? 'Today, '.$at->format('H:i') : ($at->isYesterday() ? 'Yesterday, '.$at->format('H:i') : $at->format('j M Y, H:i')) }}</time>
 @else
-    <span {{ $attributes->merge(['class' => 'text-adm-mute']) }}>In progress</span>
+    <span {{ $attributes->merge(['class' => 'text-em-mute']) }}>In progress</span>
 @endif

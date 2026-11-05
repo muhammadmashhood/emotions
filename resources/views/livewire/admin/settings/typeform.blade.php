@@ -1,7 +1,7 @@
 <div>
-    <x-admin.page>
-        <x-admin.header title="Typeform connection" subtitle="The personal access token used to read forms, register webhooks and fetch responses." />
-        <x-admin.flash />
+    <x-ui.page>
+        <x-ui.header title="Typeform connection" subtitle="The personal access token used to read forms, register webhooks and fetch responses." />
+        <x-ui.flash />
 
         @if($connection)
             <x-card title="Current connection">
@@ -40,5 +40,5 @@
             </div>
             <div class="flex justify-end"><button type="submit" class="btn-primary" wire:loading.attr="disabled">Verify and save</button></div>
         </form>
-    </x-admin.page>
+    </x-ui.page>
 </div>

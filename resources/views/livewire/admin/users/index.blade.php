@@ -1,14 +1,14 @@
 <div x-data="{ inviting: {{ request()->boolean('invite') ? 'true' : 'false' }} }" x-on:invite-sent.window="inviting = false" x-on:keydown.escape.window="inviting = false">
-<x-admin.page>
-    <x-admin.header title="Users & invitations" subtitle="All accounts across hospitals, plus eMotion staff.">
+<x-ui.page>
+    <x-ui.header title="Users & invitations" subtitle="All accounts across hospitals, plus eMotion staff.">
         <x-slot name="actions">
             <button type="button" class="btn btn-primary" x-on:click="inviting = true">Invite user</button>
         </x-slot>
-    </x-admin.header>
+    </x-ui.header>
 
-    <x-admin.flash />
+    <x-ui.flash />
 
-    <div class="bg-white border border-adm-line rounded-2xl p-3 flex flex-wrap gap-2.5">
+    <div class="bg-white border border-em-line rounded-2xl p-3 flex flex-wrap gap-2.5">
         <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search name or email…" class="field flex-1 min-w-56" aria-label="Search users">
         <select wire:model.live="hospital" class="field w-auto min-w-52" aria-label="Filter by hospital">
             <option value="">All hospitals</option>
@@ -28,14 +28,14 @@
                 <tr wire:key="i-{{ $invitation->id }}">
                     <td>
                         <div class="flex items-center gap-3">
-                            <span class="h-[30px] w-[30px] rounded-full bg-adm-accent-soft text-adm-accent flex items-center justify-center text-[11px] font-semibold shrink-0" aria-hidden="true">{{ mb_strtoupper(mb_substr($invitation->email, 0, 1)) }}</span>
-                            <div class="min-w-0"><div class="font-medium truncate">{{ $invitation->email }}</div><div class="text-xs text-adm-soft">Invited {{ $invitation->created_at?->diffForHumans() }}</div></div>
+                            <span class="h-[30px] w-[30px] rounded-full bg-em-accent-soft text-em-accent flex items-center justify-center text-[11px] font-semibold shrink-0" aria-hidden="true">{{ mb_strtoupper(mb_substr($invitation->email, 0, 1)) }}</span>
+                            <div class="min-w-0"><div class="font-medium truncate">{{ $invitation->email }}</div><div class="text-xs text-em-soft">Invited {{ $invitation->created_at?->diffForHumans() }}</div></div>
                         </div>
                     </td>
                     <td>{{ $invitation->hospital?->name ?? 'eMotion' }}</td>
                     <td>{{ $invitation->role === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $invitation->role->label() }}</td>
-                    <td>@if($invitation->isExpired())<x-admin.pill tone="warn">Expired</x-admin.pill>@else<x-admin.pill tone="info">Invited</x-admin.pill>@endif</td>
-                    <td class="text-adm-soft">–</td>
+                    <td>@if($invitation->isExpired())<x-ui.pill tone="warn">Expired</x-ui.pill>@else<x-ui.pill tone="info">Invited</x-ui.pill>@endif</td>
+                    <td class="text-em-soft">–</td>
                     <td class="text-right"><button type="button" wire:click="resend({{ $invitation->id }})" class="btn btn-secondary btn-sm">Resend</button></td>
                 </tr>
             @endforeach
@@ -43,8 +43,8 @@
                 <tr wire:key="u-{{ $user->id }}">
                     <td>
                         <div class="flex items-center gap-3">
-                            <span class="h-[30px] w-[30px] rounded-full bg-adm-muted-bg text-adm-ink flex items-center justify-center text-[11px] font-semibold shrink-0" aria-hidden="true">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
-                            <div class="min-w-0"><div class="font-medium truncate">{{ $user->name }}</div><div class="text-xs text-adm-soft truncate">{{ $user->email }}</div></div>
+                            <span class="h-[30px] w-[30px] rounded-full bg-em-muted-bg text-em-ink flex items-center justify-center text-[11px] font-semibold shrink-0" aria-hidden="true">{{ mb_strtoupper(mb_substr($user->name, 0, 1)) }}</span>
+                            <div class="min-w-0"><div class="font-medium truncate">{{ $user->name }}</div><div class="text-xs text-em-soft truncate">{{ $user->email }}</div></div>
                         </div>
                     </td>
                     <td>{{ $user->hospital?->name ?? 'eMotion' }}</td>
@@ -52,18 +52,18 @@
                         @if($user->isSuperAdmin())
                             eMotion admin
                         @else
-                            <select class="field py-1 pl-2 pr-8 w-auto !border-transparent hover:!border-adm-field !bg-transparent" aria-label="Role for {{ $user->name }}" wire:change="changeRole({{ $user->id }}, $event.target.value)">
+                            <select class="field py-1 pl-2 pr-8 w-auto !border-transparent hover:!border-em-field !bg-transparent" aria-label="Role for {{ $user->name }}" wire:change="changeRole({{ $user->id }}, $event.target.value)">
                                 @foreach(\App\Enums\Role::hospitalRoles() as $r)
                                     <option value="{{ $r->value }}" @selected($user->role === $r)>{{ $r->label() }}</option>
                                 @endforeach
                             </select>
                         @endif
                     </td>
-                    <td>@if($user->is_active)<x-admin.pill tone="ok">Active</x-admin.pill>@else<x-admin.pill>Deactivated</x-admin.pill>@endif</td>
-                    <td class="text-adm-soft whitespace-nowrap">@if($user->id === auth()->id())
+                    <td>@if($user->is_active)<x-ui.pill tone="ok">Active</x-ui.pill>@else<x-ui.pill>Deactivated</x-ui.pill>@endif</td>
+                    <td class="text-em-soft whitespace-nowrap">@if($user->id === auth()->id())
                             Now
                         @elseif($user->last_login_at)
-                            <x-admin.when :at="$user->last_login_at" />
+                            <x-ui.when :at="$user->last_login_at" />
                         @else
                             Never
                         @endif</td>
@@ -75,22 +75,22 @@
                 </tr>
             @empty
                 @if($invitations->isEmpty())
-                    <tr><td colspan="6" class="text-center text-adm-soft py-8">No users match these filters.</td></tr>
+                    <tr><td colspan="6" class="text-center text-em-soft py-8">No users match these filters.</td></tr>
                 @endif
             @endforelse
             </tbody>
         </table>
     </div>
     {{ $users->links() }}
-</x-admin.page>
+</x-ui.page>
 
     {{-- Invite dialog --}}
-    <div x-show="inviting" x-cloak class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 bg-adm-ink/30" x-transition.opacity>
+    <div x-show="inviting" x-cloak class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 bg-em-ink/30" x-transition.opacity>
         <form wire:submit="invite" x-on:click.outside="inviting = false" role="dialog" aria-modal="true" aria-labelledby="invite-title"
-              class="theme-admin w-full max-w-[460px] bg-white rounded-[20px] p-6 flex flex-col gap-4 shadow-[0_24px_64px_-24px_rgba(43,31,38,0.35)]">
+              class="w-full max-w-[460px] bg-white rounded-[20px] p-6 flex flex-col gap-4 shadow-[0_24px_64px_-24px_rgba(43,31,38,0.35)]">
             <div>
                 <h2 id="invite-title" class="text-lg font-semibold">Invite user</h2>
-                <p class="text-[13px] text-adm-soft">They'll get an email link to set a password.</p>
+                <p class="text-[13px] text-em-soft">They'll get an email link to set a password.</p>
             </div>
             <div>
                 <label class="label" for="inviteEmail">Email</label>
@@ -113,7 +113,7 @@
                     @foreach([\App\Enums\Role::HospitalAdmin, \App\Enums\Role::HospitalViewer, \App\Enums\Role::SuperAdmin] as $r)
                         <label class="cursor-pointer">
                             <input type="radio" wire:model.live="inviteRole" value="{{ $r->value }}" class="sr-only peer">
-                            <span class="block px-3.5 py-1.5 rounded-full border text-[13px] border-adm-field peer-checked:bg-adm-ink peer-checked:border-adm-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-adm-accent">{{ $r === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $r->label() }}</span>
+                            <span class="block px-3.5 py-1.5 rounded-full border text-[13px] border-em-field peer-checked:bg-em-ink peer-checked:border-em-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-em-accent">{{ $r === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $r->label() }}</span>
                         </label>
                     @endforeach
                 </div>

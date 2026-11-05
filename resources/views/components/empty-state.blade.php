@@ -1,8 +1,8 @@
 @props(['title' => 'Nothing here yet', 'message' => null])
-<div {{ $attributes->merge(['class' => 'panel p-8 text-center']) }}>
-    <p class="text-ink font-medium">{{ $title }}</p>
+<div {{ $attributes->merge(['class' => 'panel p-10 text-center']) }}>
+    <p class="font-medium text-em-ink">{{ $title }}</p>
     @if($message)
-        <p class="text-ink-soft text-sm mt-1">{{ $message }}</p>
+        <p class="text-em-soft text-[13px] mt-1">{{ $message }}</p>
     @endif
     @isset($action)
         <div class="mt-4">{{ $action }}</div>

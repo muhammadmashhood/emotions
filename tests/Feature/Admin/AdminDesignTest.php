@@ -22,18 +22,21 @@ test('the admin sidebar shows the design navigation, the review count and the ho
 
     $this->actingAs(superAdmin())->get(route('admin.hospitals.show', $hospital))
         ->assertOk()
-        ->assertSee('theme-admin', false)
         ->assertSeeInOrder(['Overview', 'Hospitals', 'Review queue', '2', 'Users &amp; invitations', 'Deliveries &amp; audit'], false)
         ->assertSee('Jump to a hospital')
         ->assertSee('<option value="'.route('admin.hospitals.show', $hospital).'" selected', false)
         ->assertSee(route('hospitals.dashboard', $hospital), false);
 });
 
-test('hospital users keep their own navigation and palette', function () {
-    $this->actingAs(hospitalAdmin())->get(route('dashboard'))
+test('hospital users get the hospital navigation, without the admin tools', function () {
+    $hospital = Hospital::factory()->create(['name' => 'Ittefaq Hospital']);
+    $this->actingAs(hospitalAdmin($hospital))->get(route('dashboard'))
         ->assertOk()
-        ->assertDontSee('theme-admin', false)
-        ->assertDontSee('Jump to a hospital');
+        ->assertSee('Ittefaq Hospital')
+        ->assertSeeInOrder(['Menu', 'Dashboard', 'Evaluations', 'Team'])
+        ->assertSee('Log out')
+        ->assertDontSee('Jump to a hospital')
+        ->assertDontSee('Review queue');
 });
 
 test('the review queue flags low scores and blank info fields the form maps', function () {

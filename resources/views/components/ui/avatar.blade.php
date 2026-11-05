@@ -6,7 +6,7 @@
     $box = $size === 'lg' ? 'h-12 w-12 rounded-xl text-xl' : 'h-10 w-10 rounded-[10px] text-base';
 @endphp
 @if($logo)
-    <img src="{{ Storage::disk('public')->url($logo) }}" alt="" {{ $attributes->merge(['class' => "$box object-contain bg-white border border-adm-line p-1 shrink-0"]) }}>
+    <img src="{{ Storage::disk('public')->url($logo) }}" alt="" {{ $attributes->merge(['class' => "$box object-contain bg-white border border-em-line p-1 shrink-0"]) }}>
 @else
     <span {{ $attributes->merge(['class' => "$box flex items-center justify-center text-white font-semibold shrink-0"]) }} style="background: {{ $color }}" aria-hidden="true">{{ mb_strtoupper(mb_substr($name, 0, 1)) }}</span>
 @endif

@@ -1,6 +1,1 @@
-@if (session('status'))
-    <x-alert type="success">{{ session('status') }}</x-alert>
-@endif
-@if (session('error'))
-    <x-alert type="danger">{{ session('error') }}</x-alert>
-@endif
+<x-ui.flash />

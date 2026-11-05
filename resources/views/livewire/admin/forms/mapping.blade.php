@@ -1,6 +1,6 @@
 <div x-data="mappingEditor()" x-init="init()">
-    <x-admin.page>
-        <x-admin.header :back="route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms'])" :back-label="$form->hospital->name.' · Forms'" :title="'Mapping · '.$form->title" :subtitle="'Typeform '.$form->typeform_form_id.' · Version '.$version->version_number.($readOnly ? ' (read-only)' : ' (current)')">
+    <x-ui.page>
+        <x-ui.header :back="route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms'])" :back-label="$form->hospital->name.' · Forms'" :title="'Mapping · '.$form->title" :subtitle="'Typeform '.$form->typeform_form_id.' · Version '.$version->version_number.($readOnly ? ' (read-only)' : ' (current)')">
             <x-slot name="actions">
                 <label class="sr-only" for="version-select">Version</label>
                 <select id="version-select" class="field w-auto" onchange="window.location = '{{ route('admin.forms.mapping', $form) }}?version=' + this.value">
@@ -10,8 +10,8 @@
                 </select>
                 <a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="btn-secondary">Form details</a>
             </x-slot>
-        </x-admin.header>
-        <x-admin.flash />
+        </x-ui.header>
+        <x-ui.flash />
         @if($readOnly)
             <x-alert type="info">You are viewing an older version. Only the current version can be edited.</x-alert>
         @elseif($version->needs_review)
@@ -52,7 +52,7 @@
                             <div class="flex items-center gap-1">
                                 <button type="button" wire:click="moveSection({{ $i }}, -1)" class="btn-secondary px-2" aria-label="Move section up" @disabled($i === 0)>↑</button>
                                 <button type="button" wire:click="moveSection({{ $i }}, 1)" class="btn-secondary px-2" aria-label="Move section down" @disabled($i === count($sections) - 1)>↓</button>
-                                <button type="button" wire:click="deleteSection({{ $i }})" class="btn-secondary px-2 text-rag-red" aria-label="Delete section" @disabled(count($section['fields']) > 0) title="{{ count($section['fields']) > 0 ? 'Move the questions out first' : 'Delete section' }}">✕</button>
+                                <button type="button" wire:click="deleteSection({{ $i }})" class="btn-secondary px-2 text-em-bad" aria-label="Delete section" @disabled(count($section['fields']) > 0) title="{{ count($section['fields']) > 0 ? 'Move the questions out first' : 'Delete section' }}">✕</button>
                             </div>
                         @endunless
                     </header>
@@ -112,7 +112,7 @@
                 </div>
             </div>
         @endunless
-    </x-admin.page>
+    </x-ui.page>
 
     <script>
         function mappingEditor() {
