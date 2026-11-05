@@ -7,6 +7,9 @@ use App\Domain\Typeform\ConnectionManager;
 use App\Domain\Typeform\Data\Workspace;
 use App\Domain\Typeform\Exceptions\TypeformException;
 use App\Domain\Typeform\FormCatalog;
+use App\Enums\SubmissionStatus;
+use App\Enums\WebhookStatus;
+use App\Models\Form;
 use App\Models\Hospital;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
@@ -95,10 +98,18 @@ class Show extends Component
 
     public function render(): View
     {
-        $this->hospital->loadCount(['users', 'forms' => fn ($q) => $q->active(), 'submissions']);
+        $this->hospital->loadCount(['users', 'forms' => fn ($q) => $q->active(), 'submissions', 'branches' => fn ($q) => $q->where('is_active', true)]);
+        $forms = $this->hospital->forms()->with('currentVersion')->withCount('submissions')->orderBy('title')->get();
+        $activeForms = $forms->filter->isActive();
 
         return view('livewire.admin.hospitals.show', [
-            'forms' => $this->hospital->forms()->with('currentVersion')->withCount('submissions')->orderBy('title')->get(),
+            'forms' => $forms,
+            'branches' => $this->tab === 'facilities'
+                ? $this->hospital->branches()->withCount('submissions')->withMax('submissions', 'submitted_at')->orderByDesc('is_active')->orderBy('name')->get()
+                : collect(),
+            'pendingCount' => $this->hospital->submissions()->where('status', SubmissionStatus::PendingReview->value)->count(),
+            'reviewForms' => $activeForms->filter(fn (Form $f) => (bool) $f->currentVersion?->needs_review)->values(),
+            'webhookForms' => $activeForms->filter(fn (Form $f) => $f->webhook_status !== WebhookStatus::Active)->values(),
             'workspaces' => $this->tab === 'settings' ? $this->workspaces() : [],
         ]);
     }

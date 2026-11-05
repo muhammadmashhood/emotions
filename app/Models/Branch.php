@@ -6,6 +6,7 @@ use App\Models\Concerns\BelongsToHospital;
 use Database\Factories\BranchFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -26,5 +27,11 @@ class Branch extends Model
     protected function casts(): array
     {
         return ['is_active' => 'boolean'];
+    }
+
+    /** @return HasMany<Submission, $this> */
+    public function submissions(): HasMany
+    {
+        return $this->hasMany(Submission::class);
     }
 }

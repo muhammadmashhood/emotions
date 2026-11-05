@@ -25,7 +25,7 @@ test('pending evaluations are queued, hidden from hospital users, and approving 
     Livewire::actingAs(superAdmin())
         ->test(Review::class)
         ->assertSee('Pending Place')
-        ->assertSee('1 evaluation waiting')
+        ->assertSee('1 response waiting')
         ->set("notes.{$this->pending->id}", 'Looks genuine')
         ->call('approve', $this->pending->id)
         ->assertSee('Nothing to review');

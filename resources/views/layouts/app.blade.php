@@ -1,3 +1,8 @@
+@php
+    // Super admins get the eMotion Admin look (sidebar everywhere, page content on admin routes).
+    $isSuperAdmin = auth()->user()?->isSuperAdmin() ?? false;
+    $adminPage = $isSuperAdmin && request()->routeIs('admin.*', 'profile');
+@endphp
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
@@ -10,15 +15,18 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        @if($isSuperAdmin)
+            <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+        @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="font-sans antialiased" x-data="{ sidebarOpen: false }">
-        <div class="min-h-screen bg-paper lg:flex">
+        <div class="min-h-screen bg-paper lg:flex {{ $adminPage ? 'theme-admin' : '' }}">
             <livewire:layout.navigation />
 
             <div class="flex-1 min-w-0 flex flex-col">
-                <header class="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-line px-4 h-14 flex items-center justify-between no-print">
+                <header class="lg:hidden sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-line px-4 h-14 flex items-center justify-between no-print {{ $isSuperAdmin ? 'theme-admin' : '' }}">
                     <button type="button" @click="sidebarOpen = true" class="p-2 -ml-2 rounded-lg text-ink-soft hover:bg-paper" aria-label="Open menu">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>

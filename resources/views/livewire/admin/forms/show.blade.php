@@ -1,13 +1,11 @@
 <div>
-    <x-page-header :title="$form->title" :subtitle="$form->hospital->name.' · Typeform '.$form->typeform_form_id">
-        <x-slot name="actions">
-            <a href="{{ route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms']) }}" wire:navigate class="btn-secondary">Back to hospital</a>
-            <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn-primary">Edit mapping</a>
-        </x-slot>
-    </x-page-header>
-
-    <x-page>
-        <x-flash />
+    <x-admin.page>
+        <x-admin.header :back="route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms'])" :back-label="$form->hospital->name.' · Forms'" :title="$form->title" :subtitle="'Typeform '.$form->typeform_form_id.($form->currentVersion ? ' · Version '.$form->currentVersion->version_number : '')">
+            <x-slot name="actions">
+                <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn-primary">Edit mapping</a>
+            </x-slot>
+        </x-admin.header>
+        <x-admin.flash />
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -119,5 +117,5 @@
                 @endif
             </div>
         </div>
-    </x-page>
+    </x-admin.page>
 </div>

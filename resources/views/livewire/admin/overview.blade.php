@@ -1,88 +1,87 @@
-<div>
-    <x-page-header title="Overview" :subtitle="'All hospitals · '.$filters->label()">
+<x-admin.page>
+    <x-admin.header title="Overview" :subtitle="'All hospitals, facilities and incoming responses · '.now()->format('j M Y')">
         <x-slot name="actions">
-            <div class="inline-flex rounded-md border border-line overflow-hidden" role="group" aria-label="Period">
-                @foreach(['30d' => '30 days', '90d' => '90 days', '12m' => '12 months'] as $key => $label)
-                    <button type="button" wire:click="setPeriod('{{ $key }}')" class="px-3 py-2 text-sm {{ $period === $key ? 'bg-ink text-white' : 'bg-white text-ink-soft hover:bg-paper' }}">{{ $label }}</button>
-                @endforeach
-            </div>
-            <a href="{{ route('admin.hospitals.create') }}" wire:navigate class="btn-primary">New hospital</a>
+            <a href="{{ route('admin.users.index', ['invite' => 1]) }}" wire:navigate class="btn btn-secondary">Invite user</a>
+            <a href="{{ route('admin.hospitals.create') }}" wire:navigate class="btn btn-primary">New hospital</a>
         </x-slot>
-    </x-page-header>
+    </x-admin.header>
 
-    <x-page>
-        <x-flash />
+    <x-admin.flash />
 
-        <x-card :title="'Alerts'.($alertCount > 0 ? ' ('.$alertCount.')' : '')" :padding="false">
+    <div class="grid gap-3.5 grid-cols-[repeat(auto-fit,minmax(160px,1fr))]">
+        <x-admin.kpi label="Active hospitals" :value="$kpis['hospitals']" :note="$kpis['hospitalTotal'].' '.Str::plural('account', $kpis['hospitalTotal']).' in total'" :href="route('admin.hospitals.index')" />
+        <x-admin.kpi label="Facilities" :value="$kpis['facilities']" :note="'Across '.$kpis['facilityHospitals'].' '.Str::plural('hospital', $kpis['facilityHospitals'])" />
+        <x-admin.kpi label="Awaiting review" :value="$kpis['pending']" :tone="$kpis['pending'] > 0 ? 'warn' : null" :href="route('admin.review')"
+            :note="$kpis['oldestPending'] ? 'Oldest received '.$kpis['oldestPending']->diffForHumans() : 'Queue is empty'" />
+        <x-admin.kpi label="Webhooks failing" :value="$kpis['webhooksFailing']" :tone="$kpis['webhooksFailing'] > 0 ? 'bad' : null" :href="route('admin.deliveries', ['status' => 'error'])"
+            :note="$kpis['activeForms'].' '.Str::plural('form', $kpis['activeForms']).' linked'" />
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_386px] gap-4 items-start">
+        <x-admin.card title="Needs attention" :count="$alertCount">
             @if($alertCount === 0)
-                <p class="p-4 text-sm text-ink-soft">All clear: every linked form has an active webhook and a reviewed mapping, and no deliveries failed in the last 24 hours.</p>
+                <p class="px-[22px] py-5 text-[13px] text-adm-soft">All clear: every linked form has an active webhook and a reviewed mapping, nothing is waiting for review and no deliveries failed in the last 24 hours.</p>
             @else
-                <ul class="divide-y divide-line text-sm">
-                    @if($connection === null)
-                        <li class="p-4 flex flex-wrap items-center justify-between gap-2"><span><x-badge variant="red">Typeform</x-badge> No Typeform connection configured.</span><a href="{{ route('admin.settings.typeform') }}" wire:navigate class="underline">Connect</a></li>
-                    @elseif($connection->last_error)
-                        <li class="p-4 flex flex-wrap items-center justify-between gap-2"><span><x-badge variant="red">Typeform</x-badge> Connection error: {{ Str::limit($connection->last_error, 120) }}</span><a href="{{ route('admin.settings.typeform') }}" wire:navigate class="underline">Check connection</a></li>
+                <ul class="divide-y divide-adm-line">
+                    @if($pendingCount > 0)
+                        <x-admin.attention tone="info" tag="Review" :title="$pendingCount.' '.Str::plural('response', $pendingCount).' waiting for review'" detail="Every Typeform response is checked before it reaches a dashboard">
+                            <x-slot name="action"><a href="{{ route('admin.review') }}" wire:navigate class="btn btn-secondary btn-sm">Open queue</a></x-slot>
+                        </x-admin.attention>
                     @endif
-                    @foreach($webhookForms as $form)
-                        <li class="p-4 flex flex-wrap items-center justify-between gap-2" wire:key="wh-{{ $form->id }}">
-                            <span><x-badge variant="red">Webhook {{ $form->webhook_status->label() }}</x-badge> <a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="font-medium hover:underline">{{ $form->title }}</a> <span class="text-ink-soft">· {{ $form->hospital->name }}</span>@if($form->webhook_last_error)<span class="block text-xs text-rag-red">{{ Str::limit($form->webhook_last_error, 140) }}</span>@endif</span>
-                            <button type="button" wire:click="repairWebhook('{{ $form->uuid }}')" wire:loading.attr="disabled" class="btn-secondary">Repair webhook</button>
-                        </li>
-                    @endforeach
+                    @if($connection === null)
+                        <x-admin.attention tone="bad" tag="Typeform" title="No Typeform connection configured." detail="Forms cannot be linked and responses cannot be fetched until a token is added">
+                            <x-slot name="action"><a href="{{ route('admin.settings.typeform') }}" wire:navigate class="btn btn-secondary btn-sm">Connect</a></x-slot>
+                        </x-admin.attention>
+                    @elseif($connection->last_error)
+                        <x-admin.attention tone="bad" tag="Typeform" title="Connection error" :detail="Str::limit($connection->last_error, 140)">
+                            <x-slot name="action"><a href="{{ route('admin.settings.typeform') }}" wire:navigate class="btn btn-secondary btn-sm">Check connection</a></x-slot>
+                        </x-admin.attention>
+                    @endif
                     @foreach($reviewForms as $form)
-                        <li class="p-4 flex flex-wrap items-center justify-between gap-2" wire:key="rv-{{ $form->id }}">
-                            <span><x-badge variant="amber">Mapping review</x-badge> <a href="{{ route('admin.forms.show', $form) }}" wire:navigate class="font-medium hover:underline">{{ $form->title }}</a> <span class="text-ink-soft">· {{ $form->hospital->name }} · v{{ $form->currentVersion?->version_number }}</span></span>
-                            <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn-secondary">Review mapping</a>
-                        </li>
+                        <x-admin.attention tone="warn" tag="Mapping review" wire:key="rv-{{ $form->id }}" :title="$form->title.' · v'.$form->currentVersion?->version_number"
+                            :detail="$form->hospital->name.' · the Typeform changed, check the new questions and scored flags'">
+                            <x-slot name="action"><a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn btn-secondary btn-sm">Review mapping</a></x-slot>
+                        </x-admin.attention>
+                    @endforeach
+                    @foreach($webhookForms as $form)
+                        <x-admin.attention tone="bad" :tag="'Webhook '.$form->webhook_status->label()" wire:key="wh-{{ $form->id }}" :title="$form->title"
+                            :detail="$form->hospital->name.($form->webhook_last_error ? ' · '.Str::limit($form->webhook_last_error, 120) : ' · new responses are not arriving')">
+                            <x-slot name="action"><button type="button" wire:click="repairWebhook('{{ $form->uuid }}')" wire:loading.attr="disabled" class="btn btn-secondary btn-sm">Repair webhook</button></x-slot>
+                        </x-admin.attention>
                     @endforeach
                     @foreach($failedDeliveries as $delivery)
-                        <li class="p-4 flex flex-wrap items-center justify-between gap-2" wire:key="fd-{{ $delivery->id }}">
-                            <span><x-badge variant="red">Delivery failed</x-badge> {{ $delivery->form?->title ?? 'Unknown form' }} <span class="text-ink-soft">· {{ $delivery->received_at->diffForHumans() }}</span><span class="block text-xs text-rag-red">{{ Str::limit($delivery->error, 140) }}</span></span>
-                            <a href="{{ route('admin.deliveries', ['status' => 'error']) }}" wire:navigate class="btn-secondary">Open deliveries</a>
-                        </li>
+                        <x-admin.attention tone="bad" tag="Delivery failed" wire:key="fd-{{ $delivery->id }}" :title="($delivery->form?->title ?? 'Unknown form').' · '.$delivery->received_at->diffForHumans()"
+                            :detail="Str::limit($delivery->error, 140)">
+                            <x-slot name="action"><a href="{{ route('admin.deliveries', ['status' => 'error']) }}" wire:navigate class="btn btn-secondary btn-sm">View deliveries</a></x-slot>
+                        </x-admin.attention>
+                    @endforeach
+                    @foreach($unlinkedHospitals as $hospital)
+                        <x-admin.attention tone="muted" tag="No form" wire:key="nf-{{ $hospital->id }}" :title="$hospital->name" detail="No Typeform linked, so no evaluations arrive">
+                            <x-slot name="action"><a href="{{ route('admin.hospitals.forms.link', $hospital) }}" wire:navigate class="btn btn-secondary btn-sm">Link a form</a></x-slot>
+                        </x-admin.attention>
                     @endforeach
                 </ul>
             @endif
             @if($invalidDeliveries > 0)
-                <p class="px-4 py-2 text-xs text-ink-soft border-t border-line">{{ $invalidDeliveries }} {{ Str::plural('request', $invalidDeliveries) }} with an invalid signature or unknown form were rejected in the last 24 hours.</p>
+                <p class="px-[22px] py-2.5 text-xs text-adm-mute border-t border-adm-line">{{ $invalidDeliveries }} {{ Str::plural('request', $invalidDeliveries) }} with an invalid signature or unknown form were rejected in the last 24 hours.</p>
             @endif
-        </x-card>
+        </x-admin.card>
 
-        @if($rows->isEmpty())
-            <x-empty-state title="No hospitals yet" message="Create the first hospital to get started.">
-                <x-slot name="action"><a href="{{ route('admin.hospitals.create') }}" wire:navigate class="btn-primary">New hospital</a></x-slot>
-            </x-empty-state>
-        @else
-            <div class="panel overflow-x-auto">
-                <table class="table-base">
-                    <thead><tr><th>Hospital</th><th>Active forms</th><th>Evaluations</th><th>Average score</th><th>Trend</th><th>Mapping review</th><th>Webhook problems</th><th></th></tr></thead>
-                    <tbody>
-                    @foreach($rows as $row)
-                        @php $h = $row['hospital']; $s = $row['stats']; @endphp
-                        <tr wire:key="h-{{ $h->id }}" class="{{ $h->is_active ? '' : 'opacity-60' }}">
-                            <td class="font-medium"><a href="{{ route('admin.hospitals.show', $h) }}" wire:navigate class="hover:underline">{{ $h->name }}</a>@unless($h->is_active) <x-badge variant="red">Inactive</x-badge>@endunless</td>
-                            <td class="tabular-nums">{{ $h->active_forms_count }}</td>
-                            <td class="tabular-nums">{{ $s['count'] }}</td>
-                            <td><x-rag-pill :pct="$s['avg']" /></td>
-                            <td class="tabular-nums">
-                                @if($row['delta'] === null)
-                                    <span class="text-ink-soft">–</span>
-                                @elseif($row['delta'] > 0)
-                                    <span class="text-rag-green" title="vs previous period">▲ +{{ number_format($row['delta'], 1) }}</span>
-                                @elseif($row['delta'] < 0)
-                                    <span class="text-rag-red" title="vs previous period">▼ {{ number_format($row['delta'], 1) }}</span>
-                                @else
-                                    <span class="text-ink-soft">▶ 0.0</span>
-                                @endif
-                            </td>
-                            <td>@if($h->review_forms_count > 0)<x-badge variant="amber">{{ $h->review_forms_count }}</x-badge>@else<span class="text-ink-soft">–</span>@endif</td>
-                            <td>@if($h->webhook_problem_count > 0)<x-badge variant="red">{{ $h->webhook_problem_count }}</x-badge>@else<span class="text-ink-soft">–</span>@endif</td>
-                            <td class="text-right"><a href="{{ route('hospitals.dashboard', $h) }}" wire:navigate class="text-sm underline text-ink-soft hover:text-ink">Dashboard</a></td>
-                        </tr>
+        <x-admin.card title="Recent activity">
+            <x-slot name="actions"><a href="{{ route('admin.audit') }}" wire:navigate class="text-adm-accent hover:underline">Audit log</a></x-slot>
+            @if($activity->isEmpty())
+                <p class="px-[22px] py-5 text-[13px] text-adm-soft">Nothing yet. Logins, invitations, form links and review decisions appear here.</p>
+            @else
+                <ul class="px-[22px] pb-2">
+                    @foreach($activity as $entry)
+                        <li class="py-3.5 border-b border-adm-line last:border-b-0" wire:key="act-{{ $entry->id }}">
+                            <div class="text-[13px] font-medium">{{ $entry->label() }}</div>
+                            <div class="text-[12.5px] text-adm-ink/90">{{ $entry->summary() }}</div>
+                            <div class="text-[11.5px] text-adm-mute">{{ $entry->created_at->diffForHumans() }} · {{ $entry->user?->name ?? 'System' }}</div>
+                        </li>
                     @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @endif
-    </x-page>
-</div>
+                </ul>
+            @endif
+        </x-admin.card>
+    </div>
+</x-admin.page>

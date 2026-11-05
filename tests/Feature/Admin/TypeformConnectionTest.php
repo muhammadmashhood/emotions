@@ -87,7 +87,7 @@ test('form picker lists forms per workspace, excludes linked ones and passes the
         ->assertSee('Hospitals')
         ->call('select', 'NEW1')
         ->assertSee('Link form')
-        ->assertSee('to <strong>'.$hospital->name, false);
+        ->assertSee('to <strong>'.e($hospital->name), false);
 
     Http::assertSent(fn (Request $r) => str_contains($r->url(), '/forms') && str_contains($r->url(), 'search=ittefaq') && str_contains($r->url(), 'workspace_id=ws1'));
 });
