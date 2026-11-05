@@ -53,4 +53,5 @@ Scores are derived from the stored raw answers and the form version's mapping, s
 | `php artisan forms:auto-link` | link new forms from mapped workspaces now |
 | `php artisan deliveries:prune [--days=90]` | delete old webhook deliveries |
 | `php artisan app:seed-demo [--large]` | demo data (never in production) |
+| `php artisan app:purge-demo-data --force` | remove demo hospitals/forms/evaluations if a local database was imported into production |
 | `php artisan queue:failed` / `queue:retry all` | inspect / retry failed jobs |
