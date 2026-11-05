@@ -9,11 +9,11 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased" x-data="{ sidebarOpen: false }">
+    <body class="antialiased" x-data="{ sidebarOpen: false }">
         <div class="min-h-screen bg-paper lg:flex">
             <livewire:layout.navigation />
 
@@ -22,7 +22,10 @@
                     <button type="button" @click="sidebarOpen = true" class="p-2 -ml-2 rounded-lg text-ink-soft hover:bg-paper" aria-label="Open menu">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
-                    <span class="font-semibold text-ink">{{ config('app.name') }}</span>
+                    <span class="flex items-center gap-2">
+                        <span class="h-7 w-7 rounded-lg bg-em-ink text-white flex items-center justify-center text-lg font-medium leading-none pb-0.5" aria-hidden="true">e</span>
+                        <span class="text-[15px] font-light tracking-[0.09em]">MOTION</span>
+                    </span>
                     <span class="w-6"></span>
                 </header>
 

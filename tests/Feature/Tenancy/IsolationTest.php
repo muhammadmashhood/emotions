@@ -55,8 +55,8 @@ test('detail of another hospital evaluation is 404, not 403', function () {
 test('dashboard numbers only count the own hospital', function () {
     Livewire::actingAs($this->ittefaqUser)
         ->test(Dashboard::class)
-        ->assertSee('1 evaluation')
-        ->assertDontSee('2 evaluations')
+        ->assertSee('1 visit')
+        ->assertDontSee('2 visits')
         ->assertDontSee('CMH');
 });
 

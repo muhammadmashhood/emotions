@@ -6,6 +6,7 @@ use Database\Factories\HospitalFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 /**
@@ -18,6 +19,7 @@ use Illuminate\Support\Str;
  * @property bool $require_review
  * @property string|null $typeform_workspace_id
  * @property string|null $typeform_workspace_name
+ * @property Carbon|null $created_at
  */
 class Hospital extends Model
 {

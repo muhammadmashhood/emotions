@@ -36,8 +36,8 @@ new class extends Component
 
 <section>
     <header>
-        <h2 class="text-lg font-medium text-ink">Profile information</h2>
-        <p class="mt-1 text-sm text-ink-soft">Update your name and email address.</p>
+        <h2 class="text-sm font-semibold text-em-ink">Profile information</h2>
+        <p class="mt-1 text-xs text-em-soft">Update your name and email address.</p>
     </header>
 
     <form wire:submit="updateProfileInformation" class="mt-6 space-y-6">

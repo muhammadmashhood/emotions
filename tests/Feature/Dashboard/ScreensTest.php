@@ -26,14 +26,14 @@ test('dashboard renders all widgets for a hospital user with a single form selec
     Livewire::actingAs($this->viewer)
         ->test(Dashboard::class)
         ->assertSee('77.7%')
-        ->assertSee('1 evaluation')
+        ->assertSee('1 visit')
         ->assertSee('Pick a survey above')
         ->set('form', $this->form->uuid)
         ->assertSee('Phone booking')
         ->assertSee('Waiting Area')
         ->assertSee('Areas of concern')
         ->assertSee('Areas of strength')
-        ->assertSee('Facility / branch ranking')
+        ->assertSee('Facility ranking')
         ->assertSee('Ittefaq Hospital')
         ->assertDontSee('Viewing as admin');
 });
@@ -47,7 +47,7 @@ test('dashboard period presets update the filters', function () {
         ->call('setPeriod', 'custom')
         ->set('from', now()->subYear()->toDateString())
         ->set('to', now()->toDateString())
-        ->assertSee('1 evaluation');
+        ->assertSee('1 visit');
 });
 
 test('admin opens any hospital dashboard with the admin banner', function () {
@@ -94,7 +94,7 @@ test('evaluation detail shows header, journey strip, sections and answers; admin
         ->assertSee('Dr. Farhan Siddiqui')
         ->assertSee('Phone call')
         ->assertSee('77.7')
-        ->assertSee('Journey')
+        ->assertSee('Patient journey')
         ->assertSee('Phone booking')
         ->assertSee('Quick and friendly call.')
         ->assertSee('8 / 10')

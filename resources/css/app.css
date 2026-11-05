@@ -2,21 +2,31 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * eMotion design system (eMotion Admin + eMotion Dashboard designs): Poppins,
+ * warm neutrals, plum ink (#2B1F26), violet accent, olive / amber / red score bands.
+ * Colour tokens are "R G B" triplets so Tailwind opacity modifiers keep working.
+ */
 @layer base {
     :root {
-        --ink: #123A4A;
-        --ink-soft: #4E6875;
-        --paper: #F7F9FA;
-        --line: #DCE3E7;
-        --accent: #2457F5;
-        --rag-green: #2F855A;
-        --rag-amber: #B7791F;
-        --rag-red: #B83A33;
-        --rag-neutral: #A9B6BD;
+        --font-sans: "Poppins";
+        --c-ink: 43 31 38;          /* #2B1F26 brown */
+        --c-ink-soft: 110 102 107;  /* #6E666B */
+        --c-paper: 246 245 243;     /* #F6F5F3 */
+        --c-line: 236 233 231;      /* #ECE9E7 */
+        --c-accent: 91 86 185;      /* #5B56B9 blue dark */
+        --c-accent-soft: 241 240 254;
+        --c-accent-deep: 72 67 154;
+        /* Score bands as bar / dot colours; text uses the em-ok / em-warn / em-bad tokens. */
+        --c-rag-green: 194 183 0;   /* #C2B700 Good */
+        --c-rag-amber: 227 160 72;  /* #E3A048 Watch */
+        --c-rag-red: 244 67 54;     /* #F44336 Poor */
+        --c-rag-neutral: 217 211 217;
     }
 
     body {
-        @apply bg-paper text-ink antialiased;
+        @apply bg-paper text-ink antialiased text-[13px] leading-[1.45];
+        font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
     }
 
     *:focus-visible {
@@ -34,55 +44,80 @@
 
 @layer components {
     .panel {
-        @apply bg-white border border-line/80 rounded-2xl shadow-card;
+        @apply bg-white border border-em-line rounded-2xl;
     }
     .btn {
-        @apply inline-flex items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-medium transition;
+        @apply inline-flex items-center justify-center gap-2 rounded-[10px] px-4 py-[9px] text-[13px] font-medium transition-colors;
     }
     .btn-primary {
-        @apply btn bg-accent text-white hover:bg-accent-deep shadow-glow disabled:opacity-50 disabled:shadow-none;
+        @apply btn bg-em-ink border border-em-ink text-white hover:bg-black disabled:bg-[#A9A2A6] disabled:border-[#A9A2A6];
     }
     .btn-secondary {
-        @apply btn bg-white border border-line text-ink hover:border-ink/30 hover:bg-paper disabled:opacity-50;
+        @apply btn bg-white border border-em-field text-em-ink hover:border-em-hover disabled:opacity-50;
     }
     .btn-danger {
-        @apply btn bg-rag-red text-white hover:bg-rag-red/90 disabled:opacity-50;
+        @apply btn bg-white border border-em-field text-em-bad hover:border-em-bad/50 disabled:opacity-50;
+    }
+    .btn-sm {
+        @apply px-3 py-1.5 text-[12.5px] rounded-[9px];
     }
     .field {
-        @apply block w-full rounded-xl border-line bg-white text-ink shadow-sm focus:border-accent focus:ring-accent text-sm;
+        @apply block w-full rounded-[10px] border-em-field bg-white text-ink text-[13px] focus:border-em-accent focus:ring-em-accent/30;
     }
     .label {
-        @apply block text-xs font-semibold uppercase tracking-wide text-ink-soft mb-1;
-    }
-    .table-base {
-        @apply min-w-full divide-y divide-line text-sm;
-    }
-    .table-base thead th {
-        @apply px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-ink-soft bg-paper/70;
-    }
-    .table-base tbody td {
-        @apply px-3 py-2.5 align-top;
-    }
-    .table-base tbody tr {
-        @apply border-t border-line/70 hover:bg-paper/60 transition-colors;
-    }
-    .kpi-value {
-        @apply text-4xl font-semibold tracking-tight text-ink;
+        @apply block text-[12.5px] font-medium text-em-ink mb-1.5;
     }
     .eyebrow {
-        @apply text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-soft;
+        @apply text-[10.5px] uppercase tracking-[0.08em] text-em-mute;
     }
-    .nav-item {
-        @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/10 transition;
+    .table-base {
+        @apply min-w-full divide-y divide-em-line text-[13px];
     }
-    .nav-item-active {
-        @apply bg-accent text-white shadow-glow hover:bg-accent;
+    .table-base thead th {
+        @apply px-5 py-3.5 text-left text-[10.5px] font-normal uppercase tracking-[0.08em] text-em-mute bg-white;
+    }
+    .table-base tbody td {
+        @apply px-5 py-3.5 align-middle;
+    }
+    .table-base tbody tr {
+        @apply border-t border-em-line hover:bg-[#FCFBFA] transition-colors;
+    }
+    .kpi-value {
+        @apply text-[28px] font-semibold tracking-[-0.02em] text-ink;
+    }
+    .em-nav-item {
+        @apply w-full flex items-center gap-2.5 px-2.5 py-[9px] rounded-[10px] text-[13px] text-em-soft border border-transparent hover:bg-white transition-colors;
+    }
+    .em-nav-item-active {
+        @apply bg-white text-em-ink border-em-line font-semibold;
+    }
+    .em-pill {
+        @apply inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap;
+    }
+    /* Dark sign-in screens: the same controls, restyled inside .auth-dark. */
+    .auth-dark .field {
+        @apply border-white/20 bg-white/[0.06] px-[13px] py-[11px] text-white placeholder:text-white/40 focus:border-[#A8A4F7] focus:ring-[#A8A4F7]/30;
+    }
+    .auth-dark .label {
+        @apply text-xs text-[#E6E1E4];
+    }
+    .auth-dark .btn-primary {
+        @apply w-full py-3 text-[13.5px] font-semibold bg-white border-white text-em-ink hover:bg-em-accent-soft;
+    }
+    .auth-dark .btn-secondary {
+        @apply bg-transparent border-white/25 text-white hover:border-white/50;
+    }
+    .auth-dark a.auth-link {
+        @apply text-[#C9C6FA] hover:text-white;
+    }
+    .auth-dark *:focus-visible {
+        @apply ring-[#A8A4F7] ring-offset-em-ink;
     }
 }
 
 @media print {
     .no-print { display: none !important; }
     body { background: white; }
-    .panel { break-inside: avoid; box-shadow: none; }
+    .panel { break-inside: avoid; }
     main { margin-left: 0 !important; }
 }

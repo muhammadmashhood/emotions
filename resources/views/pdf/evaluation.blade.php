@@ -5,27 +5,27 @@
     <title>Evaluation · {{ $e->form->title }}</title>
     <style>
         @page { margin: 18mm 16mm; }
-        body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 10.5px; color: #123A4A; }
+        body { font-family: DejaVu Sans, Helvetica, Arial, sans-serif; font-size: 10.5px; color: #2B1F26; }
         h1 { font-size: 18px; margin: 0 0 2px; }
         h2 { font-size: 12.5px; margin: 0; }
-        .muted { color: #4E6875; }
+        .muted { color: #6E666B; }
         .meta td { padding: 2px 14px 2px 0; vertical-align: top; }
         .score { font-size: 26px; font-weight: bold; text-align: right; }
-        .green { color: #2F855A; } .amber { color: #B7791F; } .red { color: #B83A33; } .neutral { color: #A9B6BD; }
+        .green { color: #5F5A00; } .amber { color: #8A5A0E; } .red { color: #B73228; } .neutral { color: #A9A2A6; }
         .journey { width: 100%; border-collapse: collapse; margin: 10px 0 14px; table-layout: fixed; }
         .journey td { text-align: center; vertical-align: bottom; padding: 0 2px; font-size: 8.5px; }
-        .bar-wrap { height: 54px; border: 1px solid #DCE3E7; background: #F7F9FA; position: relative; }
+        .bar-wrap { height: 54px; border: 1px solid #ECE9E7; background: #F6F5F3; position: relative; }
         .bar { position: absolute; bottom: 0; left: 0; right: 0; }
-        .bg-green { background: #2F855A; } .bg-amber { background: #B7791F; } .bg-red { background: #B83A33; } .bg-neutral { background: #DCE3E7; }
-        .section { border: 1px solid #DCE3E7; border-radius: 4px; margin: 0 0 8px; page-break-inside: avoid; }
-        .section-head { background: #F7F9FA; padding: 5px 8px; border-bottom: 1px solid #DCE3E7; }
+        .bg-green { background: #C2B700; } .bg-amber { background: #E3A048; } .bg-red { background: #F44336; } .bg-neutral { background: #ECE9E7; }
+        .section { border: 1px solid #ECE9E7; border-radius: 4px; margin: 0 0 8px; page-break-inside: avoid; }
+        .section-head { background: #F6F5F3; padding: 5px 8px; border-bottom: 1px solid #ECE9E7; }
         .section-head .pct { float: right; font-weight: bold; }
         .answers { width: 100%; border-collapse: collapse; }
-        .answers td { padding: 3px 8px; border-top: 1px solid #EEF2F4; vertical-align: top; }
+        .answers td { padding: 3px 8px; border-top: 1px solid #F3F1F0; vertical-align: top; }
         .answers td.q { width: 42%; }
         .answers td.p { width: 12%; text-align: right; white-space: nowrap; }
-        .unscored { color: #4E6875; }
-        .footer { margin-top: 10px; font-size: 8.5px; color: #4E6875; border-top: 1px solid #DCE3E7; padding-top: 4px; }
+        .unscored { color: #6E666B; }
+        .footer { margin-top: 10px; font-size: 8.5px; color: #6E666B; border-top: 1px solid #ECE9E7; padding-top: 4px; }
     </style>
 </head>
 <body>

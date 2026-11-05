@@ -1,13 +1,11 @@
 <div>
-    <x-page-header :title="$form->title" :subtitle="$form->hospital->name.' · Typeform '.$form->typeform_form_id">
-        <x-slot name="actions">
-            <a href="{{ route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms']) }}" wire:navigate class="btn-secondary">Back to hospital</a>
-            <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn-primary">Edit mapping</a>
-        </x-slot>
-    </x-page-header>
-
-    <x-page>
-        <x-flash />
+    <x-ui.page>
+        <x-ui.header :back="route('admin.hospitals.show', ['hospital' => $form->hospital, 'tab' => 'forms'])" :back-label="$form->hospital->name.' · Forms'" :title="$form->title" :subtitle="'Typeform '.$form->typeform_form_id.($form->currentVersion ? ' · Version '.$form->currentVersion->version_number : '')">
+            <x-slot name="actions">
+                <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="btn-primary">Edit mapping</a>
+            </x-slot>
+        </x-ui.header>
+        <x-ui.flash />
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -22,7 +20,7 @@
                         <div><dt class="text-ink-soft">Status</dt><dd><x-badge :variant="$form->webhook_status === \App\Enums\WebhookStatus::Active ? 'green' : ($form->isActive() ? 'red' : 'neutral')">{{ $form->webhook_status->label() }}</x-badge></dd></div>
                         <div><dt class="text-ink-soft">Last checked</dt><dd>{{ $form->webhook_checked_at?->diffForHumans() ?? 'never' }}</dd></div>
                         <div class="sm:col-span-2"><dt class="text-ink-soft">Endpoint</dt><dd class="font-mono text-xs break-all">{{ $form->webhookUrl() }}</dd></div>
-                        @if($form->webhook_last_error)<div class="sm:col-span-2"><dt class="text-ink-soft">Last error</dt><dd class="text-rag-red text-xs">{{ $form->webhook_last_error }}</dd></div>@endif
+                        @if($form->webhook_last_error)<div class="sm:col-span-2"><dt class="text-ink-soft">Last error</dt><dd class="text-em-bad text-xs">{{ $form->webhook_last_error }}</dd></div>@endif
                     </dl>
                     @if(! $httpsOk)<x-alert type="warning" class="mt-3">APP_URL is not HTTPS; Typeform will not deliver to this endpoint.</x-alert>@endif
                     @if($form->isActive())
@@ -111,13 +109,13 @@
                 </div>
 
                 @if($form->isActive())
-                    <div class="panel p-4 space-y-3 border-rag-red/40">
-                        <h2 class="text-sm font-semibold text-rag-red">Unlink form</h2>
+                    <div class="panel p-4 space-y-3 border-em-bad/40">
+                        <h2 class="text-sm font-semibold text-em-bad">Unlink form</h2>
                         <p class="text-xs text-ink-soft">Removes the webhook. Existing evaluations are kept and stay visible. You can re-link later.</p>
                         <button type="button" wire:click="unlink" wire:confirm="Unlink {{ $form->title }} from {{ $form->hospital->name }}?" class="btn-danger w-full">Unlink</button>
                     </div>
                 @endif
             </div>
         </div>
-    </x-page>
+    </x-ui.page>
 </div>

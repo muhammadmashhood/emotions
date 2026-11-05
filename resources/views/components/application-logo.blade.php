@@ -1,5 +1,6 @@
-<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" {{ $attributes }}>
-    <rect x="2" y="2" width="36" height="36" rx="8" fill="#123A4A"/>
-    <path d="M9 26c3-8 6-12 9-12s4 6 6 6 4-4 7-6" stroke="#F7F9FA" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="30" cy="12" r="2.5" fill="#2F855A"/>
-</svg>
+@props(['dark' => false])
+{{-- eMotion mark: the "e" tile and the MOTION wordmark. --}}
+<span {{ $attributes->merge(['class' => 'inline-flex items-center gap-2.5']) }}>
+    <span class="h-9 w-9 rounded-[10px] flex items-center justify-center text-2xl font-medium leading-none pb-[3px] {{ $dark ? 'bg-white text-em-ink' : 'bg-em-ink text-white' }}" aria-hidden="true">e</span>
+    <span class="text-[19px] font-light tracking-[0.09em]">MOTION</span>
+</span>

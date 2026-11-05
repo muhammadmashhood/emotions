@@ -31,6 +31,12 @@ class Index extends Component
         }
     }
 
+    public function setStatus(string $status): void
+    {
+        $this->status = in_array($status, ['ok', 'duplicate', 'pending', 'error', 'invalid'], true) ? $status : '';
+        $this->resetPage();
+    }
+
     public function view(int $id): void
     {
         $this->viewing = $this->viewing === $id ? null : $id;
@@ -50,7 +56,7 @@ class Index extends Component
     public function render(): View
     {
         $deliveries = WebhookDelivery::query()
-            ->with('form:id,title,uuid')
+            ->with(['form:id,title,uuid,hospital_id', 'form.hospital:id,name'])
             ->when($this->form !== '', fn ($q) => $q->whereHas('form', fn ($f) => $f->where('uuid', $this->form)))
             ->when($this->status === 'ok', fn ($q) => $q->where('signature_valid', true)->whereNotNull('processed_at')->whereNull('error'))
             ->when($this->status === 'duplicate', fn ($q) => $q->whereNotNull('processed_at')->where('error', 'like', 'Duplicate%'))

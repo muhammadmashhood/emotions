@@ -61,6 +61,7 @@ class Index extends Component
 
         $this->reset('inviteEmail', 'inviteHospital');
         session()->flash('status', 'Invitation sent.');
+        $this->dispatch('invite-sent');
     }
 
     public function toggleActive(int $userId, UserManager $users): void
@@ -117,7 +118,14 @@ class Index extends Component
         return view('livewire.admin.users.index', [
             'users' => $users,
             'hospitals' => Hospital::query()->orderBy('name')->get(),
-            'invitations' => UserInvitation::query()->with('hospital')->whereNull('accepted_at')->orderByDesc('created_at')->limit(50)->get(),
+            // Pending invitations are listed above the users on the first page, with the same filters.
+            'invitations' => $users->onFirstPage()
+                ? UserInvitation::query()->with('hospital')->whereNull('accepted_at')
+                    ->when($this->search !== '', fn ($q) => $q->where('email', 'like', "%{$this->search}%"))
+                    ->when($this->role !== '', fn ($q) => $q->where('role', $this->role))
+                    ->when($this->hospital !== '', fn ($q) => $q->whereHas('hospital', fn ($h) => $h->where('uuid', $this->hospital)))
+                    ->orderByDesc('created_at')->limit(50)->get()
+                : collect(),
             'roles' => Role::cases(),
         ]);
     }

@@ -2,34 +2,43 @@
 
 namespace App\Livewire\Admin\Hospitals;
 
+use App\Domain\Dashboard\DashboardFilters;
+use App\Domain\Dashboard\DashboardQuery;
 use App\Models\Hospital;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
-use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
+/**
+ * Hospital accounts as cards (eMotion Admin design): counts plus the 30-day
+ * average score with its change against the previous 30 days.
+ */
 #[Layout('layouts.app')]
 class Index extends Component
 {
     use WithPagination;
 
-    #[Url]
-    public string $search = '';
-
-    public function updatedSearch(): void
-    {
-        $this->resetPage();
-    }
-
     public function render(): View
     {
-        $hospitals = Hospital::query()
-            ->withCount(['users', 'forms' => fn ($q) => $q->active()])
-            ->when($this->search !== '', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
-            ->orderBy('name')
-            ->paginate(25);
+        /** @var User $user */
+        $user = auth()->user();
+        $scores = (new DashboardQuery($user))->perHospital(DashboardFilters::fromRequest('30d'));
 
-        return view('livewire.admin.hospitals.index', ['hospitals' => $hospitals]);
+        $hospitals = Hospital::query()
+            ->withCount([
+                'users',
+                'forms' => fn ($q) => $q->active(),
+                'branches' => fn ($q) => $q->where('is_active', true),
+            ])
+            ->orderByDesc('is_active')
+            ->orderBy('name')
+            ->paginate(24);
+
+        return view('livewire.admin.hospitals.index', [
+            'hospitals' => $hospitals,
+            'scores' => $scores,
+        ]);
     }
 }

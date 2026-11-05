@@ -29,6 +29,19 @@ trait HasDashboardFilters
     #[Url(except: '')]
     public string $branch = '';
 
+    /** Period buttons in the filter bar (dashboard and evaluations list). */
+    public function setPeriod(string $period): void
+    {
+        $this->period = in_array($period, ['30d', '90d', '12m', 'custom'], true) ? $period : '90d';
+        if ($this->period !== 'custom') {
+            $this->from = '';
+            $this->to = '';
+        }
+        if (method_exists($this, 'resetPage')) {
+            $this->resetPage();
+        }
+    }
+
     protected function filters(Hospital $hospital): DashboardFilters
     {
         $form = $this->selectedForm($hospital);
