@@ -22,6 +22,11 @@ class Dashboard extends Component
 
     public bool $viewingAsAdmin = false;
 
+    /** Heat-map drill-down: the facility row and touchpoint/survey column the user clicked. */
+    public ?string $cellFacility = null;
+
+    public ?string $cellColumn = null;
+
     public function mount(?Hospital $hospital = null): void
     {
         /** @var User $user */
@@ -35,6 +40,26 @@ class Dashboard extends Component
         } else {
             abort_unless($user->hospital instanceof Hospital, 404);
             $this->hospital = $user->hospital;
+        }
+    }
+
+    public function selectCell(string $facility, string $column): void
+    {
+        $this->cellFacility = $facility;
+        $this->cellColumn = $column;
+    }
+
+    public function clearCell(): void
+    {
+        $this->cellFacility = null;
+        $this->cellColumn = null;
+    }
+
+    /** Filter changes invalidate the selected cell. */
+    public function updated(string $property): void
+    {
+        if (in_array($property, ['period', 'from', 'to', 'form', 'branch'], true)) {
+            $this->clearCell();
         }
     }
 
@@ -66,6 +91,9 @@ class Dashboard extends Component
             'kpis' => $query->kpis($this->hospital, $filters),
             'ranking' => $query->facilityRanking($this->hospital, $filters),
             'heatmap' => $query->heatmap($this->hospital, $filters, $selectedForm),
+            'cell' => $this->cellFacility !== null && $this->cellColumn !== null
+                ? $query->heatmapCell($this->hospital, $filters, $selectedForm, $this->cellFacility, $this->cellColumn)
+                : null,
             'ragGreen' => $selectedForm?->settings->ragGreenMin ?? 80,
             'ragAmber' => $selectedForm?->settings->ragAmberMin ?? 60,
         ]);

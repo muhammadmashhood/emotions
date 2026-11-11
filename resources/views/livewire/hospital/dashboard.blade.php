@@ -182,7 +182,7 @@
 
                 <x-ui.card :divider="false" title="Touchpoint heat-map">
                     <div class="px-[22px] pt-1 pb-5">
-                        <p class="text-xs text-em-soft mb-3">Facility × {{ $selectedForm ? 'touchpoint' : 'survey' }} · poor scores are filled in</p>
+                        <p class="text-xs text-em-soft mb-3">Facility × {{ $selectedForm ? 'touchpoint' : 'survey' }} · poor scores are filled in · click a cell to see its visits</p>
                         @if($heatmap['rows'] === [] || $heatmap['columns'] === [])
                             <p class="text-[13px] text-em-soft">No scored evaluations in this period.</p>
                         @else
@@ -201,13 +201,48 @@
                                             <tr>
                                                 <th scope="row" class="text-left pr-2 py-0.5 max-w-[12rem]"><span class="block font-medium text-[13px] text-em-ink truncate" title="{{ $row['label'] }}">{{ $row['label'] }}</span><span class="block font-normal text-[11.5px] text-em-mute">{{ $row['count'] }} {{ Str::plural('visit', $row['count']) }}</span></th>
                                                 @foreach($heatmap['columns'] as $col)
-                                                    @php $v = $row['cells'][$col]; $cb = $band($v); @endphp
-                                                    <td><div class="h-9 min-w-[3.25rem] rounded-lg flex items-center justify-center text-[13px] font-medium tabular-nums {{ $cb->cell() }}" title="{{ $row['label'] }} · {{ $col }}: {{ $v === null ? 'no data' : number_format($v, 1).'% ('.$cb->label().')' }}">{{ $v === null ? '—' : number_format($v, 0) }}</div></td>
+                                                    @php $v = $row['cells'][$col]; $cb = $band($v); $selected = $cellFacility === $row['label'] && $cellColumn === $col; @endphp
+                                                    <td>
+                                                        @if($v === null)
+                                                            <div class="h-9 min-w-[3.25rem] rounded-lg flex items-center justify-center text-[13px] font-medium tabular-nums {{ $cb->cell() }}" title="{{ $row['label'] }} · {{ $col }}: no data">—</div>
+                                                        @else
+                                                            <button type="button" wire:click="selectCell({{ Js::from($row['label']) }}, {{ Js::from($col) }})"
+                                                                    class="h-9 w-full min-w-[3.25rem] rounded-lg flex items-center justify-center text-[13px] font-medium tabular-nums cursor-pointer transition hover:ring-2 hover:ring-em-accent/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-em-accent {{ $cb->cell() }} {{ $selected ? 'ring-2 ring-em-ink' : '' }}"
+                                                                    title="{{ $row['label'] }} · {{ $col }}: {{ number_format($v, 1).'% ('.$cb->label().')' }}" aria-pressed="{{ $selected ? 'true' : 'false' }}">{{ number_format($v, 0) }}</button>
+                                                        @endif
+                                                    </td>
                                                 @endforeach
                                             </tr>
                                         @endforeach
                                     </tbody>
                                 </table>
+                            </div>
+                        @endif
+
+                        @if($cellFacility !== null && $cellColumn !== null)
+                            <div class="mt-4 rounded-xl border border-em-line bg-em-bg p-4" wire:key="cell-{{ md5($cellFacility.'|'.$cellColumn) }}">
+                                <div class="flex flex-wrap items-start justify-between gap-2 mb-3">
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-semibold truncate">{{ $cellFacility }} <span class="text-em-mute font-normal">·</span> {{ $cellColumn }}</p>
+                                        <p class="text-xs text-em-soft">{{ $cell['count'] }} {{ Str::plural('visit', $cell['count']) }}@if($cell['avg'] !== null) · average {{ number_format($cell['avg'], 0) }}% ({{ $band($cell['avg'])->label() }})@endif · {{ $periodLabel }}</p>
+                                    </div>
+                                    <button type="button" wire:click="clearCell" class="btn-secondary btn-sm">Close</button>
+                                </div>
+                                @if($cell['rows'] === [])
+                                    <p class="text-[13px] text-em-soft">No scored evaluations for this cell.</p>
+                                @else
+                                    <ul class="divide-y divide-em-line">
+                                        @foreach($cell['rows'] as $r)
+                                            @php $rb = $band($r['pct']); @endphp
+                                            <li class="py-2 flex items-center gap-3 text-[13px]">
+                                                <span class="text-em-soft tabular-nums shrink-0 w-24">{{ $r['submitted_at']?->format('d M Y') ?? '—' }}</span>
+                                                <span class="flex-1 min-w-0 truncate">{{ $r['doctor'] ?? $r['title'] }}@if($r['doctor'] !== null && ! $selectedForm) <span class="text-em-mute">· {{ $r['title'] }}</span>@endif</span>
+                                                <x-ui.pill :tone="$rb->tone()" class="tabular-nums">{{ $r['pct'] === null ? '—' : number_format($r['pct'], 0).'%' }}</x-ui.pill>
+                                                <a href="{{ route('evaluations.show', $r['uuid']) }}" wire:navigate class="text-em-accent hover:underline whitespace-nowrap">Open →</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
                             </div>
                         @endif
                     </div>
