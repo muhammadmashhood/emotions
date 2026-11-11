@@ -11,7 +11,7 @@
     @endphp
 
     <x-ui.page wide>
-        <x-ui.header title="Patient experience"
+        <x-ui.header :title="$hospital->name.' Mystery Shopping Dashboard'"
             :subtitle="$hospital->name.' · '.$periodLabel.' · '.number_format($headline['count']).' '.Str::plural('visit', $headline['count']).' · '.$kpis['facilities'].' '.Str::plural('facility', $kpis['facilities']).($selectedForm ? ' · '.$selectedForm->title : ' · all surveys')">
             <x-slot name="eyebrowSlot">
                 Mystery shopping

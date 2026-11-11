@@ -24,7 +24,7 @@ beforeEach(function () {
 
 test('the dashboard shows the design widgets and score bands', function () {
     Livewire::actingAs(viewer($this->hospital))->test(Dashboard::class)
-        ->assertSee('Patient experience')
+        ->assertSee($this->hospital->name.' Mystery Shopping Dashboard')
         ->assertSee('Mystery shopping')
         ->assertSee('Score bands')
         ->assertSee('Good ≥ 80%')
