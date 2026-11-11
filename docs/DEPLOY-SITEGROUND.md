@@ -78,7 +78,7 @@ Do **not** run `db:seed` in production (the demo seeder refuses anyway).
 
 ## 6. Cron jobs (Site Tools → Devs → Cron Jobs)
 
-Add the two lines from `cron.txt`, replacing `APP` with the absolute path (`pwd` prints it):
+Add the two lines from `cron.txt`, replacing `APP` with the absolute path. Copy it from the File Manager address bar or from a path in Site Tools → Statistics → Error Log; SiteGround homes look like `/home/u1204-xxxxxxxxxx/www/domain/public_html`, not `/home/customer/...`. A wrong path makes `cd` fail silently and nothing is ever logged.
 
 | Interval | Command |
 |---|---|
@@ -160,7 +160,7 @@ ssh -p 18765 USER@HOST 'cd ~/www/evaluations.yourdomain.com/emotion && unzip -oq
 |---|---|
 | 500 on every page | `storage/logs/laravel-*.log`; usually `APP_KEY` missing or `storage/` not writable |
 | Login page loads without styling | `public/build/` missing → rebuild the bundle (`npm run build` runs inside `build-release.sh`) |
-| Deliveries stay "Pending" | queue cron not running, or wrong `php` binary in the cron line; run the queue command by hand over SSH |
+| Deliveries stay "Pending" | queue cron not running, wrong app path (`cd` fails silently), or wrong `php` binary in the cron line; redirect the job to `storage/logs/queue.log` to see output, or run the queue command by hand over SSH |
 | Webhook "Error" after linking | `APP_URL` not HTTPS/public, or token lacks `webhooks:write`; fix and click **Repair webhook** |
 | Emails not sent | `MAIL_*` from Site Tools; test with `php artisan tinker --execute="Mail::raw('hi', fn($m) => $m->to('you@example.com')->subject('test'));"` |
 | Slow dashboard | `php artisan optimize` after each deploy; the heavy queries use covering indexes already |

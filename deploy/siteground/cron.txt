@@ -1,4 +1,4 @@
-# SiteGround → Site Tools → Devs → Cron Jobs. Replace APP with the absolute app folder, e.g. /home/customer/www/example.com/emotion
+# SiteGround → Site Tools → Devs → Cron Jobs. Replace APP with the absolute app folder. Note: the account home is NOT /home/customer; find the real path in File Manager (address bar) or Site Tools → Statistics → Error Log, e.g. /home/u1204-xxxxxxxxxx/www/example.com/public_html
 # 1) Laravel scheduler (reconcile, structure/webhook checks, auto-link, pruning) — every minute
 * * * * * cd APP && php artisan schedule:run >> /dev/null 2>&1
 # 2) Queue worker in short bursts (webhook processing, backfills, re-scores) — every minute, exits when idle or after 50 s
