@@ -21,4 +21,9 @@ class FormPolicy
     {
         return $user->isSuperAdmin();
     }
+
+    public function delete(User $user, Form $form): bool
+    {
+        return $user->isSuperAdmin();
+    }
 }

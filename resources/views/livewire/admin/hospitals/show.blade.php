@@ -106,7 +106,13 @@
                             </td>
                             <td class="tabular-nums">{{ $form->submissions_count }}</td>
                             <td class="text-em-soft">{{ $form->last_synced_at?->diffForHumans() ?? '–' }}</td>
-                            <td class="text-right"><a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="text-em-accent hover:underline whitespace-nowrap">Mapping →</a></td>
+                            <td class="text-right whitespace-nowrap space-x-3">
+                                <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="text-em-accent hover:underline">Mapping →</a>
+                                @if($form->isActive())
+                                    <button type="button" wire:click="unlinkForm({{ $form->id }})" wire:confirm="Unlink {{ $form->title }}? The webhook is removed; its evaluations stay." class="text-em-soft hover:text-em-ink hover:underline">Unlink</button>
+                                @endif
+                                <button type="button" wire:click="deleteForm({{ $form->id }})" wire:confirm="Delete {{ $form->title }} and its {{ $form->submissions_count }} evaluations? This cannot be undone." class="text-em-bad hover:underline">Delete</button>
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -149,5 +155,18 @@
             </div>
             <div class="flex justify-end"><button type="submit" class="btn-primary">Save settings</button></div>
         </form>
+
+        <div class="panel p-6 space-y-3 max-w-2xl border-em-bad/40">
+            <h2 class="text-sm font-semibold text-em-bad">Danger zone</h2>
+            <p class="text-xs text-ink-soft">Deleting <strong>{{ $hospital->name }}</strong> removes its {{ $hospital->forms_count }} linked {{ Str::plural('form', $hospital->forms_count) }}, {{ number_format($hospital->submissions_count) }} {{ Str::plural('evaluation', $hospital->submissions_count) }} and {{ $hospital->users_count }} {{ Str::plural('user', $hospital->users_count) }}, and drops its Typeform webhooks. This cannot be undone.</p>
+            <div>
+                <label class="label" for="confirmDeleteName">Type the hospital name to confirm</label>
+                <input id="confirmDeleteName" type="text" wire:model="confirmDeleteName" class="field" autocomplete="off" placeholder="{{ $hospital->name }}">
+                <x-input-error :messages="$errors->get('confirmDeleteName')" class="mt-1" />
+            </div>
+            <div class="flex justify-end">
+                <button type="button" wire:click="deleteHospital" wire:confirm="Delete {{ $hospital->name }} and all of its data?" class="btn-danger">Delete hospital</button>
+            </div>
+        </div>
     @endif
 </x-ui.page>

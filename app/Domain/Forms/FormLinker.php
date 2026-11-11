@@ -91,6 +91,35 @@ class FormLinker
         return $form->refresh();
     }
 
+    /**
+     * Hard-delete a form with its versions and evaluations. Delivery history is kept (form_id set to null).
+     */
+    public function delete(Form $form, User $by): void
+    {
+        $summary = ['id' => $form->id, 'title' => $form->title, 'typeform_form_id' => $form->typeform_form_id, 'submissions' => $form->submissions()->count()];
+        $hospitalId = $form->hospital_id;
+
+        DB::transaction(fn () => $this->purge($form));
+
+        $this->audit->log('form.deleted', null, $summary, $hospitalId, $by);
+    }
+
+    /**
+     * Remove a form and everything that hangs off it, without an audit row (the caller writes one).
+     * Must run inside a transaction.
+     */
+    public function purge(Form $form): void
+    {
+        if ($form->isActive()) {
+            $this->webhooks->unregister($form);
+        }
+
+        $form->submissions()->delete();
+        $form->forceFill(['current_version_id' => null])->save();
+        $form->versions()->delete();
+        $form->forceDelete();
+    }
+
     public function unlink(Form $form, User $by): void
     {
         $this->webhooks->unregister($form);

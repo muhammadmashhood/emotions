@@ -105,6 +105,17 @@ class Show extends Component
         session()->flash('status', 'Recalculation started.');
     }
 
+    public function delete(FormLinker $linker): void
+    {
+        $this->authorize('delete', $this->form);
+        /** @var User $user */
+        $user = auth()->user();
+        $hospital = $this->form->hospital;
+        $linker->delete($this->form, $user);
+        session()->flash('status', 'Form deleted with its evaluations.');
+        $this->redirect(route('admin.hospitals.show', ['hospital' => $hospital, 'tab' => 'forms']), navigate: true);
+    }
+
     public function unlink(FormLinker $linker): void
     {
         /** @var User $user */

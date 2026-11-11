@@ -27,6 +27,11 @@ class HospitalPolicy
         return $user->isSuperAdmin();
     }
 
+    public function delete(User $user, Hospital $hospital): bool
+    {
+        return $user->isSuperAdmin();
+    }
+
     public function manageUsers(User $user, Hospital $hospital): bool
     {
         return $user->isSuperAdmin() || ($user->isHospitalAdmin() && $user->belongsToHospital($hospital));
