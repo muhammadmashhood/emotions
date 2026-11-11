@@ -150,3 +150,24 @@ test('out-of-range scale values are clamped', function () use ($engine, $setting
     expect($engine->score($m, answers([['fid' => 'a', 'type' => 'number', 'number' => 0]]), $settings)->answerPoints['a']['points'])->toBe(0.0);
     expect($engine->score($m, answers([['fid' => 'a', 'type' => 'number', 'number' => 9]]), $settings)->answerPoints['a']['points'])->toBe(4.0);
 });
+
+test('point overrides replace the computed points, clamp to the maximum and never touch unscored fields', function () use ($engine, $settings) {
+    $m = mapping([[1, 1.0]], [
+        ['rating', 'rating', 1, true, 1, 5],
+        ['scale', 'opinion_scale', 1, true, 0, 10],
+        ['note', 'long_text', 1, false, null, null],
+    ]);
+    $a = answers([
+        ['fid' => 'rating', 'type' => 'number', 'number' => 4],   // 3/4
+        ['fid' => 'scale', 'type' => 'number', 'number' => 7],    // 7/10
+        ['fid' => 'note', 'type' => 'text', 'text' => 'ok'],
+    ]);
+
+    $r = $engine->score($m, $a, $settings, ['rating' => 1.0, 'scale' => 99.0, 'note' => 5.0]);
+
+    expect($r->answerPoints['rating'])->toBe(['points' => 1.0, 'max_points' => 4.0])
+        ->and($r->answerPoints['scale'])->toBe(['points' => 10.0, 'max_points' => 10.0])
+        ->and($r->answerPoints['note'])->toBeNull()
+        ->and($r->sections[0]->points)->toBe(11.0)->and($r->sections[0]->maxPoints)->toBe(14.0)
+        ->and($r->overallPct)->toBe(78.57);
+});

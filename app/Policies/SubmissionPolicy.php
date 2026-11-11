@@ -26,4 +26,10 @@ class SubmissionPolicy
     {
         return $user->isEmotionStaff();
     }
+
+    /** Edit scores and comments, add or remove supporting documents. */
+    public function edit(User $user, Submission $submission): bool
+    {
+        return $user->isEmotionStaff();
+    }
 }
