@@ -141,6 +141,12 @@ class Submission extends Model
         return $this->hasMany(SubmissionSectionScore::class)->orderBy('display_order');
     }
 
+    /** @return HasMany<SubmissionAttachment, $this> */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(SubmissionAttachment::class)->orderBy('id');
+    }
+
     /**
      * What hospital users may see: approved and (unless the form includes partials) complete evaluations.
      *

@@ -9,6 +9,7 @@ use App\Domain\Typeform\Data\NormalizedAnswer;
 use App\Domain\Typeform\Exceptions\TypeformException;
 use App\Enums\SubmissionSource;
 use App\Enums\SubmissionStatus;
+use App\Jobs\StoreSubmissionAttachments;
 use App\Models\Form;
 use App\Models\FormVersion;
 use App\Models\Submission;
@@ -93,6 +94,10 @@ class SubmissionIngestor
                 return $submission;
             });
 
+            if ($this->hasFileAnswers($answers)) {
+                StoreSubmissionAttachments::dispatch($submission->id);
+            }
+
             return new IngestOutcome($existing ? IngestOutcome::UPDATED : IngestOutcome::CREATED, $submission);
         });
     }
@@ -131,6 +136,20 @@ class SubmissionIngestor
         }
 
         return $new ?? $version;
+    }
+
+    /**
+     * @param  list<NormalizedAnswer>  $answers
+     */
+    private function hasFileAnswers(array $answers): bool
+    {
+        foreach ($answers as $answer) {
+            if ($answer->answerType === 'file_url') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function timestamp(mixed $value): ?Carbon

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EvaluationAttachmentController;
 use App\Http\Controllers\EvaluationExportController;
 use App\Http\Controllers\EvaluationFileController;
 use App\Http\Controllers\EvaluationPdfController;
@@ -30,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('evaluations/export', EvaluationExportController::class)->name('evaluations.export');
     Route::get('evaluations/{evaluation}', Hospital\Evaluations\Show::class)->name('evaluations.show');
     Route::get('evaluations/{evaluation}/files/{answer}', EvaluationFileController::class)->whereNumber('answer')->name('evaluations.files.show');
+    Route::get('evaluations/{evaluation}/attachments/{attachment}', EvaluationAttachmentController::class)->whereNumber('attachment')->name('evaluations.attachments.show');
     Route::get('evaluations/{evaluation}/pdf', EvaluationPdfController::class)->name('evaluations.pdf');
     Route::view('profile', 'profile')->name('profile');
     Route::get('team', Hospital\Team::class)->middleware('role:hospital_admin')->name('team');

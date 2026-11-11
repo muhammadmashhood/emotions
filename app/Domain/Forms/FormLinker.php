@@ -3,6 +3,7 @@
 namespace App\Domain\Forms;
 
 use App\Domain\Audit\AuditLogger;
+use App\Domain\Submissions\AttachmentStore;
 use App\Domain\Typeform\TypeformClient;
 use App\Enums\FormStatus;
 use App\Enums\WebhookStatus;
@@ -23,6 +24,7 @@ class FormLinker
         private readonly FormVersioner $versioner,
         private readonly WebhookRegistrar $webhooks,
         private readonly AuditLogger $audit,
+        private readonly AttachmentStore $attachments,
     ) {}
 
     public function link(Hospital $hospital, TypeformConnection $connection, string $typeformFormId, ?User $by): Form
@@ -114,6 +116,11 @@ class FormLinker
             $this->webhooks->unregister($form);
         }
 
+        $form->submissions()->select(['id', 'uuid'])->chunkById(200, function ($submissions): void {
+            foreach ($submissions as $submission) {
+                $this->attachments->purge($submission);
+            }
+        });
         $form->submissions()->delete();
         $form->forceFill(['current_version_id' => null])->save();
         $form->versions()->delete();

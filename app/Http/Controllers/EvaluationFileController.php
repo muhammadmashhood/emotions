@@ -6,8 +6,10 @@ use App\Domain\Typeform\Exceptions\TypeformException;
 use App\Domain\Typeform\TypeformClient;
 use App\Models\Answer;
 use App\Models\Submission;
+use App\Models\SubmissionAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -22,6 +24,12 @@ class EvaluationFileController extends Controller
         $answerModel = Answer::query()->where('submission_id', $evaluation->id)->findOrFail($answer);
         $url = $answerModel->fileUrl();
         abort_if($url === null, 404);
+
+        // Prefer the copy stored at ingest; fall back to Typeform for older evaluations.
+        $stored = $evaluation->attachments()->where('source', SubmissionAttachment::SOURCE_TYPEFORM)->where('answer_typeform_field_id', $answerModel->typeform_field_id)->first();
+        if ($stored !== null && Storage::disk($stored->disk)->exists($stored->path)) {
+            return EvaluationAttachmentController::stream($stored);
+        }
 
         $evaluation->loadMissing('form.connection');
 
