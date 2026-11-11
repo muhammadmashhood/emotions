@@ -221,3 +221,17 @@ test('an unreachable mail server shows an error on the invite form instead of a 
 
     expect(UserInvitation::query()->where('email', 'qa@example.com')->exists())->toBeFalse();
 });
+
+test('resending during a mail outage keeps the original invitation and shows the error on the Users page', function () {
+    $hospital = Hospital::factory()->create();
+    $invitation = UserInvitation::factory()->create(['hospital_id' => $hospital->id, 'email' => 'qa@example.com']);
+    Mail::shouldReceive('to')->once()->andThrow(new TransportException('getaddrinfo failed'));
+
+    Livewire::actingAs(superAdmin())
+        ->test(UsersIndex::class)
+        ->call('resend', $invitation->id)
+        ->assertSee('could not be emailed');
+
+    expect(UserInvitation::query()->find($invitation->id))->not->toBeNull()
+        ->and(UserInvitation::query()->where('email', 'qa@example.com')->count())->toBe(1);
+});

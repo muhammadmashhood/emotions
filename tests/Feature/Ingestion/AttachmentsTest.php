@@ -4,8 +4,10 @@ use App\Domain\Forms\FormVersioner;
 use App\Domain\Submissions\AttachmentStore;
 use App\Domain\Submissions\SubmissionIngestor;
 use App\Enums\SubmissionSource;
+use App\Livewire\Hospital\Evaluations\Show;
 use App\Models\Form;
 use App\Models\Hospital;
+use App\Models\Submission;
 use App\Models\SubmissionAttachment;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
@@ -75,4 +77,33 @@ test('staff can upload a supporting document to an evaluation', function () {
 
     app(AttachmentStore::class)->delete($upload);
     expect(Storage::disk('local')->exists($upload->path))->toBeFalse()->and($submission->attachments()->count())->toBe(1);
+});
+
+test('SVG attachments are never served inline and file responses carry a sandboxing CSP', function () {
+    $submission = Submission::factory()->create(['form_id' => $this->form->id, 'form_version_id' => $this->form->fresh()->currentVersion->id, 'hospital_id' => $this->hospital->id]);
+    Storage::disk('local')->put('attachments/x/evil.svg', '<svg onload="alert(1)"/>');
+    $svg = SubmissionAttachment::factory()->create(['submission_id' => $submission->id, 'path' => 'attachments/x/evil.svg', 'original_name' => 'evil.svg', 'mime' => 'image/svg+xml']);
+    $png = SubmissionAttachment::factory()->png()->create(['submission_id' => $submission->id]);
+
+    $this->actingAs(superAdmin())->get(route('evaluations.attachments.show', [$submission, $svg->id]))
+        ->assertOk()
+        ->assertHeader('content-type', 'application/octet-stream')
+        ->assertHeader('content-security-policy', "default-src 'none'; sandbox")
+        ->assertHeader('content-disposition', 'attachment; filename=evil.svg');
+    $this->actingAs(superAdmin())->get(route('evaluations.attachments.show', [$submission, $png->id]))
+        ->assertOk()->assertHeader('content-type', 'image/png')->assertHeader('content-security-policy', "default-src 'none'; sandbox");
+});
+
+test('staff uploads are limited to images and office documents', function () {
+    $submission = Submission::factory()->create(['form_id' => $this->form->id, 'form_version_id' => $this->form->fresh()->currentVersion->id, 'hospital_id' => $this->hospital->id]);
+
+    Livewire\Livewire::actingAs(superAdmin())->test(Show::class, ['evaluation' => $submission])
+        ->set('documents', [UploadedFile::fake()->create('evil.svg', 1, 'image/svg+xml')])
+        ->call('uploadDocuments')
+        ->assertHasErrors(['documents.0'])
+        ->set('documents', [UploadedFile::fake()->create('page.html', 1, 'text/html')])
+        ->call('uploadDocuments')
+        ->assertHasErrors(['documents.0']);
+
+    expect(SubmissionAttachment::query()->count())->toBe(0);
 });

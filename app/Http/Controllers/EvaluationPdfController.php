@@ -8,6 +8,7 @@ use App\Models\Submission;
 use App\Models\SubmissionAttachment;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 
@@ -16,6 +17,11 @@ use Illuminate\Support\Facades\Storage;
  */
 class EvaluationPdfController extends Controller
 {
+    /** Images inlined into one PDF: total bytes and count, so dompdf stays within shared-hosting memory. */
+    public const MAX_INLINE_TOTAL_BYTES = 10 * 1024 * 1024;
+
+    public const MAX_INLINE_IMAGES = 12;
+
     public function __invoke(Submission $evaluation): Response
     {
         Gate::authorize('view', $evaluation);
@@ -36,6 +42,7 @@ class EvaluationPdfController extends Controller
         $answersByField = $evaluation->answers->keyBy('typeform_field_id');
         $scores = $evaluation->sectionScores->keyBy('section_id');
         $typeformFiles = $evaluation->attachments->where('source', SubmissionAttachment::SOURCE_TYPEFORM)->keyBy('answer_typeform_field_id');
+        $inlineImages = $this->inlineImages($evaluation->attachments);
 
         $sections = $evaluation->formVersion->sections()->get()->map(function ($section) use ($fieldsBySection, $answersByField, $scores, $typeformFiles) {
             $questions = [];
@@ -77,7 +84,37 @@ class EvaluationPdfController extends Controller
             'sections' => $sections,
             'journey' => $journey,
             'documents' => $evaluation->attachments->where('source', SubmissionAttachment::SOURCE_UPLOAD)->values(),
+            'inlineImages' => $inlineImages,
             'logo' => $logo,
         ])->render();
+    }
+
+    /**
+     * Data URIs for the images that fit the budget, keyed by attachment id; each file is read once.
+     *
+     * @param  Collection<int, SubmissionAttachment>  $attachments
+     * @return array<int, string>
+     */
+    private function inlineImages($attachments): array
+    {
+        $uris = [];
+        $bytes = 0;
+        foreach ($attachments as $attachment) {
+            if (! $attachment->isImage() || count($uris) >= self::MAX_INLINE_IMAGES) {
+                continue;
+            }
+            $size = (int) ($attachment->size ?? 0);
+            if ($size > SubmissionAttachment::MAX_INLINE_BYTES || $bytes + $size > self::MAX_INLINE_TOTAL_BYTES) {
+                continue;
+            }
+            $uri = $attachment->dataUri();
+            if ($uri === null) {
+                continue;
+            }
+            $uris[$attachment->id] = $uri;
+            $bytes += $size;
+        }
+
+        return $uris;
     }
 }

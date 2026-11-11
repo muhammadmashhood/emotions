@@ -39,15 +39,6 @@ class EvaluationFileController extends Controller
             abort(502, 'The file could not be fetched from Typeform.');
         }
 
-        $contentType = $upstream->header('Content-Type') ?: 'application/octet-stream';
-        $filename = $answerModel->value_text ?: 'file';
-        $disposition = str_starts_with($contentType, 'image/') ? 'inline' : 'attachment';
-
-        return response($upstream->body(), 200, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => $disposition.'; filename="'.addslashes($filename).'"',
-            'Cache-Control' => 'private, max-age=300',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return EvaluationAttachmentController::fileResponse($upstream->body(), $upstream->header('Content-Type') ?: null, $answerModel->value_text ?: 'file');
     }
 }

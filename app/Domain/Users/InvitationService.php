@@ -37,24 +37,28 @@ class InvitationService
             throw ValidationException::withMessages(['email' => 'A user with this email already exists.']);
         }
 
-        // One pending invitation per email: replace any existing one.
-        UserInvitation::query()->where('email', $email)->whereNull('accepted_at')->delete();
-
         $token = Str::random(64);
 
-        $invitation = UserInvitation::query()->create([
-            'email' => $email,
-            'hospital_id' => $hospital?->id,
-            'role' => $role,
-            'token_hash' => UserInvitation::hashToken($token),
-            'invited_by' => $invitedBy->id,
-            'expires_at' => now()->addHours(72),
-        ]);
-
+        // One pending invitation per email: replace any existing one — but only once the email is actually handed
+        // to the mail server. A transport failure rolls the whole thing back, so a previously sent link keeps working.
         try {
-            Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+            $invitation = DB::transaction(function () use ($email, $hospital, $role, $invitedBy, $token): UserInvitation {
+                UserInvitation::query()->where('email', $email)->whereNull('accepted_at')->delete();
+
+                $invitation = UserInvitation::query()->create([
+                    'email' => $email,
+                    'hospital_id' => $hospital?->id,
+                    'role' => $role,
+                    'token_hash' => UserInvitation::hashToken($token),
+                    'invited_by' => $invitedBy->id,
+                    'expires_at' => now()->addHours(72),
+                ]);
+
+                Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+
+                return $invitation;
+            });
         } catch (TransportExceptionInterface $e) {
-            $invitation->delete();
             Log::warning('invitation.mail_failed', ['email' => $email, 'error' => $e->getMessage()]);
 
             throw new InvitationMailFailed(InvitationMailFailed::MESSAGE, 0, $e);

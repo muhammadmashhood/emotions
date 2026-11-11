@@ -166,7 +166,10 @@ class Show extends Component
     public function uploadDocuments(AttachmentStore $store, AuditLogger $audit): void
     {
         $this->authorize('edit', $this->evaluation);
-        $this->validate(['documents' => ['required', 'array', 'max:10'], 'documents.*' => ['file', 'max:10240']], ['documents.*.max' => 'Each file must be 10 MB or smaller.']);
+        $this->validate(
+            ['documents' => ['required', 'array', 'max:10'], 'documents.*' => ['file', 'max:10240', 'mimes:jpg,jpeg,png,gif,webp,pdf,doc,docx,xls,xlsx']],
+            ['documents.*.max' => 'Each file must be 10 MB or smaller.', 'documents.*.mimes' => 'Only images (JPG, PNG, GIF, WebP), PDF and Office documents can be added.'],
+        );
         /** @var User $user */
         $user = auth()->user();
 

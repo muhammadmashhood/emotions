@@ -61,7 +61,7 @@ class UserManagement extends Component
         try {
             $invitations->resend($invitation, $this->currentUser());
         } catch (InvitationMailFailed $e) {
-            $this->addError('inviteEmail', $e->getMessage());
+            session()->flash('error', $e->getMessage());
 
             return;
         }

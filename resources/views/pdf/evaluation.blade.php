@@ -133,8 +133,10 @@
                             <td class="q">{{ $f->title }}</td>
                             <td class="a">
                                 @if($a->answer_type === 'file_url')
-                                    @if($file && $file->dataUri())
-                                        <div class="evidence"><img src="{{ $file->dataUri() }}" alt=""><span class="cap">{{ $file->original_name }}</span></div>
+                                    @if($file && isset($inlineImages[$file->id]))
+                                        <div class="evidence"><img src="{{ $inlineImages[$file->id] }}" alt=""><span class="cap">{{ $file->original_name }}</span></div>
+                                    @elseif($file && $file->isImage())
+                                        <span class="muted">Image: {{ $file->original_name }} (not embedded, too large)</span>
                                     @else
                                         <span class="muted">File: {{ $a->value_text }}</span>
                                     @endif
@@ -165,11 +167,11 @@
             <table><tr>
                 @foreach($documents as $doc)
                     <td>
-                        @if($doc->dataUri())
-                            <img src="{{ $doc->dataUri() }}" alt=""><br>
+                        @if(isset($inlineImages[$doc->id]))
+                            <img src="{{ $inlineImages[$doc->id] }}" alt=""><br>
                             <span class="small muted">{{ $doc->original_name }}@if($doc->uploader) · added by {{ $doc->uploader->name }}@endif</span>
                         @else
-                            <div class="file">{{ $doc->original_name }}<br><span class="small muted">@if($doc->uploader)added by {{ $doc->uploader->name }}@else supporting document @endif</span></div>
+                            <div class="file">{{ $doc->original_name }}@if($doc->isImage()) <span class="small muted">(image not embedded, too large)</span>@endif<br><span class="small muted">@if($doc->uploader)added by {{ $doc->uploader->name }}@else supporting document @endif</span></div>
                         @endif
                     </td>
                     @if($loop->iteration % 2 === 0 && ! $loop->last)</tr><tr>@endif

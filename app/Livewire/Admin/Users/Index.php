@@ -111,7 +111,7 @@ class Index extends Component
         try {
             $invitations->resend($invitation, $actor);
         } catch (InvitationMailFailed $e) {
-            $this->addError('inviteEmail', $e->getMessage());
+            session()->flash('error', $e->getMessage());
 
             return;
         }
