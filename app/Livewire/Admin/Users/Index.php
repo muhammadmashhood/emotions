@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin\Users;
 
+use App\Domain\Users\InvitationMailFailed;
 use App\Domain\Users\InvitationService;
 use App\Domain\Users\UserManager;
 use App\Enums\Role;
@@ -57,7 +58,13 @@ class Index extends Component
 
         /** @var User $actor */
         $actor = auth()->user();
-        $invitations->invite($this->inviteEmail, $role, $hospital, $actor);
+        try {
+            $invitations->invite($this->inviteEmail, $role, $hospital, $actor);
+        } catch (InvitationMailFailed $e) {
+            $this->addError('inviteEmail', $e->getMessage());
+
+            return;
+        }
 
         $this->reset('inviteEmail', 'inviteHospital');
         session()->flash('status', 'Invitation sent.');
@@ -101,7 +108,13 @@ class Index extends Component
         $this->authorize('invite', [User::class, $invitation->role, $invitation->hospital]);
         /** @var User $actor */
         $actor = auth()->user();
-        $invitations->resend($invitation, $actor);
+        try {
+            $invitations->resend($invitation, $actor);
+        } catch (InvitationMailFailed $e) {
+            $this->addError('inviteEmail', $e->getMessage());
+
+            return;
+        }
         session()->flash('status', 'Invitation re-sent.');
     }
 

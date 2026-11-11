@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Livewire;
+use Symfony\Component\Mailer\Exception\TransportException;
 
 beforeEach(fn () => Mail::fake());
 
@@ -203,4 +204,20 @@ test('resending an invitation issues a new token and sends another email', funct
     expect($pending)->toHaveCount(1)
         ->and($pending->first()->token_hash)->not->toBe($first->token_hash);
     Mail::assertSent(UserInvitationMail::class, 2);
+});
+
+test('an unreachable mail server shows an error on the invite form instead of a 500', function () {
+    Mail::shouldReceive('to')->once()->andThrow(new TransportException('getaddrinfo for mail.example.com failed'));
+    $hospital = Hospital::factory()->create();
+
+    Livewire::actingAs(superAdmin())
+        ->test(UsersIndex::class)
+        ->set('inviteEmail', 'qa@example.com')
+        ->set('inviteRole', 'hospital_admin')
+        ->set('inviteHospital', $hospital->uuid)
+        ->call('invite')
+        ->assertHasErrors(['inviteEmail'])
+        ->assertSee('could not be emailed');
+
+    expect(UserInvitation::query()->where('email', 'qa@example.com')->exists())->toBeFalse();
 });

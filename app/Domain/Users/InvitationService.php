@@ -9,9 +9,11 @@ use App\Models\Hospital;
 use App\Models\User;
 use App\Models\UserInvitation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class InvitationService
 {
@@ -49,7 +51,14 @@ class InvitationService
             'expires_at' => now()->addHours(72),
         ]);
 
-        Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+        try {
+            Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+        } catch (TransportExceptionInterface $e) {
+            $invitation->delete();
+            Log::warning('invitation.mail_failed', ['email' => $email, 'error' => $e->getMessage()]);
+
+            throw new InvitationMailFailed(InvitationMailFailed::MESSAGE, 0, $e);
+        }
 
         $this->audit->log('user.invited', $invitation, ['email' => $email, 'role' => $role->value], $hospital, $invitedBy);
 
