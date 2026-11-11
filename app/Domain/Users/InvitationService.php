@@ -27,10 +27,10 @@ class InvitationService
     {
         $email = Str::lower(trim($email));
 
-        if ($role === Role::SuperAdmin && $hospital !== null) {
-            throw ValidationException::withMessages(['role' => 'Super admins do not belong to a hospital.']);
+        if (! $role->isHospitalRole() && $hospital !== null) {
+            throw ValidationException::withMessages(['role' => 'eMotion staff do not belong to a hospital.']);
         }
-        if ($role !== Role::SuperAdmin && $hospital === null) {
+        if ($role->isHospitalRole() && $hospital === null) {
             throw ValidationException::withMessages(['hospital_id' => 'A hospital is required for this role.']);
         }
         if (User::query()->where('email', $email)->exists()) {

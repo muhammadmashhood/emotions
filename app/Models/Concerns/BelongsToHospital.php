@@ -27,7 +27,7 @@ trait BelongsToHospital
      */
     public function scopeVisibleTo(Builder $query, User $user): Builder
     {
-        if ($user->isSuperAdmin()) {
+        if ($user->isEmotionStaff()) {
             return $query;
         }
 

@@ -31,7 +31,7 @@ class Dashboard extends Component
         if ($hospital !== null && $hospital->exists) {
             $this->authorize('view', $hospital);
             $this->hospital = $hospital;
-            $this->viewingAsAdmin = $user->isSuperAdmin();
+            $this->viewingAsAdmin = $user->isEmotionStaff();
         } else {
             abort_unless($user->hospital instanceof Hospital, 404);
             $this->hospital = $user->hospital;

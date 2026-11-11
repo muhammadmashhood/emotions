@@ -19,7 +19,7 @@ class EvaluationExportController extends Controller
         $user = $request->user();
 
         $hospital = null;
-        if ($user->isSuperAdmin()) {
+        if ($user->isEmotionStaff()) {
             if ($request->filled('hospital')) {
                 $hospital = Hospital::query()->where('uuid', (string) $request->query('hospital'))->firstOrFail();
             }

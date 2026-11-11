@@ -93,8 +93,8 @@ class Index extends Component
         $this->authorize('changeRole', [$user, $newRole]);
 
         // Role changes across the hospital boundary are not allowed here.
-        if ($newRole === Role::SuperAdmin || $user->isSuperAdmin()) {
-            abort(403, 'Super admin roles are managed by invitation only.');
+        if (! $newRole->isHospitalRole() || $user->isEmotionStaff()) {
+            abort(403, 'eMotion staff roles are managed by invitation only.');
         }
 
         /** @var User $actor */

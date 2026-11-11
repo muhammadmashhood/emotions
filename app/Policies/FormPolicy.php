@@ -14,7 +14,7 @@ class FormPolicy
 
     public function view(User $user, Form $form): bool
     {
-        return $user->isSuperAdmin() || $user->belongsToHospital($form->hospital_id);
+        return $user->isEmotionStaff() || $user->belongsToHospital($form->hospital_id);
     }
 
     public function manage(User $user, Form $form): bool

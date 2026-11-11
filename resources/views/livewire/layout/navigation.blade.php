@@ -13,7 +13,7 @@ new class extends Component
     }
 }; ?>
 
-@if(auth()->user()->isSuperAdmin())
+@if(auth()->user()->isEmotionStaff())
     @include('livewire.layout.partials.admin-sidebar')
 @else
     @include('livewire.layout.partials.hospital-sidebar')

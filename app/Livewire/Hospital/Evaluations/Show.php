@@ -134,9 +134,9 @@ class Show extends Component
             'orphanAnswers' => $orphanAnswers,
             'benchmark' => $this->benchmark($user),
             'journeyScores' => $this->evaluation->sectionScores->filter(fn ($s) => in_array((int) $s->section_id, $scorableSectionIds, true))->values(),
-            'isAdmin' => $user->isSuperAdmin(),
-            'rawJson' => $user->isSuperAdmin() ? json_encode($this->evaluation->raw, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null,
-            'backUrl' => $user->isSuperAdmin() ? route('hospitals.evaluations.index', $this->evaluation->form->hospital) : route('evaluations.index'),
+            'isAdmin' => $user->isEmotionStaff(),
+            'rawJson' => $user->isEmotionStaff() ? json_encode($this->evaluation->raw, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) : null,
+            'backUrl' => $user->isEmotionStaff() ? route('hospitals.evaluations.index', $this->evaluation->form->hospital) : route('evaluations.index'),
         ]);
     }
 }

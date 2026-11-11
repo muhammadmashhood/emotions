@@ -57,11 +57,11 @@ class User extends Authenticatable
         static::saving(function (User $user): void {
             $role = $user->role;
 
-            if ($role === Role::SuperAdmin && $user->hospital_id !== null) {
-                throw new InvalidArgumentException('A super admin cannot belong to a hospital.');
+            if (! $role->isHospitalRole() && $user->hospital_id !== null) {
+                throw new InvalidArgumentException('eMotion staff cannot belong to a hospital.');
             }
 
-            if ($role !== Role::SuperAdmin && $user->hospital_id === null) {
+            if ($role->isHospitalRole() && $user->hospital_id === null) {
                 throw new InvalidArgumentException('Hospital users must belong to a hospital.');
             }
         });
@@ -76,6 +76,17 @@ class User extends Authenticatable
     public function isSuperAdmin(): bool
     {
         return $this->role === Role::SuperAdmin;
+    }
+
+    public function isQa(): bool
+    {
+        return $this->role === Role::QualityAssurance;
+    }
+
+    /** Super admins and QA: see every hospital, review and edit evaluations. */
+    public function isEmotionStaff(): bool
+    {
+        return $this->role === Role::SuperAdmin || $this->role === Role::QualityAssurance;
     }
 
     public function isHospitalAdmin(): bool
@@ -99,7 +110,7 @@ class User extends Authenticatable
             return false;
         }
 
-        if ($this->isSuperAdmin()) {
+        if ($this->isEmotionStaff()) {
             return true;
         }
 

@@ -184,7 +184,7 @@ class Submission extends Model
     {
         $query->visibleTo($user);
 
-        if (! $user->isSuperAdmin()) {
+        if (! $user->isEmotionStaff()) {
             $query->hospitalVisible();
         }
 

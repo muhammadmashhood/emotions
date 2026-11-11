@@ -14,7 +14,7 @@ class HospitalPolicy
 
     public function view(User $user, Hospital $hospital): bool
     {
-        return $user->isSuperAdmin() || $user->belongsToHospital($hospital);
+        return $user->isEmotionStaff() || $user->belongsToHospital($hospital);
     }
 
     public function create(User $user): bool
