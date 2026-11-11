@@ -6,8 +6,10 @@ use App\Domain\Typeform\Exceptions\TypeformException;
 use App\Domain\Typeform\TypeformClient;
 use App\Models\Answer;
 use App\Models\Submission;
+use App\Models\SubmissionAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
@@ -23,6 +25,12 @@ class EvaluationFileController extends Controller
         $url = $answerModel->fileUrl();
         abort_if($url === null, 404);
 
+        // Prefer the copy stored at ingest; fall back to Typeform for older evaluations.
+        $stored = $evaluation->attachments()->where('source', SubmissionAttachment::SOURCE_TYPEFORM)->where('answer_typeform_field_id', $answerModel->typeform_field_id)->first();
+        if ($stored !== null && Storage::disk($stored->disk)->exists($stored->path)) {
+            return EvaluationAttachmentController::stream($stored);
+        }
+
         $evaluation->loadMissing('form.connection');
 
         try {
@@ -31,15 +39,6 @@ class EvaluationFileController extends Controller
             abort(502, 'The file could not be fetched from Typeform.');
         }
 
-        $contentType = $upstream->header('Content-Type') ?: 'application/octet-stream';
-        $filename = $answerModel->value_text ?: 'file';
-        $disposition = str_starts_with($contentType, 'image/') ? 'inline' : 'attachment';
-
-        return response($upstream->body(), 200, [
-            'Content-Type' => $contentType,
-            'Content-Disposition' => $disposition.'; filename="'.addslashes($filename).'"',
-            'Cache-Control' => 'private, max-age=300',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
+        return EvaluationAttachmentController::fileResponse($upstream->body(), $upstream->header('Content-Type') ?: null, $answerModel->value_text ?: 'file');
     }
 }

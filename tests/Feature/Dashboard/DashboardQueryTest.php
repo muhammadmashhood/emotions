@@ -193,6 +193,19 @@ test('facility ranking and heat-map', function () {
         ->and(collect($bySection['rows'])->firstWhere('label', 'Facility 80')['cells'])->toBe(['Experience' => null]);
 });
 
+test('a heat-map cell lists the evaluations behind it', function () {
+    $cell = $this->query->heatmapCell($this->hospital, $this->filters, $this->form, 'Facility 70', 'Experience');
+    expect($cell['count'])->toBe(1)->and($cell['avg'])->toBe(70.0)
+        ->and(collect($cell['rows'])->pluck('pct')->all())->toBe([70.0])
+        ->and($cell['rows'][0]['doctor'])->toBe('Dr X')
+        ->and($cell['rows'][0]['title'])->toBe('OPD');
+
+    $byForm = $this->query->heatmapCell($this->hospital, $this->filters, null, 'Facility 80', 'ER');
+    expect(collect($byForm['rows'])->pluck('pct')->all())->toBe([80.0]);
+
+    expect($this->query->heatmapCell($this->hospital, $this->filters, $this->form, 'Facility 80', 'Experience'))->toBe(['avg' => null, 'count' => 0, 'rows' => []]);
+});
+
 test('per-hospital summary for the admin overview', function () {
     $per = (new DashboardQuery(superAdmin()))->perHospital($this->filters);
     expect($per[$this->hospital->id])->toBe(['count' => 4, 'avg' => 72.5, 'previous_avg' => 50.0]);

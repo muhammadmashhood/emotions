@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\EvaluationAttachmentController;
 use App\Http\Controllers\EvaluationExportController;
 use App\Http\Controllers\EvaluationFileController;
 use App\Http\Controllers\EvaluationPdfController;
@@ -17,7 +18,7 @@ Route::get('/', function () {
     /** @var User $user */
     $user = auth()->user();
 
-    return redirect()->route($user->isSuperAdmin() ? 'admin.overview' : 'dashboard');
+    return redirect()->route($user->isSuperAdmin() ? 'admin.overview' : ($user->isQa() ? 'admin.review' : 'dashboard'));
 })->name('home');
 
 Route::middleware('guest')->group(function () {
@@ -30,15 +31,20 @@ Route::middleware(['auth'])->group(function () {
     Route::get('evaluations/export', EvaluationExportController::class)->name('evaluations.export');
     Route::get('evaluations/{evaluation}', Hospital\Evaluations\Show::class)->name('evaluations.show');
     Route::get('evaluations/{evaluation}/files/{answer}', EvaluationFileController::class)->whereNumber('answer')->name('evaluations.files.show');
+    Route::get('evaluations/{evaluation}/attachments/{attachment}', EvaluationAttachmentController::class)->whereNumber('attachment')->name('evaluations.attachments.show');
     Route::get('evaluations/{evaluation}/pdf', EvaluationPdfController::class)->name('evaluations.pdf');
     Route::view('profile', 'profile')->name('profile');
     Route::get('team', Hospital\Team::class)->middleware('role:hospital_admin')->name('team');
 
-    // Admin "view as hospital": same components, explicit hospital.
-    Route::middleware('role:super_admin')->group(function () {
+    // Staff "view as hospital": same components, explicit hospital.
+    Route::middleware('role:super_admin,emotion_qa')->group(function () {
         Route::get('hospitals/{hospital}/dashboard', Hospital\Dashboard::class)->name('hospitals.dashboard');
         Route::get('hospitals/{hospital}/evaluations', Hospital\Evaluations\Index::class)->name('hospitals.evaluations.index');
     });
+});
+
+Route::middleware(['auth', 'role:super_admin,emotion_qa'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('review', Admin\Review::class)->name('review');
 });
 
 Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -51,7 +57,6 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('admin')->name('admin.')
     Route::get('forms/{form}/mapping', Admin\Forms\Mapping::class)->name('forms.mapping');
     Route::get('deliveries', Admin\Deliveries\Index::class)->name('deliveries');
     Route::get('audit-log', Admin\AuditLog::class)->name('audit');
-    Route::get('review', Admin\Review::class)->name('review');
     Route::get('users', Admin\Users\Index::class)->name('users.index');
     Route::get('settings/typeform', Admin\Settings\Typeform::class)->name('settings.typeform');
 });

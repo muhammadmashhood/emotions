@@ -14,8 +14,9 @@ class ScoringEngine
 {
     /**
      * @param  list<NormalizedAnswer>  $answers
+     * @param  array<string, float>  $pointOverrides  staff-edited points keyed by Typeform field id; clamped to [0, max]
      */
-    public function score(ScoringMapping $mapping, array $answers, FormSettings $settings): ScoreResult
+    public function score(ScoringMapping $mapping, array $answers, FormSettings $settings, array $pointOverrides = []): ScoreResult
     {
         $answerPoints = [];
         /** @var array<int, array{points: float, max: float}> $totals */
@@ -30,6 +31,9 @@ class ScoringEngine
             }
 
             $score = $this->pointsFor($field, $answer, $settings);
+            if ($score !== null && array_key_exists($answer->fieldId, $pointOverrides)) {
+                $score['points'] = min($score['max_points'], max(0.0, (float) $pointOverrides[$answer->fieldId]));
+            }
             $answerPoints[$answer->fieldId] = $score;
 
             if ($score !== null) {

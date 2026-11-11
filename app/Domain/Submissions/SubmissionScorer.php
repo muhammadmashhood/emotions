@@ -23,7 +23,8 @@ class SubmissionScorer
     public function scoreAndPersist(Submission $submission, FormVersion $version, array $answers, ?ScoringMapping $mapping = null): void
     {
         $mapping ??= ScoringMapping::fromVersion($version);
-        $result = $this->engine->score($mapping, $answers, $submission->form->settings);
+        [$answers, $pointOverrides] = self::applyEdits($answers, is_array($submission->edits) ? $submission->edits : []);
+        $result = $this->engine->score($mapping, $answers, $submission->form->settings, $pointOverrides);
 
         $submission->answers()->delete();
         $rows = [];
@@ -76,5 +77,37 @@ class SubmissionScorer
             'rag' => $result->rag,
             'scored_at' => $now,
         ])->save();
+    }
+
+    /**
+     * Staff edits: text overrides replace the stored answer text; point overrides go to the engine.
+     *
+     * @param  list<NormalizedAnswer>  $answers
+     * @param  array<string, array<string, mixed>>  $edits
+     * @return array{0: list<NormalizedAnswer>, 1: array<string, float>}
+     */
+    public static function applyEdits(array $answers, array $edits): array
+    {
+        if ($edits === []) {
+            return [$answers, []];
+        }
+
+        $pointOverrides = [];
+        foreach ($edits as $fieldId => $edit) {
+            if (array_key_exists('points', $edit) && $edit['points'] !== null) {
+                $pointOverrides[(string) $fieldId] = (float) $edit['points'];
+            }
+        }
+
+        $answers = array_map(function (NormalizedAnswer $a) use ($edits): NormalizedAnswer {
+            $edit = $edits[$a->fieldId] ?? null;
+            if ($edit === null || ! array_key_exists('text', $edit) || $edit['text'] === null) {
+                return $a;
+            }
+
+            return new NormalizedAnswer($a->fieldId, $a->fieldType, $a->fieldRef, $a->answerType, (string) $edit['text'], $a->valueNumber, $a->valueJson, $a->raw);
+        }, $answers);
+
+        return [$answers, $pointOverrides];
     }
 }

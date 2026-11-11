@@ -16,7 +16,7 @@
         </select>
         <select wire:model.live="role" class="field w-auto min-w-40" aria-label="Filter by role">
             <option value="">All roles</option>
-            @foreach($roles as $r)<option value="{{ $r->value }}">{{ $r === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $r->label() }}</option>@endforeach
+            @foreach($roles as $r)<option value="{{ $r->value }}">{{ $r->label() }}</option>@endforeach
         </select>
     </div>
 
@@ -33,7 +33,7 @@
                         </div>
                     </td>
                     <td>{{ $invitation->hospital?->name ?? 'eMotion' }}</td>
-                    <td>{{ $invitation->role === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $invitation->role->label() }}</td>
+                    <td>{{ $invitation->role->label() }}</td>
                     <td>@if($invitation->isExpired())<x-ui.pill tone="warn">Expired</x-ui.pill>@else<x-ui.pill tone="info">Invited</x-ui.pill>@endif</td>
                     <td class="text-em-soft">–</td>
                     <td class="text-right"><button type="button" wire:click="resend({{ $invitation->id }})" class="btn btn-secondary btn-sm">Resend</button></td>
@@ -49,8 +49,8 @@
                     </td>
                     <td>{{ $user->hospital?->name ?? 'eMotion' }}</td>
                     <td>
-                        @if($user->isSuperAdmin())
-                            eMotion admin
+                        @if($user->isEmotionStaff())
+                            {{ $user->role->label() }}
                         @else
                             <select class="field py-1 pl-2 pr-8 w-auto !border-transparent hover:!border-em-field !bg-transparent" aria-label="Role for {{ $user->name }}" wire:change="changeRole({{ $user->id }}, $event.target.value)">
                                 @foreach(\App\Enums\Role::hospitalRoles() as $r)
@@ -110,10 +110,10 @@
             <fieldset>
                 <legend class="label">Role</legend>
                 <div class="flex flex-wrap gap-2">
-                    @foreach([\App\Enums\Role::HospitalAdmin, \App\Enums\Role::HospitalViewer, \App\Enums\Role::SuperAdmin] as $r)
+                    @foreach([\App\Enums\Role::HospitalAdmin, \App\Enums\Role::HospitalViewer, \App\Enums\Role::SuperAdmin, \App\Enums\Role::QualityAssurance] as $r)
                         <label class="cursor-pointer">
                             <input type="radio" wire:model.live="inviteRole" value="{{ $r->value }}" class="sr-only peer">
-                            <span class="block px-3.5 py-1.5 rounded-full border text-[13px] border-em-field peer-checked:bg-em-ink peer-checked:border-em-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-em-accent">{{ $r === \App\Enums\Role::SuperAdmin ? 'eMotion admin' : $r->label() }}</span>
+                            <span class="block px-3.5 py-1.5 rounded-full border text-[13px] border-em-field peer-checked:bg-em-ink peer-checked:border-em-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-em-accent">{{ $r->label() }}</span>
                         </label>
                     @endforeach
                 </div>

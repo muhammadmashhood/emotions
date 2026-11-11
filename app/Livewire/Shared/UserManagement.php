@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Shared;
 
+use App\Domain\Users\InvitationMailFailed;
 use App\Domain\Users\InvitationService;
 use App\Domain\Users\UserManager;
 use App\Enums\Role;
@@ -39,7 +40,13 @@ class UserManagement extends Component
         $role = Role::from($this->inviteRole);
         $this->authorize('invite', [User::class, $role, $this->hospital]);
 
-        $invitations->invite($this->inviteEmail, $role, $this->hospital, $this->currentUser());
+        try {
+            $invitations->invite($this->inviteEmail, $role, $this->hospital, $this->currentUser());
+        } catch (InvitationMailFailed $e) {
+            $this->addError('inviteEmail', $e->getMessage());
+
+            return;
+        }
 
         $this->reset('inviteEmail');
         $this->inviteRole = 'hospital_viewer';
@@ -51,7 +58,13 @@ class UserManagement extends Component
         $invitation = UserInvitation::query()->where('hospital_id', $this->hospital->id)->findOrFail($invitationId);
         $this->authorize('invite', [User::class, $invitation->role, $this->hospital]);
 
-        $invitations->resend($invitation, $this->currentUser());
+        try {
+            $invitations->resend($invitation, $this->currentUser());
+        } catch (InvitationMailFailed $e) {
+            session()->flash('error', $e->getMessage());
+
+            return;
+        }
         session()->flash('status', 'Invitation re-sent.');
     }
 

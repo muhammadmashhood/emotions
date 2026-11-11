@@ -33,6 +33,11 @@ class UserFactory extends Factory
         return $this->state(fn () => ['role' => Role::SuperAdmin, 'hospital_id' => null]);
     }
 
+    public function qa(): static
+    {
+        return $this->state(fn () => ['role' => Role::QualityAssurance, 'hospital_id' => null]);
+    }
+
     public function hospitalAdmin(?Hospital $hospital = null): static
     {
         return $this->state(fn () => array_filter([

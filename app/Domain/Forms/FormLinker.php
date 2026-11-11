@@ -3,6 +3,7 @@
 namespace App\Domain\Forms;
 
 use App\Domain\Audit\AuditLogger;
+use App\Domain\Submissions\AttachmentStore;
 use App\Domain\Typeform\TypeformClient;
 use App\Enums\FormStatus;
 use App\Enums\WebhookStatus;
@@ -23,6 +24,7 @@ class FormLinker
         private readonly FormVersioner $versioner,
         private readonly WebhookRegistrar $webhooks,
         private readonly AuditLogger $audit,
+        private readonly AttachmentStore $attachments,
     ) {}
 
     public function link(Hospital $hospital, TypeformConnection $connection, string $typeformFormId, ?User $by): Form
@@ -89,6 +91,40 @@ class FormLinker
         $this->audit->log('form.relinked', $form, ['typeform_form_id' => $form->typeform_form_id], $form->hospital_id, $by);
 
         return $form->refresh();
+    }
+
+    /**
+     * Hard-delete a form with its versions and evaluations. Delivery history is kept (form_id set to null).
+     */
+    public function delete(Form $form, User $by): void
+    {
+        $summary = ['id' => $form->id, 'title' => $form->title, 'typeform_form_id' => $form->typeform_form_id, 'submissions' => $form->submissions()->count()];
+        $hospitalId = $form->hospital_id;
+
+        DB::transaction(fn () => $this->purge($form));
+
+        $this->audit->log('form.deleted', null, $summary, $hospitalId, $by);
+    }
+
+    /**
+     * Remove a form and everything that hangs off it, without an audit row (the caller writes one).
+     * Must run inside a transaction.
+     */
+    public function purge(Form $form): void
+    {
+        if ($form->isActive()) {
+            $this->webhooks->unregister($form);
+        }
+
+        $form->submissions()->select(['id', 'uuid'])->chunkById(200, function ($submissions): void {
+            foreach ($submissions as $submission) {
+                $this->attachments->purge($submission);
+            }
+        });
+        $form->submissions()->delete();
+        $form->forceFill(['current_version_id' => null])->save();
+        $form->versions()->delete();
+        $form->forceDelete();
     }
 
     public function unlink(Form $form, User $by): void

@@ -108,13 +108,16 @@
                     <button type="button" wire:click="rescore" wire:confirm="Recalculate scores for {{ $submissionCount }} evaluations?" class="btn-secondary w-full">Recalculate scores</button>
                 </div>
 
-                @if($form->isActive())
-                    <div class="panel p-4 space-y-3 border-em-bad/40">
+                <div class="panel p-4 space-y-3 border-em-bad/40">
+                    @if($form->isActive())
                         <h2 class="text-sm font-semibold text-em-bad">Unlink form</h2>
                         <p class="text-xs text-ink-soft">Removes the webhook. Existing evaluations are kept and stay visible. You can re-link later.</p>
                         <button type="button" wire:click="unlink" wire:confirm="Unlink {{ $form->title }} from {{ $form->hospital->name }}?" class="btn-danger w-full">Unlink</button>
-                    </div>
-                @endif
+                    @endif
+                    <h2 class="text-sm font-semibold text-em-bad {{ $form->isActive() ? 'pt-2' : '' }}">Delete form</h2>
+                    <p class="text-xs text-ink-soft">Deletes the form, its mapping versions and all {{ $submissionCount }} evaluations. This cannot be undone.</p>
+                    <button type="button" wire:click="delete" wire:confirm="Delete {{ $form->title }} and its {{ $submissionCount }} evaluations? This cannot be undone." class="btn-danger w-full">Delete form</button>
+                </div>
             </div>
         </div>
     </x-ui.page>

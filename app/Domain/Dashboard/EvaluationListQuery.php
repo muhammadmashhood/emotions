@@ -45,7 +45,7 @@ class EvaluationListQuery
         if ($rag !== null && Rag::tryFrom($rag) !== null) {
             $query->where('submissions.rag', $rag);
         }
-        if ($status !== null && $this->viewer->isSuperAdmin() && SubmissionStatus::tryFrom($status) !== null) {
+        if ($status !== null && $this->viewer->isEmotionStaff() && SubmissionStatus::tryFrom($status) !== null) {
             $query->where('submissions.status', $status);
         }
         if (trim($search) !== '') {

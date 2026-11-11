@@ -18,7 +18,10 @@
     $pendingReview = \App\Models\Submission::query()->where('status', \App\Enums\SubmissionStatus::PendingReview->value)->count();
     $viewAs = $current ?? $hospitals->firstWhere('is_active', true) ?? $hospitals->first();
 
-    $links = [
+    $isQa = $user->isQa();
+    $links = $isQa ? [
+        ['route' => 'admin.review', 'label' => 'Review queue', 'active' => ['admin.review'], 'count' => $pendingReview],
+    ] : [
         ['route' => 'admin.overview', 'label' => 'Overview', 'active' => ['admin.overview']],
         ['route' => 'admin.hospitals.index', 'label' => 'Hospitals', 'active' => ['admin.hospitals.*', 'admin.forms.*', 'hospitals.*']],
         ['route' => 'admin.review', 'label' => 'Review queue', 'active' => ['admin.review'], 'count' => $pendingReview],
@@ -26,6 +29,8 @@
         ['route' => 'admin.deliveries', 'label' => 'Deliveries & audit', 'active' => ['admin.deliveries', 'admin.audit']],
         ['route' => 'admin.settings.typeform', 'label' => 'Typeform connection', 'active' => ['admin.settings.*']],
     ];
+    // QA users review and view; the hospital switcher takes them to the dashboard instead of the management page.
+    $hospitalLink = fn ($h) => $isQa ? route('hospitals.dashboard', $h) : route('admin.hospitals.show', $h);
 @endphp
 
 <div>
@@ -36,7 +41,7 @@
         <div class="flex items-center gap-[9px] px-2">
             <span class="h-8 w-8 rounded-[9px] bg-em-ink text-white flex items-center justify-center text-[21px] font-medium leading-none pb-[3px]" aria-hidden="true">e</span>
             <span class="text-[17px] font-light tracking-[0.09em]">MOTION</span>
-            <span class="ml-auto em-pill bg-em-accent-soft text-em-accent text-[10.5px]">Admin</span>
+            <span class="ml-auto em-pill bg-em-accent-soft text-em-accent text-[10.5px]">{{ $isQa ? 'QA' : 'Admin' }}</span>
             <button type="button" class="lg:hidden p-1 text-em-mute hover:text-em-ink" @click="sidebarOpen = false" aria-label="Close menu">✕</button>
         </div>
 
@@ -47,14 +52,14 @@
                         x-on:change="if ($event.target.value) { Livewire.navigate($event.target.value) }">
                     <option value="" @selected($current === null)>Jump to a hospital…</option>
                     @foreach($hospitals as $h)
-                        <option value="{{ route('admin.hospitals.show', $h) }}" @selected($current?->is($h))>{{ $h->name }}{{ $h->is_active ? '' : ' (inactive)' }}</option>
+                        <option value="{{ $hospitalLink($h) }}" @selected($current?->is($h))>{{ $h->name }}{{ $h->is_active ? '' : ' (inactive)' }}</option>
                     @endforeach
                 </select>
             </label>
         @endif
 
         <nav class="flex flex-col gap-1">
-            <div class="eyebrow uppercase px-2.5 pb-1.5">eMotion admin</div>
+            <div class="eyebrow uppercase px-2.5 pb-1.5">{{ $isQa ? 'eMotion QA' : 'eMotion admin' }}</div>
             @foreach($links as $link)
                 @php $active = request()->routeIs(...$link['active']); @endphp
                 <a href="{{ route($link['route']) }}" wire:navigate class="em-nav-item {{ $active ? 'em-nav-item-active' : '' }}" @if($active) aria-current="page" @endif>

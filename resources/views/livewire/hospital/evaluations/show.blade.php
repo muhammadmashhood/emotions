@@ -104,7 +104,7 @@
                     $comments = $rows->filter(fn ($r) => $isComment($r['field']));
                     $questions = $rows->reject(fn ($r) => $isComment($r['field']));
                 @endphp
-                <section id="section-{{ $section->id }}" class="panel scroll-mt-4" x-data="{ open: {{ $loop->index < 2 && $pct !== null ? 'true' : 'false' }} }" x-on:open-section="open = true">
+                <section id="section-{{ $section->id }}" class="panel scroll-mt-4" x-data="{ open: {{ $editing || ($loop->index < 2 && $pct !== null) ? 'true' : 'false' }} }" x-on:open-section="open = true" x-on:open-all-sections.window="open = true">
                     <button type="button" x-on:click="open = !open" class="w-full flex items-center gap-4 px-[22px] py-[18px] text-left rounded-2xl" :aria-expanded="open.toString()">
                         <span class="h-8 w-[3px] rounded-full {{ $sb->bar() }} shrink-0" aria-hidden="true"></span>
                         <span class="flex-1 min-w-0">
@@ -126,8 +126,14 @@
                                 @foreach($questions as $row)
                                     @php $field = $row['field']; $answer = $row['answer']; $scored = $answer->isScored(); $ratio = $scored && $answer->max_points > 0 ? 100 * $answer->points / $answer->max_points : null; $rb = $band($ratio); @endphp
                                     <div class="py-3 grid grid-cols-1 sm:grid-cols-[minmax(0,1fr)_11rem_5rem] gap-2 sm:gap-6 items-center {{ $scored ? '' : 'text-em-soft' }}">
-                                        <dt>{{ $field->title }}</dt>
-                                        @if($answer->answer_type === 'file_url')
+                                        <dt>{{ $field->title }}@if(isset($edits[$answer->typeform_field_id])) <x-ui.pill tone="info" class="ml-1 align-middle text-[10.5px]" title="Edited by eMotion{{ isset($edits[$answer->typeform_field_id]['original_points']) ? ' · original '.number_format((float) $edits[$answer->typeform_field_id]['original_points'], 0).' points' : '' }}">edited</x-ui.pill>@endif</dt>
+                                        @if($editing && $ratio !== null)
+                                            <dd class="sm:col-span-2 flex items-center sm:justify-end gap-2">
+                                                <input type="number" step="0.5" min="0" max="{{ $answer->max_points }}" wire:model="editPoints.{{ $answer->typeform_field_id }}" class="field w-24 text-right tabular-nums" aria-label="Points for {{ $field->title }}">
+                                                <span class="text-em-soft whitespace-nowrap">/ {{ number_format($answer->max_points, 0) }} points</span>
+                                                <x-input-error :messages="$errors->get('editPoints.'.$answer->typeform_field_id)" />
+                                            </dd>
+                                        @elseif($answer->answer_type === 'file_url')
                                             <dd class="sm:col-span-2 sm:text-right">
                                                 @php $isImage = (bool) preg_match('/\.(jpe?g|png|gif|webp)$/i', (string) $answer->value_text); @endphp
                                                 @if($isImage)
@@ -148,8 +154,15 @@
                                 @endforeach
                                 @foreach($comments as $row)
                                     <div class="py-3 flex flex-col sm:flex-row gap-1 sm:gap-4">
-                                        <dt class="text-em-soft shrink-0">{{ $comments->count() > 1 ? $row['field']->title : 'Shopper comment' }}</dt>
-                                        <dd class="italic whitespace-pre-wrap">{{ trim((string) $row['answer']->value_text) !== '' ? '“'.$row['answer']->value_text.'”' : '—' }}</dd>
+                                        <dt class="text-em-soft shrink-0">{{ $comments->count() > 1 ? $row['field']->title : 'Shopper comment' }}@if(isset($edits[$row['answer']->typeform_field_id])) <x-ui.pill tone="info" class="ml-1 align-middle text-[10.5px]" title="Edited by eMotion">edited</x-ui.pill>@endif</dt>
+                                        @if($editing)
+                                            <dd class="flex-1">
+                                                <textarea rows="3" wire:model="editText.{{ $row['answer']->typeform_field_id }}" class="field w-full" aria-label="{{ $row['field']->title }}"></textarea>
+                                                <x-input-error :messages="$errors->get('editText.'.$row['answer']->typeform_field_id)" class="mt-1" />
+                                            </dd>
+                                        @else
+                                            <dd class="italic whitespace-pre-wrap">{{ trim((string) $row['answer']->value_text) !== '' ? '“'.$row['answer']->value_text.'”' : '—' }}</dd>
+                                        @endif
                                     </div>
                                 @endforeach
                             </dl>
@@ -170,9 +183,57 @@
             @endif
         </div>
 
+        @if($supportingDocs->isNotEmpty() || $isAdmin)
+            <x-ui.card title="Supporting documents" subtitle="Evidence added by eMotion: SMS confirmations, invoices, photos" :divider="false">
+                <div class="px-[22px] pt-1 pb-5 space-y-3">
+                    @if($supportingDocs->isEmpty())
+                        <p class="text-[13px] text-em-soft">No documents added yet.</p>
+                    @else
+                        <ul class="divide-y divide-[#F3F1F0]">
+                            @foreach($supportingDocs as $doc)
+                                <li class="py-2.5 flex items-center gap-3" wire:key="doc-{{ $doc->id }}">
+                                    @if($doc->isImage())
+                                        <a href="{{ route('evaluations.attachments.show', [$e, $doc->id]) }}" target="_blank" rel="noopener" class="shrink-0"><img src="{{ route('evaluations.attachments.show', [$e, $doc->id]) }}" alt="" class="h-12 w-12 object-cover rounded-lg border border-em-line" loading="lazy"></a>
+                                    @else
+                                        <span class="h-12 w-12 rounded-lg border border-em-line bg-em-bg flex items-center justify-center text-[10px] font-semibold text-em-soft uppercase shrink-0">{{ Str::limit(pathinfo($doc->original_name, PATHINFO_EXTENSION), 4, '') ?: 'file' }}</span>
+                                    @endif
+                                    <div class="flex-1 min-w-0">
+                                        <a href="{{ route('evaluations.attachments.show', [$e, $doc->id]) }}" target="_blank" rel="noopener" class="font-medium hover:text-em-accent truncate block">{{ $doc->original_name }}</a>
+                                        <p class="text-xs text-em-soft">{{ $doc->size ? number_format($doc->size / 1024, 0).' KB · ' : '' }}added {{ $doc->created_at?->format('j M Y') }}@if($doc->uploader) by {{ $doc->uploader->name }}@endif</p>
+                                    </div>
+                                    @if($isAdmin)
+                                        <button type="button" wire:click="deleteDocument({{ $doc->id }})" wire:confirm="Remove {{ $doc->original_name }}?" class="text-xs text-em-bad hover:underline no-print">Remove</button>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                    @if($isAdmin)
+                        <form wire:submit="uploadDocuments" class="no-print flex flex-wrap items-end gap-2 pt-2 border-t border-em-line">
+                            <div class="flex-1 min-w-[14rem]">
+                                <label class="label" for="documents">Add documents</label>
+                                <input id="documents" type="file" wire:model="documents" multiple class="block text-sm text-ink-soft" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx">
+                                <x-input-error :messages="$errors->get('documents')" class="mt-1" />
+                                @foreach($errors->get('documents.*') as $messages)<x-input-error :messages="$messages" class="mt-1" />@endforeach
+                                <p class="text-xs text-em-soft mt-1" wire:loading wire:target="documents">Uploading…</p>
+                            </div>
+                            <button type="submit" class="btn-secondary" @disabled($documents === [])>Upload</button>
+                        </form>
+                    @endif
+                </div>
+            </x-ui.card>
+        @endif
+
         @if($isAdmin)
             <x-ui.card title="Admin tools" class="no-print">
                 <div class="px-[22px] py-4">
+                    @if($editing)
+                        <div class="mb-4 flex flex-wrap items-center gap-2 rounded-xl border border-em-accent/40 bg-em-accent-soft/40 px-4 py-3">
+                            <p class="flex-1 text-[13px]">Editing: change points on scored questions and the shopper comments above, then save. Every change is logged with the original value.</p>
+                            <button type="button" wire:click="saveEdits" class="btn-primary">Save changes</button>
+                            <button type="button" wire:click="cancelEditing" class="btn-secondary">Cancel</button>
+                        </div>
+                    @endif
                     <div class="flex flex-wrap gap-2 items-end">
                         <div class="flex-1 min-w-[14rem]">
                             <label class="label" for="reviewNote">Review note (optional)</label>
@@ -185,6 +246,9 @@
                             <button type="button" wire:click="reject" wire:confirm="Reject this evaluation? Hospital users will not see it." class="btn-danger">Reject</button>
                         @endif
                         <button type="button" wire:click="rescore" wire:confirm="Re-score this evaluation against mapping v{{ $e->formVersion->version_number }}?" class="btn-secondary">Re-score this evaluation</button>
+                        @unless($editing)
+                            <button type="button" wire:click="startEditing" class="btn-secondary">Edit evaluation</button>
+                        @endunless
                     </div>
                     @if($e->reviewed_at)
                         <p class="text-xs text-em-soft mt-3">Reviewed {{ $e->reviewed_at->diffForHumans() }} by {{ $e->reviewer?->name ?? 'unknown' }}@if($e->review_note): “{{ $e->review_note }}”@endif</p>

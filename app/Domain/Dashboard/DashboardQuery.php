@@ -2,6 +2,7 @@
 
 namespace App\Domain\Dashboard;
 
+use App\Enums\SubmissionStatus;
 use App\Models\Form;
 use App\Models\Hospital;
 use App\Models\Submission;
@@ -9,6 +10,7 @@ use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -436,6 +438,59 @@ class DashboardQuery
      *
      * @return array<int, array{count: int, avg: float|null, previous_avg: float|null}>
      */
+    /**
+     * The evaluations behind one heat-map cell (facility × touchpoint, or facility × survey when no form is selected),
+     * worst first, so a user can click a poor cell and see which visits caused it.
+     *
+     * @return array{avg: float|null, count: int, rows: list<array{uuid: string, submitted_at: Carbon|null, title: string, doctor: string|null, pct: float|null, status: SubmissionStatus}>}
+     */
+    public function heatmapCell(?Hospital $hospital, DashboardFilters $filters, ?Form $form, string $facility, string $column, int $limit = 25): array
+    {
+        $facilityExpr = self::FACILITY_EXPR;
+
+        if ($form !== null) {
+            $query = $this->base($hospital, $filters->withForm($form->id))
+                ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
+                ->join('submission_section_scores as sss', 'sss.submission_id', '=', 'submissions.id')
+                ->join('forms', 'forms.id', '=', 'submissions.form_id')
+                ->where('sss.section_name', $column)
+                ->whereNotNull('sss.pct')
+                ->selectRaw('submissions.uuid, submissions.submitted_at, submissions.status, submissions.info, forms.title, sss.pct as cell_pct');
+        } else {
+            $query = $this->base($hospital, $filters)
+                ->leftJoin('branches', 'branches.id', '=', 'submissions.branch_id')
+                ->join('forms', 'forms.id', '=', 'submissions.form_id')
+                ->where('forms.title', $column)
+                ->whereNotNull('submissions.overall_pct')
+                ->selectRaw('submissions.uuid, submissions.submitted_at, submissions.status, submissions.info, forms.title, submissions.overall_pct as cell_pct');
+        }
+
+        $query->whereRaw("$facilityExpr = ?", [$facility]);
+
+        // Aggregate over the same row set without the per-row select.
+        $stats = DB::query()->fromSub($query->toBase(), 'cell')->selectRaw('COUNT(*) as cnt, AVG(cell_pct) as avg')->first();
+
+        $rows = $query->orderBy('cell_pct')->orderByDesc('submissions.submitted_at')->limit($limit)->get()->map(function (Submission $s) {
+            $info = is_array($s->info) ? $s->info : [];
+            $pct = $s->getAttribute('cell_pct');
+
+            return [
+                'uuid' => (string) $s->uuid,
+                'submitted_at' => $s->submitted_at,
+                'title' => (string) $s->getAttribute('title'),
+                'doctor' => isset($info['doctor']) && $info['doctor'] !== '' ? (string) $info['doctor'] : null,
+                'pct' => $pct === null ? null : round((float) $pct, 1),
+                'status' => $s->status,
+            ];
+        })->values()->all();
+
+        return [
+            'avg' => $stats === null || $stats->avg === null ? null : round((float) $stats->avg, 1),
+            'count' => (int) ($stats->cnt ?? 0),
+            'rows' => $rows,
+        ];
+    }
+
     public function perHospital(DashboardFilters $filters): array
     {
         $current = $this->base(null, $filters)->toBase()->selectRaw('hospital_id, AVG(overall_pct) as avg, COUNT(*) as cnt')->groupBy('hospital_id')->get()->keyBy('hospital_id');

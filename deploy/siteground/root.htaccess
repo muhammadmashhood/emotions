@@ -7,7 +7,10 @@ Options -Indexes
 
     # Hard deny for sensitive paths even if something else goes wrong.
     RewriteRule ^(\.env|\.env\..*|composer\.(json|lock)|artisan|post-deploy\.sh|cron\.txt)$ - [F,L]
-    RewriteRule ^(app|bootstrap|config|database|deploy|docs|resources|routes|storage|tests|vendor)(/|$) - [F,L]
+    RewriteRule ^(app|bootstrap|config|database|deploy|docs|resources|routes|tests|vendor)(/|$) - [F,L]
+
+    # Uploaded files (hospital logos) live in storage/app/public, exposed through the public/storage symlink.
+    RewriteRule ^storage/(.*)$ public/storage/$1 [L]
 
     # Already pointing at public/ → nothing to do.
     RewriteCond %{REQUEST_URI} ^/public/

@@ -9,9 +9,11 @@ use App\Models\Hospital;
 use App\Models\User;
 use App\Models\UserInvitation;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 
 class InvitationService
 {
@@ -25,31 +27,42 @@ class InvitationService
     {
         $email = Str::lower(trim($email));
 
-        if ($role === Role::SuperAdmin && $hospital !== null) {
-            throw ValidationException::withMessages(['role' => 'Super admins do not belong to a hospital.']);
+        if (! $role->isHospitalRole() && $hospital !== null) {
+            throw ValidationException::withMessages(['role' => 'eMotion staff do not belong to a hospital.']);
         }
-        if ($role !== Role::SuperAdmin && $hospital === null) {
+        if ($role->isHospitalRole() && $hospital === null) {
             throw ValidationException::withMessages(['hospital_id' => 'A hospital is required for this role.']);
         }
         if (User::query()->where('email', $email)->exists()) {
             throw ValidationException::withMessages(['email' => 'A user with this email already exists.']);
         }
 
-        // One pending invitation per email: replace any existing one.
-        UserInvitation::query()->where('email', $email)->whereNull('accepted_at')->delete();
-
         $token = Str::random(64);
 
-        $invitation = UserInvitation::query()->create([
-            'email' => $email,
-            'hospital_id' => $hospital?->id,
-            'role' => $role,
-            'token_hash' => UserInvitation::hashToken($token),
-            'invited_by' => $invitedBy->id,
-            'expires_at' => now()->addHours(72),
-        ]);
+        // One pending invitation per email: replace any existing one — but only once the email is actually handed
+        // to the mail server. A transport failure rolls the whole thing back, so a previously sent link keeps working.
+        try {
+            $invitation = DB::transaction(function () use ($email, $hospital, $role, $invitedBy, $token): UserInvitation {
+                UserInvitation::query()->where('email', $email)->whereNull('accepted_at')->delete();
 
-        Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+                $invitation = UserInvitation::query()->create([
+                    'email' => $email,
+                    'hospital_id' => $hospital?->id,
+                    'role' => $role,
+                    'token_hash' => UserInvitation::hashToken($token),
+                    'invited_by' => $invitedBy->id,
+                    'expires_at' => now()->addHours(72),
+                ]);
+
+                Mail::to($email)->send(new UserInvitationMail($invitation, $this->acceptUrl($token)));
+
+                return $invitation;
+            });
+        } catch (TransportExceptionInterface $e) {
+            Log::warning('invitation.mail_failed', ['email' => $email, 'error' => $e->getMessage()]);
+
+            throw new InvitationMailFailed(InvitationMailFailed::MESSAGE, 0, $e);
+        }
 
         $this->audit->log('user.invited', $invitation, ['email' => $email, 'role' => $role->value], $hospital, $invitedBy);
 

@@ -31,6 +31,7 @@ use Illuminate\Support\Str;
  * @property SubmissionSource $source
  * @property array $raw
  * @property array|null $info
+ * @property array<string, array{points?: float|null, text?: string|null, original_points?: float|null, original_text?: string|null, edited_by?: int, edited_at?: string}>|null $edits
  * @property float|null $points
  * @property float|null $max_points
  * @property float|null $overall_pct
@@ -54,7 +55,7 @@ class Submission extends Model
 
     protected $fillable = [
         'form_id', 'form_version_id', 'hospital_id', 'branch_id', 'response_token', 'submitted_at', 'landed_at',
-        'is_partial', 'status', 'source', 'raw', 'info', 'points', 'max_points', 'overall_pct', 'rag', 'scored_at',
+        'is_partial', 'status', 'source', 'raw', 'info', 'edits', 'points', 'max_points', 'overall_pct', 'rag', 'scored_at',
         'reviewed_by', 'reviewed_at', 'review_note',
     ];
 
@@ -68,6 +69,7 @@ class Submission extends Model
             'source' => SubmissionSource::class,
             'raw' => 'array',
             'info' => 'array',
+            'edits' => 'array',
             'points' => 'float',
             'max_points' => 'float',
             'overall_pct' => 'float',
@@ -141,6 +143,12 @@ class Submission extends Model
         return $this->hasMany(SubmissionSectionScore::class)->orderBy('display_order');
     }
 
+    /** @return HasMany<SubmissionAttachment, $this> */
+    public function attachments(): HasMany
+    {
+        return $this->hasMany(SubmissionAttachment::class)->orderBy('id');
+    }
+
     /**
      * What hospital users may see: approved and (unless the form includes partials) complete evaluations.
      *
@@ -184,7 +192,7 @@ class Submission extends Model
     {
         $query->visibleTo($user);
 
-        if (! $user->isSuperAdmin()) {
+        if (! $user->isEmotionStaff()) {
             $query->hospitalVisible();
         }
 

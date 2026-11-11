@@ -3,6 +3,8 @@
 namespace App\Livewire\Admin\Hospitals;
 
 use App\Domain\Audit\AuditLogger;
+use App\Domain\Forms\FormLinker;
+use App\Domain\Hospitals\HospitalDeleter;
 use App\Domain\Typeform\ConnectionManager;
 use App\Domain\Typeform\Data\Workspace;
 use App\Domain\Typeform\Exceptions\TypeformException;
@@ -11,6 +13,7 @@ use App\Enums\SubmissionStatus;
 use App\Enums\WebhookStatus;
 use App\Models\Form;
 use App\Models\Hospital;
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
@@ -37,6 +40,8 @@ class Show extends Component
     public ?TemporaryUploadedFile $logo = null;
 
     public string $workspace = '';
+
+    public string $confirmDeleteName = '';
 
     public function mount(Hospital $hospital): void
     {
@@ -77,6 +82,46 @@ class Show extends Component
 
         session()->flash('status', 'Settings saved.');
         $this->dispatch('$refresh');
+    }
+
+    public function unlinkForm(int $formId, FormLinker $linker): void
+    {
+        $form = $this->hospital->forms()->findOrFail($formId);
+        $this->authorize('manage', $form);
+        $linker->unlink($form, $this->actor());
+        session()->flash('status', 'Form unlinked. Its evaluations stay visible on the dashboard.');
+    }
+
+    public function deleteForm(int $formId, FormLinker $linker): void
+    {
+        $form = $this->hospital->forms()->findOrFail($formId);
+        $this->authorize('delete', $form);
+        $linker->delete($form, $this->actor());
+        session()->flash('status', 'Form "'.$form->title.'" and its evaluations deleted.');
+    }
+
+    public function deleteHospital(HospitalDeleter $deleter): void
+    {
+        $this->authorize('delete', $this->hospital);
+
+        if (trim($this->confirmDeleteName) !== $this->hospital->name) {
+            $this->addError('confirmDeleteName', 'Type the hospital name exactly as shown to confirm.');
+
+            return;
+        }
+
+        $name = $this->hospital->name;
+        $deleter->delete($this->hospital, $this->actor());
+        session()->flash('status', 'Hospital "'.$name.'" deleted.');
+        $this->redirect(route('admin.hospitals.index'), navigate: true);
+    }
+
+    private function actor(): User
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user;
     }
 
     /**
