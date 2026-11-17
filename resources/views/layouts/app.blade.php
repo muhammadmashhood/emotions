@@ -6,6 +6,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'eMotion Evaluations') }}</title>
+        <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+        <link rel="icon" type="image/png" href="{{ asset('images/emotion-mark.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,10 +25,7 @@
                     <button type="button" @click="sidebarOpen = true" class="p-2 -ml-2 rounded-lg text-ink-soft hover:bg-paper" aria-label="Open menu">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     </button>
-                    <span class="flex items-center gap-2">
-                        <span class="h-7 w-7 rounded-lg bg-em-ink text-white flex items-center justify-center text-lg font-medium leading-none pb-0.5" aria-hidden="true">e</span>
-                        <span class="text-[15px] font-light tracking-[0.09em]">MOTION</span>
-                    </span>
+                    <x-application-logo size="h-7" />
                     <span class="w-6"></span>
                 </header>
 
