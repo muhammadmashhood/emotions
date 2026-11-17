@@ -32,14 +32,14 @@ test('admin maps a hospital to a Typeform workspace', function () {
 test('the scheduled auto-link job links new forms in mapped workspaces with needs_review', function () {
     Queue::fake();
     $connection = TypeformConnection::factory()->create();
-    $mapped = Hospital::factory()->create(['typeform_workspace_id' => 'ws-itt', 'typeform_workspace_name' => 'Ittefaq']);
+    $mapped = Hospital::factory()->create(['typeform_workspace_id' => 'ws-itt', 'typeform_workspace_name' => 'Ittefaq', 'typeform_workspace_mapped_at' => '2026-01-15 00:00:00']);
     Hospital::factory()->create(); // unmapped: ignored
     Form::factory()->for($mapped)->create(['typeform_connection_id' => $connection->id, 'typeform_form_id' => 'ALREADY']);
 
     Http::fake([
         '*/forms?*' => Http::response(['total_items' => 2, 'page_count' => 1, 'items' => [
-            ['id' => 'ALREADY', 'title' => 'Old', 'last_updated_at' => '2026-01-01T00:00:00Z'],
-            ['id' => 'rACXmOJ2', 'title' => 'New survey', 'last_updated_at' => '2026-02-01T00:00:00Z'],
+            ['id' => 'ALREADY', 'title' => 'Old', 'created_at' => '2026-01-01T00:00:00Z', 'last_updated_at' => '2026-01-01T00:00:00Z'],
+            ['id' => 'rACXmOJ2', 'title' => 'New survey', 'created_at' => '2026-02-01T00:00:00Z', 'last_updated_at' => '2026-02-01T00:00:00Z'],
         ]]),
         '*/forms/rACXmOJ2' => Http::response(fixture('form_definition_rACXmOJ2.json')),
         '*/forms/rACXmOJ2/webhooks/*' => Http::response(['enabled' => true]),

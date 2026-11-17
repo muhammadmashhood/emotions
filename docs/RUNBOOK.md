@@ -87,3 +87,16 @@ Logos are stored in `storage/app/public/logos` and served through the `public/st
 | `php artisan app:seed-demo [--large]` | demo data (never in production) |
 | `php artisan app:purge-demo-data --force` | remove demo hospitals/forms/evaluations if a local database was imported into production |
 | `php artisan queue:failed` / `queue:retry all` | inspect / retry failed jobs |
+
+## Workspace auto-linking linked the wrong forms
+
+A hospital mapped to a Typeform workspace (Settings → "Typeform workspace") gets forms from that workspace linked by the hourly `forms:auto-link` job. Since 17 Nov 2026 only forms **created after the mapping was saved** qualify (`hospitals.typeform_workspace_mapped_at`); the migration stamps existing mappings with the deploy time so nothing old is picked up.
+
+If a mapping to a shared workspace already pulled in forms that do not belong to the hospital:
+
+```
+php artisan forms:purge-auto-linked          # dry run: lists every automatically linked form
+php artisan forms:purge-auto-linked --force  # removes them, their webhooks, versions and imported evaluations
+```
+
+Forms linked by a person (audit row `form.linked` without `automatic`) are never touched. Clear the workspace on the hospital first, or the next hourly run links new forms again.
