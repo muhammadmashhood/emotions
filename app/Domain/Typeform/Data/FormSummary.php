@@ -10,6 +10,7 @@ final readonly class FormSummary
         public ?string $lastUpdatedAt,
         public ?string $workspaceId = null,
         public ?string $workspaceName = null,
+        public ?string $createdAt = null,
     ) {}
 
     public static function fromApi(array $item, ?string $workspaceId = null, ?string $workspaceName = null): self
@@ -20,6 +21,7 @@ final readonly class FormSummary
             lastUpdatedAt: $item['last_updated_at'] ?? null,
             workspaceId: $workspaceId,
             workspaceName: $workspaceName,
+            createdAt: $item['created_at'] ?? null,
         );
     }
 }

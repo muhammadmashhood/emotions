@@ -65,13 +65,20 @@ class Show extends Component
 
         $before = $this->hospital->only(['name', 'is_active', 'require_review', 'typeform_workspace_id']);
         $workspaces = collect($this->workspaces())->keyBy('id');
+        $workspaceId = $this->workspace !== '' ? $this->workspace : null;
         $this->hospital->fill([
             'name' => $this->name,
             'is_active' => $this->is_active,
             'require_review' => $this->require_review,
-            'typeform_workspace_id' => $this->workspace !== '' ? $this->workspace : null,
-            'typeform_workspace_name' => $this->workspace !== '' ? ($workspaces->get($this->workspace)->name ?? $this->hospital->typeform_workspace_name) : null,
+            'typeform_workspace_id' => $workspaceId,
+            'typeform_workspace_name' => $workspaceId !== null ? ($workspaces->get($workspaceId)->name ?? $this->hospital->typeform_workspace_name) : null,
         ]);
+        // Auto-linking only picks up forms created after the mapping was made; a changed mapping starts the clock again.
+        if ($workspaceId === null) {
+            $this->hospital->typeform_workspace_mapped_at = null;
+        } elseif ($workspaceId !== $before['typeform_workspace_id'] || $this->hospital->typeform_workspace_mapped_at === null) {
+            $this->hospital->typeform_workspace_mapped_at = now();
+        }
         if ($this->logo) {
             $this->hospital->logo_path = $this->logo->store('logos', 'public');
             $this->logo = null;

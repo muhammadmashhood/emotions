@@ -3,10 +3,12 @@
 namespace App\Domain\Forms;
 
 use App\Domain\Typeform\ConnectionManager;
+use App\Domain\Typeform\Data\FormSummary;
 use App\Domain\Typeform\Exceptions\TypeformException;
 use App\Domain\Typeform\TypeformClient;
 use App\Models\Form;
 use App\Models\Hospital;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
@@ -47,7 +49,7 @@ class WorkspaceAutoLinker
             }
 
             foreach ($page->items as $summary) {
-                if (isset($linkedIds[$summary->id])) {
+                if (isset($linkedIds[$summary->id]) || ! $this->createdAfterMapping($summary, $hospital)) {
                     continue;
                 }
                 try {
@@ -62,5 +64,18 @@ class WorkspaceAutoLinker
         }
 
         return $result;
+    }
+
+    /**
+     * Only forms created after the hospital was mapped to the workspace count as "new". Forms that pre-date the
+     * mapping (or whose creation time Typeform did not report) are left for the admin to link by hand.
+     */
+    private function createdAfterMapping(FormSummary $summary, Hospital $hospital): bool
+    {
+        if ($hospital->typeform_workspace_mapped_at === null || $summary->createdAt === null) {
+            return false;
+        }
+
+        return Carbon::parse($summary->createdAt)->greaterThanOrEqualTo($hospital->typeform_workspace_mapped_at);
     }
 }

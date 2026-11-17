@@ -19,6 +19,7 @@ use Illuminate\Support\Str;
  * @property bool $require_review
  * @property string|null $typeform_workspace_id
  * @property string|null $typeform_workspace_name
+ * @property Carbon|null $typeform_workspace_mapped_at
  * @property Carbon|null $created_at
  */
 class Hospital extends Model
@@ -26,13 +27,14 @@ class Hospital extends Model
     /** @use HasFactory<HospitalFactory> */
     use HasFactory;
 
-    protected $fillable = ['name', 'slug', 'logo_path', 'is_active', 'require_review', 'typeform_workspace_id', 'typeform_workspace_name'];
+    protected $fillable = ['name', 'slug', 'logo_path', 'is_active', 'require_review', 'typeform_workspace_id', 'typeform_workspace_name', 'typeform_workspace_mapped_at'];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
             'require_review' => 'boolean',
+            'typeform_workspace_mapped_at' => 'datetime',
         ];
     }
 

@@ -96,9 +96,12 @@ class FormLinker
     /**
      * Hard-delete a form with its versions and evaluations. Delivery history is kept (form_id set to null).
      */
-    public function delete(Form $form, User $by): void
+    public function delete(Form $form, ?User $by, bool $automatic = false): void
     {
         $summary = ['id' => $form->id, 'title' => $form->title, 'typeform_form_id' => $form->typeform_form_id, 'submissions' => $form->submissions()->count()];
+        if ($automatic) {
+            $summary['automatic'] = true;
+        }
         $hospitalId = $form->hospital_id;
 
         DB::transaction(fn () => $this->purge($form));
