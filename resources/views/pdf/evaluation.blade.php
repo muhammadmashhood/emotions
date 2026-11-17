@@ -87,6 +87,7 @@
         <p class="muted">{{ $e->form->hospital->name }} · {{ $e->form->title }} · {{ $e->submitted_at ? 'submitted '.$e->submitted_at->format('d M Y H:i') : 'in progress' }}</p>
     </td>
     <td class="score-box">
+        <img src="{{ $emotionLogo }}" alt="eMotion" style="height: 22px; width: auto; margin-bottom: 6px">
         <div class="pct {{ $band($e->overall_pct) }}">{{ $e->overall_pct === null ? '–' : $fmt($e->overall_pct, 1).'%' }}</div>
         <span class="band tint-{{ $band($e->overall_pct) }} {{ $band($e->overall_pct) }}">{{ $bandLabel($e->overall_pct) }}</span>
         @if($e->points !== null)<div class="small muted">{{ $fmt($e->points) }} / {{ $fmt($e->max_points) }} points</div>@endif

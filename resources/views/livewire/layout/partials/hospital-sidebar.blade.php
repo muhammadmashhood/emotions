@@ -18,8 +18,7 @@
     <aside class="fixed inset-y-0 left-0 z-50 w-[232px] flex flex-col gap-7 px-3.5 pt-6 pb-5 bg-em-side border-r border-em-line text-em-ink text-[13px] transition-transform lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen overflow-y-auto no-print"
            :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'" aria-label="Main navigation">
         <div class="flex items-center gap-[9px] px-2">
-            <span class="h-8 w-8 rounded-[9px] bg-em-ink text-white flex items-center justify-center text-[21px] font-medium leading-none pb-[3px]" aria-hidden="true">e</span>
-            <span class="text-[17px] font-light tracking-[0.09em]">MOTION</span>
+            <x-application-logo size="h-8" />
             <button type="button" class="ml-auto lg:hidden p-1 text-em-mute hover:text-em-ink" @click="sidebarOpen = false" aria-label="Close menu">✕</button>
         </div>
 

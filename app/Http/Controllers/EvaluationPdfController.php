@@ -86,6 +86,7 @@ class EvaluationPdfController extends Controller
             'documents' => $evaluation->attachments->where('source', SubmissionAttachment::SOURCE_UPLOAD)->values(),
             'inlineImages' => $inlineImages,
             'logo' => $logo,
+            'emotionLogo' => 'data:image/png;base64,'.base64_encode((string) file_get_contents(public_path('images/emotion-logo.png'))),
         ])->render();
     }
 

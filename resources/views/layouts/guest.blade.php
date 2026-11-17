@@ -6,6 +6,9 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'eMotion Evaluations') }}</title>
+        <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="any">
+        <link rel="icon" type="image/png" href="{{ asset('images/emotion-mark.png') }}">
+        <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,7 +20,7 @@
         {{-- Sign-in screens (eMotion Dashboard design): brand story on the left, the form on the right. --}}
         <div class="auth-dark min-h-screen flex flex-wrap bg-em-ink text-white">
             <div class="flex-[1_1_420px] px-6 sm:px-[52px] py-8 sm:py-11 flex flex-col gap-10 min-w-0">
-                <x-application-logo dark />
+                <x-application-logo dark size="h-10" class="self-start" />
                 <div class="hidden md:flex flex-1 min-h-[300px] -mx-6 sm:-mx-[52px]" aria-hidden="true">
                     <canvas data-login-viz class="block w-full h-full min-h-[300px]"></canvas>
                 </div>

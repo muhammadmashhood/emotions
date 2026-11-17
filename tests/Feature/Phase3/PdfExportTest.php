@@ -76,6 +76,7 @@ test('the visit report inlines at most a bounded number of image bytes and lists
 
     $html = app(EvaluationPdfController::class)->html($submission);
 
-    expect(substr_count($html, 'data:image/png;base64,'))->toBe(2)
+    // two evidence images within budget, plus the eMotion logo in the masthead
+    expect(substr_count($html, 'data:image/png;base64,'))->toBe(3)
         ->and($html)->toContain('three.png')->toContain('huge.png')->toContain('not embedded');
 });

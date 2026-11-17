@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title') · {{ config('app.name') }}</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
@@ -20,7 +21,7 @@
 </head>
 <body>
     <main class="card">
-        <div class="mark"><span aria-hidden="true">e</span>MOTION</div>
+        <img class="mark" src="{{ asset('images/emotion-logo.png') }}" alt="eMotion" style="height:32px;width:auto">
         <div class="code">@yield('code')</div>
         <h1>@yield('title')</h1>
         <p>@yield('message')</p>
