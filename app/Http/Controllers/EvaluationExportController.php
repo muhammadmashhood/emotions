@@ -57,9 +57,9 @@ class EvaluationExportController extends Controller
 
         $filename = 'evaluations-'.($hospital->slug ?? 'all').'-'.now()->format('Ymd-His').'.csv';
 
-        return response()->streamDownload(function () use ($exporter, $query, $form): void {
+        return response()->streamDownload(function () use ($exporter, $query, $form, $user): void {
             echo "\xEF\xBB\xBF"; // UTF-8 BOM for Excel
-            foreach ($exporter->rows($query, $form) as $line) {
+            foreach ($exporter->rows($query, $form, $user->isEmotionStaff()) as $line) {
                 echo $line;
                 if (ob_get_level() > 0) {
                     ob_flush();

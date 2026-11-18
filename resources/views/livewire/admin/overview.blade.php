@@ -13,6 +13,7 @@
         <x-ui.kpi label="Facilities" :value="$kpis['facilities']" :note="'Across '.$kpis['facilityHospitals'].' '.Str::plural('hospital', $kpis['facilityHospitals'])" />
         <x-ui.kpi label="Awaiting review" :value="$kpis['pending']" :tone="$kpis['pending'] > 0 ? 'warn' : null" :href="route('admin.review')"
             :note="$kpis['oldestPending'] ? 'Oldest received '.$kpis['oldestPending']->diffForHumans() : 'Queue is empty'" />
+        <x-ui.kpi label="Rejected surveys" :value="$kpis['rejected']" :note="$kpis['rejectedRecent'].' in the last 30 days · never counted in scores'" />
         <x-ui.kpi label="Webhooks failing" :value="$kpis['webhooksFailing']" :tone="$kpis['webhooksFailing'] > 0 ? 'bad' : null" :href="route('admin.deliveries', ['status' => 'error'])"
             :note="$kpis['activeForms'].' '.Str::plural('form', $kpis['activeForms']).' linked'" />
     </div>

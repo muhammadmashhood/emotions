@@ -11,7 +11,10 @@
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <x-card title="Status">@if($form->isActive())<x-badge variant="green">Linked</x-badge>@else<x-badge>Unlinked</x-badge>@endif</x-card>
                     <x-card title="Version"><span class="text-2xl font-semibold">v{{ $form->currentVersion?->version_number ?? '–' }}</span> @if($form->currentVersion?->needs_review)<x-badge variant="amber">Needs review</x-badge>@endif</x-card>
-                    <x-card title="Evaluations"><span class="text-2xl font-semibold tabular-nums">{{ $submissionCount }}</span></x-card>
+                    <x-card title="Evaluations">
+                        <span class="text-2xl font-semibold tabular-nums">{{ $countedSubmissions }}</span>
+                        <p class="text-xs text-ink-soft">{{ $submissionCount > $countedSubmissions ? ($submissionCount - $countedSubmissions).' pending or rejected, not counted' : 'Approved only' }}</p>
+                    </x-card>
                     <x-card title="Last evaluation"><span class="text-sm">{{ $lastSubmission ? \Illuminate\Support\Carbon::parse($lastSubmission)->diffForHumans() : '—' }}</span></x-card>
                 </div>
 

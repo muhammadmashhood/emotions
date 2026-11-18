@@ -14,13 +14,17 @@ class EvaluationCsvExporter
 {
     /**
      * @param  Builder<Submission>  $query
+     * @param  bool  $withStatus  eMotion staff see pending and rejected rows, so their export says which is which.
      * @return \Generator<int, string>
      */
-    public function rows(Builder $query, ?Form $singleForm): \Generator
+    public function rows(Builder $query, ?Form $singleForm, bool $withStatus = false): \Generator
     {
         $sectionNames = $singleForm?->currentVersion?->sections()->pluck('name')->all() ?? [];
 
         $header = ['Submitted at', 'Hospital', 'Form', 'Facility', 'Location', 'Visit date', 'Doctor', 'Booking method', 'Branch', 'Overall %', 'RAG'];
+        if ($withStatus) {
+            $header[] = 'Status';
+        }
         foreach ($sectionNames as $name) {
             $header[] = 'Section: '.$name.' %';
         }
@@ -44,6 +48,9 @@ class EvaluationCsvExporter
                 $submission->overall_pct === null ? '' : number_format($submission->overall_pct, 2, '.', ''),
                 $submission->rag->value ?? '',
             ];
+            if ($withStatus) {
+                $row[] = $submission->status->label();
+            }
             if ($sectionNames !== []) {
                 $byName = $submission->sectionScores->keyBy('section_name');
                 foreach ($sectionNames as $name) {

@@ -158,3 +158,17 @@ test('file proxy streams uploads with the connection token and never exposes the
     $text = $this->submission->answers()->where('answer_type', 'text')->firstOrFail();
     $this->actingAs($this->viewer)->get(route('evaluations.files.show', [$this->submission, $text->id]))->assertNotFound();
 });
+
+test('staff export has a Status column and the hospital export does not', function () {
+    Submission::factory()->rejected()->create(['form_id' => $this->form->id, 'form_version_id' => $this->form->current_version_id, 'hospital_id' => $this->hospital->id, 'submitted_at' => now()->subDay()]);
+
+    $staff = $this->actingAs(superAdmin())->get(route('evaluations.export', ['hospital' => $this->hospital->uuid, 'status' => 'rejected']))->streamedContent();
+    $lines = array_map('str_getcsv', array_values(array_filter(explode("\n", trim(ltrim($staff, "\xEF\xBB\xBF"))))));
+    $col = array_search('Status', $lines[0], true);
+    expect($col)->toBe(array_search('RAG', $lines[0], true) + 1)
+        ->and($lines)->toHaveCount(2)
+        ->and($lines[1][$col])->toBe('Rejected');
+
+    $client = $this->actingAs($this->viewer)->get(route('evaluations.export'))->streamedContent();
+    expect(str_getcsv(explode("\n", ltrim($client, "\xEF\xBB\xBF"))[0]))->not->toContain('Status');
+});

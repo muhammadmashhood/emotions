@@ -127,11 +127,13 @@ class Show extends Component
 
     public function render(): View
     {
-        $this->form->load(['hospital', 'currentVersion', 'versions' => fn ($q) => $q->withCount('fields', 'submissions')]);
+        // Displayed counts match the dashboard (approved only); the full count is kept for rescore / delete confirmations.
+        $this->form->load(['hospital', 'currentVersion', 'versions' => fn ($q) => $q->withCount(['fields', 'submissions' => fn ($s) => $s->hospitalVisible()])]);
 
         return view('livewire.admin.forms.show', [
             'branchFields' => $this->form->currentVersion?->fields()->whereIn('type', ['dropdown', 'multiple_choice', 'short_text'])->orderBy('display_order')->get(['typeform_field_id', 'title', 'type']) ?? collect(),
             'submissionCount' => $this->form->submissions()->count(),
+            'countedSubmissions' => $this->form->submissions()->hospitalVisible()->count(),
             'lastSubmission' => $this->form->submissions()->max('submitted_at'),
             'httpsOk' => str_starts_with((string) config('app.url'), 'https://'),
         ]);

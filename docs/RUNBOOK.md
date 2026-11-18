@@ -100,3 +100,7 @@ php artisan forms:purge-auto-linked --force  # removes them, their webhooks, ver
 ```
 
 Forms linked by a person (audit row `form.linked` without `automatic`) are never touched. Clear the workspace on the hospital first, or the next hourly run links new forms again.
+
+## Rejected surveys and scores
+
+Rejected and pending-review surveys never enter any score, average, count, ranking or heat-map cell, for any viewer: `DashboardQuery::base()` applies the same approved-only rule (plus the partial-response rule) to eMotion staff as to hospital users, so both sides always see identical figures. Staff still find rejected and pending surveys in a hospital's Evaluations list via the Status filter, on the admin overview "Rejected surveys" tile, and in the staff CSV export's Status column. Re-approving a survey puts it straight back into the numbers.

@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\DB;
 /**
  * All dashboard aggregates. Always scoped to a hospital (or to everything for the admin overview) and
  * always filtered by the viewer's visibility rules (spec section 8 / 9). Reads only our database.
+ *
+ * Scores and counts only ever include approved evaluations (plus the partial-response rule), for every
+ * viewer, so staff and hospital figures always match. Rejected and pending-review evaluations stay out.
  */
 class DashboardQuery
 {
@@ -32,7 +35,7 @@ class DashboardQuery
      */
     public function base(?Hospital $hospital, DashboardFilters $filters): Builder
     {
-        $query = Submission::query()->viewableBy($this->viewer);
+        $query = Submission::query()->visibleTo($this->viewer)->hospitalVisible();
 
         if ($hospital !== null) {
             $query->forHospital($hospital);
