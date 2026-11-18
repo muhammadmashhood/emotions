@@ -24,6 +24,7 @@ class UserFactory extends Factory
             'role' => Role::HospitalViewer,
             'hospital_id' => Hospital::factory(),
             'is_active' => true,
+            'must_change_password' => false,
             'remember_token' => null,
         ];
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePasswordIsChanged;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureUserIsActive;
 use App\Http\Middleware\SecurityHeaders;
@@ -23,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'active' => EnsureUserIsActive::class,
         ]);
         $middleware->appendToGroup('web', EnsureUserIsActive::class);
+        $middleware->appendToGroup('web', EnsurePasswordIsChanged::class);
         $middleware->append(SecurityHeaders::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {

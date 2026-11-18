@@ -5,6 +5,7 @@ use App\Http\Controllers\EvaluationExportController;
 use App\Http\Controllers\EvaluationFileController;
 use App\Http\Controllers\EvaluationPdfController;
 use App\Livewire\Admin;
+use App\Livewire\Auth;
 use App\Livewire\Auth\AcceptInvitation;
 use App\Livewire\Hospital;
 use App\Models\User;
@@ -26,6 +27,7 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::middleware(['auth'])->group(function () {
+    Route::get('set-password', Auth\SetPassword::class)->name('password.force');
     Route::get('dashboard', Hospital\Dashboard::class)->middleware('role:hospital_admin,hospital_viewer')->name('dashboard');
     Route::get('evaluations', Hospital\Evaluations\Index::class)->middleware('role:hospital_admin,hospital_viewer')->name('evaluations.index');
     Route::get('evaluations/export', EvaluationExportController::class)->name('evaluations.export');
