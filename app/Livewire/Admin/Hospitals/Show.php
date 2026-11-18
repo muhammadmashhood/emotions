@@ -150,14 +150,16 @@ class Show extends Component
 
     public function render(): View
     {
-        $this->hospital->loadCount(['users', 'forms' => fn ($q) => $q->active(), 'submissions', 'branches' => fn ($q) => $q->where('is_active', true)]);
-        $forms = $this->hospital->forms()->with('currentVersion')->withCount('submissions')->orderBy('title')->get();
+        // Displayed counts match the dashboard (approved only); the full count is kept for delete confirmations.
+        $counted = fn ($q) => $q->hospitalVisible();
+        $this->hospital->loadCount(['users', 'forms' => fn ($q) => $q->active(), 'submissions', 'submissions as counted_submissions_count' => $counted, 'branches' => fn ($q) => $q->where('is_active', true)]);
+        $forms = $this->hospital->forms()->with('currentVersion')->withCount(['submissions', 'submissions as counted_submissions_count' => $counted])->orderBy('title')->get();
         $activeForms = $forms->filter->isActive();
 
         return view('livewire.admin.hospitals.show', [
             'forms' => $forms,
             'branches' => $this->tab === 'facilities'
-                ? $this->hospital->branches()->withCount('submissions')->withMax('submissions', 'submitted_at')->orderByDesc('is_active')->orderBy('name')->get()
+                ? $this->hospital->branches()->withCount(['submissions' => $counted])->withMax('submissions', 'submitted_at')->orderByDesc('is_active')->orderBy('name')->get()
                 : collect(),
             'pendingCount' => $this->hospital->submissions()->where('status', SubmissionStatus::PendingReview->value)->count(),
             'reviewForms' => $activeForms->filter(fn (Form $f) => (bool) $f->currentVersion?->needs_review)->values(),

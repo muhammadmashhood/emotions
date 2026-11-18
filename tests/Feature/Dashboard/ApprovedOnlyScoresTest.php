@@ -78,5 +78,5 @@ test('partial rule applies to staff numbers', function () {
 test('staff dashboard with only pending surveys renders empty', function () {
     Submission::query()->whereIn('status', [SubmissionStatus::Approved->value, SubmissionStatus::Rejected->value])->delete();
 
-    $this->actingAs(superAdmin())->get(route('hospitals.dashboard', $this->hospital))->assertOk()->assertDontSee('70.0');
+    $this->actingAs(superAdmin())->get(route('hospitals.dashboard', $this->hospital))->assertOk()->assertSee('No evaluations yet')->assertDontSee('100.0');
 });

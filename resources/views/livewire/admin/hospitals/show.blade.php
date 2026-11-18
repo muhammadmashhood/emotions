@@ -23,7 +23,8 @@
             <x-ui.kpi label="Facilities" :value="$hospital->branches_count" />
             <x-ui.kpi label="Linked forms" :value="$hospital->forms_count" />
             <x-ui.kpi label="Users" :value="$hospital->users_count" />
-            <x-ui.kpi label="Evaluations" :value="number_format($hospital->submissions_count)" />
+            @php $notCounted = $hospital->submissions_count - $hospital->counted_submissions_count; @endphp
+            <x-ui.kpi label="Evaluations" :value="number_format($hospital->counted_submissions_count)" :note="$notCounted > 0 ? number_format($notCounted).' pending or rejected, not counted' : 'Approved only'" />
         </div>
 
         <x-ui.card title="Setup & attention">
@@ -104,7 +105,7 @@
                                 @elseif($form->webhook_status === \App\Enums\WebhookStatus::Active)<x-ui.pill tone="ok">Active</x-ui.pill>
                                 @else<x-ui.pill tone="bad">{{ $form->webhook_status->label() }}</x-ui.pill>@endif
                             </td>
-                            <td class="tabular-nums">{{ $form->submissions_count }}</td>
+                            <td class="tabular-nums">{{ $form->counted_submissions_count }}</td>
                             <td class="text-em-soft">{{ $form->last_synced_at?->diffForHumans() ?? '–' }}</td>
                             <td class="text-right whitespace-nowrap space-x-3">
                                 <a href="{{ route('admin.forms.mapping', $form) }}" wire:navigate class="text-em-accent hover:underline">Mapping →</a>
