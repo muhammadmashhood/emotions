@@ -33,6 +33,14 @@ class UserPolicy
             && $role->isHospitalRole();
     }
 
+    /**
+     * May $user create an account directly (temporary password) with $role in $hospital? Same rules as inviting.
+     */
+    public function create(User $user, Role $role, ?Hospital $hospital): bool
+    {
+        return $this->invite($user, $role, $hospital);
+    }
+
     public function update(User $user, User $target): bool
     {
         if ($user->isSuperAdmin()) {
