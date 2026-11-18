@@ -3,6 +3,7 @@
 use App\Domain\Users\UserManager;
 use App\Enums\Role;
 use App\Livewire\Admin\Users\Index as UsersIndex;
+use App\Livewire\Shared\UserManagement;
 use App\Models\AuditLog;
 use App\Models\Hospital;
 use App\Models\User;
@@ -72,4 +73,22 @@ test('users page shows domain errors on the create form', function () {
         ->set('mode', 'create')->set('createName', 'Dup')->set('inviteEmail', $existing->email)
         ->set('inviteRole', 'super_admin')->set('createPassword', 'Temp-pass-1234')
         ->call('create')->assertHasErrors(['inviteEmail']);
+});
+
+test('hospital admin creates a colleague with a temporary password on the team tab', function () {
+    $hospital = Hospital::factory()->create();
+    $c = Livewire::actingAs(hospitalAdmin($hospital))->test(UserManagement::class, ['hospital' => $hospital])
+        ->set('mode', 'create')->set('createName', 'Omar')->set('inviteEmail', 'omar@h.ae')->set('inviteRole', 'hospital_viewer')
+        ->set('createPassword', 'Temp-pass-1234')
+        ->call('create')->assertHasNoErrors()->assertSee('Temp-pass-1234')->assertSee('shown only once');
+
+    $omar = User::query()->where('email', 'omar@h.ae')->firstOrFail();
+    expect($omar->hospital_id)->toBe($hospital->id)->and($omar->must_change_password)->toBeTrue();
+    $c->call('dismissCreated');
+    expect($c->get('createdPassword'))->toBeNull();
+
+    Livewire::actingAs(hospitalAdmin($hospital))->test(UserManagement::class, ['hospital' => $hospital])
+        ->set('mode', 'create')->set('createName', 'X')->set('inviteEmail', 'x@h.ae')->set('inviteRole', 'super_admin')
+        ->set('createPassword', 'Temp-pass-1234')->call('create')->assertHasErrors(['inviteRole']);
+    expect(User::query()->where('email', 'x@h.ae')->exists())->toBeFalse();
 });

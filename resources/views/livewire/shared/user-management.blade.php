@@ -1,9 +1,33 @@
 <div class="flex flex-col gap-5">
     <x-ui.flash />
-    <section class="panel p-4">
-        <form wire:submit="invite" class="flex flex-col sm:flex-row gap-2.5 sm:items-end">
-            <div class="flex-1">
-                <label class="label" for="inviteEmail">Invite by email</label>
+    @if($createdPassword !== null)
+        <div class="rounded-2xl border border-em-ok/30 bg-em-ok-bg px-5 py-4 flex flex-col gap-2" role="status" x-data="{ copied: false }">
+            <div class="text-[13px] font-semibold text-em-ink">Temporary password for {{ $createdEmail }}</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <code class="px-3 py-1.5 rounded-lg bg-white border border-em-line text-base tracking-wider select-all">{{ $createdPassword }}</code>
+                <button type="button" class="btn btn-secondary btn-sm" x-on:click="navigator.clipboard.writeText(@js($createdPassword)).then(() => { copied = true; setTimeout(() => copied = false, 2000) })"><span x-text="copied ? 'Copied' : 'Copy'">Copy</span></button>
+                <button type="button" class="btn btn-secondary btn-sm" wire:click="dismissCreated">Done</button>
+            </div>
+            <p class="text-xs text-em-soft">It is shown only once. Copy it now and pass it on yourself; they must choose their own password when they first sign in.</p>
+        </div>
+    @endif
+    <section class="panel p-4 flex flex-col gap-3">
+        <div class="inline-flex p-[3px] gap-0.5 bg-em-bg border border-em-line rounded-xl w-fit" role="tablist" aria-label="How to add a user">
+            @foreach(['invite' => 'Email an invitation', 'create' => 'Set a temporary password'] as $key => $label)
+                <button type="button" wire:click="$set('mode', '{{ $key }}')" role="tab" aria-selected="{{ $mode === $key ? 'true' : 'false' }}"
+                        class="px-3.5 py-1.5 rounded-[9px] text-[13px] {{ $mode === $key ? 'bg-em-ink text-white font-semibold' : 'text-em-soft hover:text-em-ink' }}">{{ $label }}</button>
+            @endforeach
+        </div>
+        <form wire:submit="{{ $mode === 'create' ? 'create' : 'invite' }}" class="flex flex-col sm:flex-row sm:flex-wrap gap-2.5 sm:items-end">
+            @if($mode === 'create')
+                <div class="flex-1 min-w-[12rem]">
+                    <label class="label" for="createName">Full name</label>
+                    <input id="createName" type="text" wire:model="createName" class="field" placeholder="Name as it should appear" required>
+                    <x-input-error :messages="$errors->get('createName')" class="mt-1" />
+                </div>
+            @endif
+            <div class="flex-1 min-w-[14rem]">
+                <label class="label" for="inviteEmail">{{ $mode === 'create' ? 'Email' : 'Invite by email' }}</label>
                 <input id="inviteEmail" type="email" wire:model="inviteEmail" class="field" placeholder="name@hospital.example" required>
                 <x-input-error :messages="$errors->get('inviteEmail')" class="mt-1" />
             </div>
@@ -19,8 +43,23 @@
                 </div>
                 <x-input-error :messages="$errors->get('inviteRole')" class="mt-1" />
             </fieldset>
-            <button type="submit" class="btn-primary">Send invitation</button>
+            @if($mode === 'create')
+                <div class="flex-1 min-w-[14rem]">
+                    <label class="label" for="createPassword">Temporary password</label>
+                    <div class="flex gap-2">
+                        <input id="createPassword" type="text" wire:model="createPassword" class="field font-mono" placeholder="At least 8 characters" autocomplete="off" required>
+                        <button type="button" class="btn-secondary shrink-0" wire:click="generatePassword">Generate</button>
+                    </div>
+                    <x-input-error :messages="$errors->get('createPassword')" class="mt-1" />
+                </div>
+                <button type="submit" class="btn-primary">Create user</button>
+            @else
+                <button type="submit" class="btn-primary">Send invitation</button>
+            @endif
         </form>
+        @if($mode === 'create')
+            <p class="text-xs text-em-soft">Share the password with them yourself. They must change it when they first sign in.</p>
+        @endif
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
     </section>
 
