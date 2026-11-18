@@ -60,6 +60,7 @@ class AuditLog extends Model
             'typeform.connection_saved' => 'Saved Typeform connection',
             'typeform.connection_failed' => 'Typeform connection failed',
             'user.invited' => 'Invited user',
+            'user.created' => 'Created user',
             'user.invitation_accepted' => 'Accepted invitation',
             'user.deactivated' => 'Deactivated user',
             'user.reactivated' => 'Reactivated user',

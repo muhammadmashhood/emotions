@@ -19,6 +19,7 @@ use InvalidArgumentException;
  * @property Role $role
  * @property int|null $hospital_id
  * @property bool $is_active
+ * @property bool $must_change_password
  * @property Carbon|null $last_login_at
  * @property-read Hospital|null $hospital
  */
@@ -34,6 +35,7 @@ class User extends Authenticatable
         'role',
         'hospital_id',
         'is_active',
+        'must_change_password',
         'last_login_at',
     ];
 
@@ -48,6 +50,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'role' => Role::class,
             'is_active' => 'boolean',
+            'must_change_password' => 'boolean',
             'last_login_at' => 'datetime',
         ];
     }

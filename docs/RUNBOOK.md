@@ -104,3 +104,7 @@ Forms linked by a person (audit row `form.linked` without `automatic`) are never
 ## Rejected surveys and scores
 
 Rejected and pending-review surveys never enter any score, average, count, ranking or heat-map cell, for any viewer: `DashboardQuery::base()` applies the same approved-only rule (plus the partial-response rule) to eMotion staff as to hospital users, so both sides always see identical figures. Staff still find rejected and pending surveys in a hospital's Evaluations list via the Status filter, on the admin overview "Rejected surveys" tile, and in the staff CSV export's Status column. Re-approving a survey puts it straight back into the numbers.
+
+## Creating a user without email
+
+When an invitation email does not arrive, create the account directly: on the eMotion Users page ("Invite user" → "Set a temporary password") or on a hospital's Team tab. Enter name, email, role and a temporary password (or press Generate), then copy the password from the green panel; it is shown only once and is never emailed. The same permission rules as invitations apply, and the action is audited as "Created user". At first sign-in the person is taken to a "Set your password" page and cannot see anything else until they choose their own. If they lose the temporary password before signing in, deactivate the account and create it again, or use "Forgot password" if their mail works.
