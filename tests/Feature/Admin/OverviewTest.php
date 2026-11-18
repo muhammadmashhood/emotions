@@ -134,3 +134,17 @@ test('audit log screen filters by action, hospital, user and date', function () 
 test('hospital users cannot open the audit log', function () {
     $this->actingAs(hospitalAdmin())->get(route('admin.audit'))->assertForbidden();
 });
+
+test('overview counts rejected surveys without adding them to any score', function () {
+    $hospital = Hospital::factory()->create();
+    $form = Form::factory()->for($hospital)->create();
+    $version = FormVersion::factory()->create(['form_id' => $form->id]);
+    $base = ['form_id' => $form->id, 'form_version_id' => $version->id, 'hospital_id' => $hospital->id];
+    Submission::factory()->rejected()->create($base + ['submitted_at' => now()->subDays(2)]);
+    Submission::factory()->rejected()->create($base + ['submitted_at' => now()->subDays(45)]);
+
+    Livewire::actingAs(superAdmin())
+        ->test(Overview::class)
+        ->assertSeeInOrder(['Rejected surveys', '2'])
+        ->assertSee('1 in the last 30 days');
+});

@@ -40,6 +40,10 @@ class Overview extends Component
         $pending = Submission::query()->where('status', SubmissionStatus::PendingReview->value);
         $pendingCount = (clone $pending)->count();
         $oldestPending = (clone $pending)->min('submitted_at');
+        // Kept on record for staff; never part of any score or count.
+        $rejected = Submission::query()->where('status', SubmissionStatus::Rejected->value);
+        $rejectedCount = (clone $rejected)->count();
+        $rejectedRecent = (clone $rejected)->where('submitted_at', '>=', now()->subDays(30))->count();
 
         $reviewForms = Form::query()->active()->with(['hospital:id,name,uuid', 'currentVersion'])
             ->whereHas('currentVersion', fn ($v) => $v->where('needs_review', true))->orderBy('title')->get();
@@ -66,6 +70,8 @@ class Overview extends Component
                 'facilityHospitals' => Branch::query()->where('is_active', true)->distinct()->count('hospital_id'),
                 'pending' => $pendingCount,
                 'oldestPending' => $oldestPending ? Carbon::parse($oldestPending) : null,
+                'rejected' => $rejectedCount,
+                'rejectedRecent' => $rejectedRecent,
                 'webhooksFailing' => $webhookForms->count(),
                 'activeForms' => $activeForms,
             ],
