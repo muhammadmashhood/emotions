@@ -2,7 +2,9 @@
 
 use App\Livewire\Auth\SetPassword;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Livewire\Livewire;
+use Livewire\Volt\Volt;
 
 test('flagged user is redirected from every page to set-password', function () {
     $user = hospitalAdmin();
@@ -49,4 +51,26 @@ test('flagged user can sign out from the set-password page', function () {
 
     Livewire::actingAs($user)->test(SetPassword::class)->call('logout')->assertRedirect(route('login'));
     $this->assertGuest();
+});
+
+test('the temporary password cannot be kept as the new one', function () {
+    $user = hospitalAdmin();
+    $user->forceFill(['password' => 'Temp-pass-1234', 'must_change_password' => true])->save();
+
+    Livewire::actingAs($user)->test(SetPassword::class)
+        ->set('password', 'Temp-pass-1234')->set('password_confirmation', 'Temp-pass-1234')
+        ->call('save')->assertHasErrors(['password'])->assertSee('different from the temporary one');
+    expect($user->fresh()->must_change_password)->toBeTrue();
+});
+
+test('resetting the password by email also clears the flag', function () {
+    $user = hospitalAdmin();
+    $user->forceFill(['must_change_password' => true])->save();
+    $token = Password::createToken($user);
+
+    Volt::test('pages.auth.reset-password', ['token' => $token])
+        ->set('email', $user->email)->set('password', 'Brand-new-pass-1')->set('password_confirmation', 'Brand-new-pass-1')
+        ->call('resetPassword')->assertHasNoErrors();
+
+    expect($user->fresh()->must_change_password)->toBeFalse();
 });

@@ -5,6 +5,7 @@ namespace App\Livewire\Auth;
 use App\Livewire\Actions\Logout;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Validation\Rules\Password;
 use Livewire\Attributes\Layout;
@@ -32,6 +33,13 @@ class SetPassword extends Component
         $this->validate([
             'password' => ['required', 'string', Password::defaults(), 'confirmed'],
         ]);
+
+        // The whole point of this page is that the password the admin shared does not stay in use.
+        if (Hash::check($this->password, (string) $this->user()->password)) {
+            $this->addError('password', 'Choose a password different from the temporary one.');
+
+            return;
+        }
 
         $this->user()->forceFill([
             'password' => $this->password,
