@@ -10,7 +10,9 @@ use App\Models\Hospital;
 use App\Models\User;
 use App\Models\UserInvitation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -35,6 +37,18 @@ class Index extends Component
     public string $inviteRole = 'hospital_viewer';
 
     public string $inviteHospital = '';
+
+    /** 'invite' emails a link; 'create' sets a temporary password the admin hands over themselves. */
+    public string $mode = 'invite';
+
+    public string $createName = '';
+
+    public string $createPassword = '';
+
+    /** Shown once after a direct creation, then cleared. Never persisted or emailed. */
+    public ?string $createdPassword = null;
+
+    public ?string $createdEmail = null;
 
     public function updated(string $property): void
     {
@@ -69,6 +83,52 @@ class Index extends Component
         $this->reset('inviteEmail', 'inviteHospital');
         session()->flash('status', 'Invitation sent.');
         $this->dispatch('invite-sent');
+    }
+
+    public function generatePassword(): void
+    {
+        // Letters and digits only so it can be read out over the phone.
+        $this->createPassword = Str::password(12, symbols: false);
+    }
+
+    public function create(UserManager $users): void
+    {
+        $this->validate([
+            'createName' => ['required', 'string', 'max:255'],
+            'inviteEmail' => ['required', 'email', 'max:255'],
+            'inviteRole' => ['required', Rule::enum(Role::class)],
+            'inviteHospital' => ['nullable', 'exists:hospitals,uuid'],
+            'createPassword' => ['required', 'string'],
+        ]);
+
+        $role = Role::from($this->inviteRole);
+        $hospital = $this->inviteHospital !== '' ? Hospital::query()->where('uuid', $this->inviteHospital)->first() : null;
+
+        $this->authorize('create', [User::class, $role, $hospital]);
+
+        /** @var User $actor */
+        $actor = auth()->user();
+        try {
+            $user = $users->create($this->createName, $this->inviteEmail, $role, $hospital, $this->createPassword, $actor);
+        } catch (ValidationException $e) {
+            $map = ['email' => 'inviteEmail', 'role' => 'inviteRole', 'hospital_id' => 'inviteHospital', 'password' => 'createPassword'];
+            foreach ($e->errors() as $field => $messages) {
+                $this->addError($map[$field] ?? $field, (string) ($messages[0] ?? 'Invalid value.'));
+            }
+
+            return;
+        }
+
+        $this->createdPassword = $this->createPassword;
+        $this->createdEmail = $user->email;
+        $this->reset('createName', 'createPassword', 'inviteEmail', 'inviteHospital');
+        session()->flash('status', 'User created. Share the temporary password below with them.');
+        $this->dispatch('invite-sent');
+    }
+
+    public function dismissCreated(): void
+    {
+        $this->reset('createdPassword', 'createdEmail', 'createName', 'createPassword');
     }
 
     public function toggleActive(int $userId, UserManager $users): void

@@ -2,12 +2,14 @@
 
 use App\Domain\Users\UserManager;
 use App\Enums\Role;
+use App\Livewire\Admin\Users\Index as UsersIndex;
 use App\Models\AuditLog;
 use App\Models\Hospital;
 use App\Models\User;
 use App\Models\UserInvitation;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Livewire\Livewire;
 
 test('super admin creates a hospital admin with a temporary password', function () {
     $hospital = Hospital::factory()->create();
@@ -46,4 +48,28 @@ test('policy: hospital admin may create only hospital roles in own hospital', fu
         ->and($admin->can('create', [User::class, Role::HospitalViewer, $other]))->toBeFalse()
         ->and($admin->can('create', [User::class, Role::SuperAdmin, null]))->toBeFalse()
         ->and(superAdmin()->can('create', [User::class, Role::QualityAssurance, null]))->toBeTrue();
+});
+
+test('users page creates a user with a temporary password and shows it once', function () {
+    $hospital = Hospital::factory()->create();
+    $c = Livewire::actingAs(superAdmin())->test(UsersIndex::class)
+        ->set('mode', 'create')->set('createName', 'Sara Ali')->set('inviteEmail', 'sara@h.ae')
+        ->set('inviteHospital', $hospital->uuid)->set('inviteRole', 'hospital_viewer')
+        ->call('generatePassword');
+    $password = $c->get('createPassword');
+    expect(strlen($password))->toBe(12)->and(ctype_alnum($password))->toBeTrue();
+
+    $c->call('create')->assertHasNoErrors()->assertSee('shown only once')->assertSee($password)->assertSee('sara@h.ae');
+    $this->assertDatabaseHas('users', ['email' => 'sara@h.ae', 'name' => 'Sara Ali', 'must_change_password' => true, 'hospital_id' => $hospital->id]);
+
+    $c->call('dismissCreated');
+    expect($c->get('createdPassword'))->toBeNull()->and($c->get('createPassword'))->toBe('')->and($c->get('createName'))->toBe('');
+});
+
+test('users page shows domain errors on the create form', function () {
+    $existing = superAdmin();
+    Livewire::actingAs(superAdmin())->test(UsersIndex::class)
+        ->set('mode', 'create')->set('createName', 'Dup')->set('inviteEmail', $existing->email)
+        ->set('inviteRole', 'super_admin')->set('createPassword', 'Temp-pass-1234')
+        ->call('create')->assertHasErrors(['inviteEmail']);
 });

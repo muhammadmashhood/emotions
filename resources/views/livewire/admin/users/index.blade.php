@@ -8,6 +8,18 @@
 
     <x-ui.flash />
 
+    @if($createdPassword !== null)
+        <div class="rounded-2xl border border-em-ok/30 bg-em-ok-bg px-5 py-4 flex flex-col gap-2" role="status" x-data="{ copied: false }">
+            <div class="text-[13px] font-semibold text-em-ink">Temporary password for {{ $createdEmail }}</div>
+            <div class="flex flex-wrap items-center gap-2">
+                <code class="px-3 py-1.5 rounded-lg bg-white border border-em-line text-base tracking-wider select-all">{{ $createdPassword }}</code>
+                <button type="button" class="btn btn-secondary btn-sm" x-on:click="navigator.clipboard.writeText(@js($createdPassword)).then(() => { copied = true; setTimeout(() => copied = false, 2000) })"><span x-text="copied ? 'Copied' : 'Copy'">Copy</span></button>
+                <button type="button" class="btn btn-secondary btn-sm" wire:click="dismissCreated">Done</button>
+            </div>
+            <p class="text-xs text-em-soft">It is shown only once. Copy it now and pass it on yourself; they must choose their own password when they first sign in.</p>
+        </div>
+    @endif
+
     <div class="bg-white border border-em-line rounded-2xl p-3 flex flex-wrap gap-2.5">
         <input type="search" wire:model.live.debounce.300ms="search" placeholder="Search name or email…" class="field flex-1 min-w-56" aria-label="Search users">
         <select wire:model.live="hospital" class="field w-auto min-w-52" aria-label="Filter by hospital">
@@ -86,12 +98,25 @@
 
     {{-- Invite dialog --}}
     <div x-show="inviting" x-cloak class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4 bg-em-ink/30" x-transition.opacity>
-        <form wire:submit="invite" x-on:click.outside="inviting = false" role="dialog" aria-modal="true" aria-labelledby="invite-title"
+        <form wire:submit="{{ $mode === 'create' ? 'create' : 'invite' }}" x-on:click.outside="inviting = false" role="dialog" aria-modal="true" aria-labelledby="invite-title"
               class="w-full max-w-[460px] bg-white rounded-[20px] p-6 flex flex-col gap-4 shadow-[0_24px_64px_-24px_rgba(43,31,38,0.35)]">
             <div>
-                <h2 id="invite-title" class="text-lg font-semibold">Invite user</h2>
-                <p class="text-[13px] text-em-soft">They'll get an email link to set a password.</p>
+                <h2 id="invite-title" class="text-lg font-semibold">{{ $mode === 'create' ? 'Create user' : 'Invite user' }}</h2>
+                <p class="text-[13px] text-em-soft">{{ $mode === 'create' ? 'Share the password with them yourself. They must change it when they first sign in.' : "They'll get an email link to set a password." }}</p>
             </div>
+            <div class="inline-flex p-[3px] gap-0.5 bg-em-bg border border-em-line rounded-xl w-fit" role="tablist" aria-label="How to add the user">
+                @foreach(['invite' => 'Email an invitation', 'create' => 'Set a temporary password'] as $key => $label)
+                    <button type="button" wire:click="$set('mode', '{{ $key }}')" role="tab" aria-selected="{{ $mode === $key ? 'true' : 'false' }}"
+                            class="px-3.5 py-1.5 rounded-[9px] text-[13px] {{ $mode === $key ? 'bg-em-ink text-white font-semibold' : 'text-em-soft hover:text-em-ink' }}">{{ $label }}</button>
+                @endforeach
+            </div>
+            @if($mode === 'create')
+                <div>
+                    <label class="label" for="createName">Full name</label>
+                    <input id="createName" type="text" wire:model="createName" class="field py-2.5" placeholder="Name as it should appear" required>
+                    <x-input-error :messages="$errors->get('createName')" class="mt-1" />
+                </div>
+            @endif
             <div>
                 <label class="label" for="inviteEmail">Email</label>
                 <input id="inviteEmail" type="email" wire:model="inviteEmail" class="field py-2.5" placeholder="name@hospital.com" required>
@@ -118,10 +143,25 @@
                     @endforeach
                 </div>
                 <x-input-error :messages="$errors->get('role')" class="mt-1" />
+                <x-input-error :messages="$errors->get('inviteRole')" class="mt-1" />
             </fieldset>
+            @if($mode === 'create')
+                <div>
+                    <label class="label" for="createPassword">Temporary password</label>
+                    <div class="flex gap-2">
+                        <input id="createPassword" type="text" wire:model="createPassword" class="field py-2.5 font-mono" placeholder="At least 8 characters" autocomplete="off" required>
+                        <button type="button" class="btn btn-secondary shrink-0" wire:click="generatePassword">Generate</button>
+                    </div>
+                    <x-input-error :messages="$errors->get('createPassword')" class="mt-1" />
+                </div>
+            @endif
             <div class="flex justify-end gap-2 pt-1">
                 <button type="button" class="btn btn-secondary" x-on:click="inviting = false">Cancel</button>
-                <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="invite">Send invitation</button>
+                @if($mode === 'create')
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="create">Create user</button>
+                @else
+                    <button type="submit" class="btn btn-primary" wire:loading.attr="disabled" wire:target="invite">Send invitation</button>
+                @endif
             </div>
         </form>
     </div>
