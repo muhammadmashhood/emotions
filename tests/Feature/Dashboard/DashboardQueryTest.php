@@ -130,11 +130,11 @@ test('distribution and recent evaluations', function () {
     expect($recent)->toHaveCount(2)->and((float) $recent->first()->overall_pct)->toBe(90.0);
 });
 
-test('a super admin sees pending and partial evaluations in the numbers, hospital users do not', function () {
+test('pending evaluations stay out of the numbers for super admins and hospital users alike', function () {
     Submission::factory()->pendingReview()->create(['form_id' => $this->form->id, 'form_version_id' => $this->version->id, 'hospital_id' => $this->hospital->id, 'submitted_at' => '2026-06-12', 'overall_pct' => 0]);
 
     expect($this->query->headline($this->hospital, $this->filters)['count'])->toBe(4);
-    expect((new DashboardQuery(superAdmin()))->headline($this->hospital, $this->filters)['count'])->toBe(5);
+    expect((new DashboardQuery(superAdmin()))->headline($this->hospital, $this->filters)['count'])->toBe(4);
 });
 
 test('kpis: likelihood to recommend, critical items passed and facilities', function () {
