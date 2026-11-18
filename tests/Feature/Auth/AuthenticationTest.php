@@ -22,7 +22,7 @@ test('users can authenticate using the login screen', function () {
 
     $component
         ->assertHasNoErrors()
-        ->assertRedirect(route('dashboard', absolute: false));
+        ->assertRedirect(route('home', absolute: false));
 
     $this->assertAuthenticated();
 });
@@ -69,4 +69,17 @@ test('users can logout', function () {
         ->assertRedirect('/');
 
     $this->assertGuest();
+});
+
+test('staff land on their home page after signing in, not on the hospital dashboard', function () {
+    $admin = superAdmin();
+
+    $component = Volt::test('pages.auth.login')
+        ->set('form.email', $admin->email)
+        ->set('form.password', 'password')
+        ->call('login');
+
+    $component->assertHasNoErrors()->assertRedirect(route('home'));
+    $this->assertAuthenticatedAs($admin);
+    $this->actingAs($admin)->get(route('home'))->assertRedirect(route('admin.overview'));
 });
