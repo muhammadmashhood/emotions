@@ -37,6 +37,11 @@ class EvaluationNotifier
     /** The evaluation is approved and visible on the hospital dashboard: tell that hospital's admins. */
     public function published(Submission $submission): void
     {
+        // "Published" means the hospital can actually open it: approved and not a hidden partial response.
+        if (! Submission::query()->whereKey($submission->id)->hospitalVisible()->exists()) {
+            return;
+        }
+
         $submission->loadMissing(['hospital', 'form', 'branch']);
 
         $recipients = User::query()

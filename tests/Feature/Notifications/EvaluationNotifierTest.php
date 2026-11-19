@@ -84,4 +84,4 @@ test('a mail failure is logged per recipient, not thrown', function () {
     Log::shouldReceive('warning')->twice()->withArgs(fn ($message) => $message === 'evaluation.notify_failed');
 
     app(EvaluationNotifier::class)->submitted($this->submission);
-})->expectNotToPerformAssertions();
+});

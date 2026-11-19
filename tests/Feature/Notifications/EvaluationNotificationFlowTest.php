@@ -121,3 +121,27 @@ test('approving from the evaluation page emails too, and again after a rejection
     Mail::assertQueued(EvaluationPublishedMail::class, 2);
     expect($evaluation->fresh()->status)->toBe(SubmissionStatus::Approved);
 });
+
+test('approving a partial response does not email until it completes, then once', function () {
+    $this->hospital->update(['require_review' => true]);
+    deliverWebhook($this, $this->form, $this->partialRaw);
+    $partial = Submission::query()->firstOrFail();
+    expect($partial->is_partial)->toBeTrue();
+
+    Livewire::actingAs($this->admin)->test(Show::class, ['evaluation' => $partial])->call('approve');
+    Mail::assertNotQueued(EvaluationPublishedMail::class);
+
+    deliverWebhook($this, $this->form, $this->raw);
+    Mail::assertQueued(EvaluationPublishedMail::class, 1);
+});
+
+test('approving twice sends one published email', function () {
+    $evaluation = pendingEvaluation($this);
+
+    $page = Livewire::actingAs($this->admin)->test(Show::class, ['evaluation' => $evaluation]);
+    $page->call('approve');
+    $page->call('approve');
+    Livewire::actingAs($this->admin)->test(Review::class)->call('approve', $evaluation->id);
+
+    Mail::assertQueued(EvaluationPublishedMail::class, 1);
+});

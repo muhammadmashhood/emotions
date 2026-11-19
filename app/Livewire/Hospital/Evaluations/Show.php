@@ -247,6 +247,7 @@ class Show extends Component
         $this->authorize('review', $this->evaluation);
         /** @var User $user */
         $user = auth()->user();
+        $wasApproved = $this->evaluation->fresh()?->status === SubmissionStatus::Approved;
 
         $this->evaluation->forceFill([
             'status' => $status,
@@ -256,7 +257,7 @@ class Show extends Component
         ])->save();
 
         $audit->log($action, $this->evaluation, ['note' => $this->evaluation->review_note], $this->evaluation->hospital_id, $user);
-        if ($status === SubmissionStatus::Approved) {
+        if ($status === SubmissionStatus::Approved && ! $wasApproved) {
             app(EvaluationNotifier::class)->published($this->evaluation);
         }
         $this->reviewNote = '';

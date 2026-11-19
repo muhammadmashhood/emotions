@@ -52,6 +52,7 @@ class Review extends Component
         /** @var User $user */
         $user = auth()->user();
         $note = trim($this->notes[$id] ?? '');
+        $wasApproved = $submission->status === SubmissionStatus::Approved;
 
         $submission->forceFill([
             'status' => $status,
@@ -61,7 +62,7 @@ class Review extends Component
         ])->save();
 
         $audit->log($action, $submission, ['note' => $submission->review_note], $submission->hospital_id, $user);
-        if ($status === SubmissionStatus::Approved) {
+        if ($status === SubmissionStatus::Approved && ! $wasApproved) {
             app(EvaluationNotifier::class)->published($submission);
         }
         unset($this->notes[$id]);
