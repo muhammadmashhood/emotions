@@ -4,6 +4,9 @@ use App\Domain\Forms\FormVersioner;
 use App\Domain\Submissions\SubmissionIngestor;
 use App\Domain\Typeform\WebhookSignature;
 use App\Enums\SubmissionSource;
+use App\Enums\SubmissionStatus;
+use App\Livewire\Admin\Review;
+use App\Livewire\Hospital\Evaluations\Show;
 use App\Mail\EvaluationPublishedMail;
 use App\Mail\EvaluationSubmittedMail;
 use App\Models\Form;
@@ -11,6 +14,7 @@ use App\Models\Hospital;
 use App\Models\Submission;
 use App\Models\WebhookDelivery;
 use Illuminate\Support\Facades\Mail;
+use Livewire\Livewire;
 
 /**
  * When the emails fire: live webhook arrivals and Approve actions. Never backfills, partials or duplicates.
@@ -82,4 +86,38 @@ test('backfilled and reconciled responses never email', function () {
 
     expect(Submission::query()->count())->toBe(2);
     Mail::assertNothingQueued();
+});
+
+function pendingEvaluation($test): Submission
+{
+    $test->hospital->update(['require_review' => true]);
+    deliverWebhook($test, $test->form, $test->raw);
+    Mail::assertNotQueued(EvaluationPublishedMail::class);
+
+    return Submission::query()->firstOrFail();
+}
+
+test('approving from the review queue emails the hospital admins; rejecting does not', function () {
+    $evaluation = pendingEvaluation($this);
+
+    Livewire::actingAs($this->admin)->test(Review::class)->call('reject', $evaluation->id);
+    Mail::assertNotQueued(EvaluationPublishedMail::class);
+
+    Livewire::actingAs($this->admin)->test(Review::class)->call('approve', $evaluation->id);
+    Mail::assertQueued(EvaluationPublishedMail::class, 1);
+    Mail::assertQueued(EvaluationPublishedMail::class, fn ($m) => $m->hasTo($this->hospitalAdmin->email) && $m->submission->is($evaluation));
+});
+
+test('approving from the evaluation page emails too, and again after a rejection', function () {
+    $evaluation = pendingEvaluation($this);
+
+    Livewire::actingAs($this->admin)->test(Show::class, ['evaluation' => $evaluation])->call('approve');
+    Mail::assertQueued(EvaluationPublishedMail::class, 1);
+
+    Livewire::actingAs($this->admin)->test(Show::class, ['evaluation' => $evaluation->fresh()])->call('reject');
+    Mail::assertQueued(EvaluationPublishedMail::class, 1);
+
+    Livewire::actingAs($this->admin)->test(Show::class, ['evaluation' => $evaluation->fresh()])->call('approve');
+    Mail::assertQueued(EvaluationPublishedMail::class, 2);
+    expect($evaluation->fresh()->status)->toBe(SubmissionStatus::Approved);
 });
