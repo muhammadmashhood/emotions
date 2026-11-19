@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\Domain\Submissions\EvaluationNotifier;
 use App\Domain\Submissions\SubmissionIngestor;
 use App\Enums\SubmissionSource;
+use App\Enums\SubmissionStatus;
 use App\Models\WebhookDelivery;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -26,7 +28,7 @@ class ProcessTypeformResponse implements ShouldQueue
         $this->onQueue('webhooks');
     }
 
-    public function handle(SubmissionIngestor $ingestor): void
+    public function handle(SubmissionIngestor $ingestor, EvaluationNotifier $notifier): void
     {
         $delivery = WebhookDelivery::query()->with('form.hospital', 'form.currentVersion')->find($this->deliveryId);
 
@@ -58,6 +60,15 @@ class ProcessTypeformResponse implements ShouldQueue
         } catch (Throwable $e) {
             $delivery->forceFill(['error' => mb_substr($e->getMessage(), 0, 2000)])->save();
             throw $e;
+        }
+
+        // Only live, complete arrivals notify (backfills and reconciliation go through the ingestor directly).
+        $submission = $outcome->submission;
+        if (! $outcome->isDuplicate() && $submission !== null && ! $submission->is_partial) {
+            $notifier->submitted($submission);
+            if ($submission->status === SubmissionStatus::Approved) {
+                $notifier->published($submission);
+            }
         }
     }
 }

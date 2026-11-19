@@ -7,6 +7,7 @@ use App\Domain\Dashboard\DashboardFilters;
 use App\Domain\Dashboard\DashboardQuery;
 use App\Domain\Scoring\Rescorer;
 use App\Domain\Submissions\AttachmentStore;
+use App\Domain\Submissions\EvaluationNotifier;
 use App\Enums\SubmissionStatus;
 use App\Models\FormField;
 use App\Models\Submission;
@@ -246,6 +247,7 @@ class Show extends Component
         $this->authorize('review', $this->evaluation);
         /** @var User $user */
         $user = auth()->user();
+        $wasApproved = $this->evaluation->fresh()?->status === SubmissionStatus::Approved;
 
         $this->evaluation->forceFill([
             'status' => $status,
@@ -255,6 +257,9 @@ class Show extends Component
         ])->save();
 
         $audit->log($action, $this->evaluation, ['note' => $this->evaluation->review_note], $this->evaluation->hospital_id, $user);
+        if ($status === SubmissionStatus::Approved && ! $wasApproved) {
+            app(EvaluationNotifier::class)->published($this->evaluation);
+        }
         $this->reviewNote = '';
         session()->flash('status', $status === SubmissionStatus::Approved ? 'Evaluation approved.' : 'Evaluation rejected.');
     }

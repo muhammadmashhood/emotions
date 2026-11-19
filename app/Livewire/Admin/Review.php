@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Domain\Audit\AuditLogger;
+use App\Domain\Submissions\EvaluationNotifier;
 use App\Enums\InfoKey;
 use App\Enums\SubmissionStatus;
 use App\Models\FormField;
@@ -51,6 +52,7 @@ class Review extends Component
         /** @var User $user */
         $user = auth()->user();
         $note = trim($this->notes[$id] ?? '');
+        $wasApproved = $submission->status === SubmissionStatus::Approved;
 
         $submission->forceFill([
             'status' => $status,
@@ -60,6 +62,9 @@ class Review extends Component
         ])->save();
 
         $audit->log($action, $submission, ['note' => $submission->review_note], $submission->hospital_id, $user);
+        if ($status === SubmissionStatus::Approved && ! $wasApproved) {
+            app(EvaluationNotifier::class)->published($submission);
+        }
         unset($this->notes[$id]);
         session()->flash('status', $status === SubmissionStatus::Approved ? 'Evaluation approved.' : 'Evaluation rejected.');
     }
