@@ -108,3 +108,7 @@ Rejected and pending-review surveys never enter any score, average, count, ranki
 ## Creating a user without email
 
 When an invitation email does not arrive, create the account directly: on the eMotion Users page ("Invite user" → "Set a temporary password") or on a hospital's Team tab. Enter name, email, role and a temporary password (or press Generate), then copy the password from the green panel; it is shown only once and is never emailed. The same permission rules as invitations apply, and the action is audited as "Created user". At first sign-in the person is taken to a "Set your password" page and cannot see anything else until they choose their own. If they lose the temporary password before signing in, deactivate the account and create it again, or use "Forgot password" if their mail works.
+
+## Evaluation email notifications
+
+Two emails, one per recipient, queued on the database queue. "New evaluation" goes to every active Super Admin and QA user when a complete response arrives through the live Typeform webhook. "Evaluation published" goes to the active Hospital Admins of that hospital when an evaluation becomes approved: on arrival for hospitals without review, or when staff press Approve (re-approving after a rejection sends it again). Nothing is sent for backfills, reconciliation, partial responses, duplicates, rejections, edits or re-scores. If emails are missing: check that the queue worker cron is running, look at the `jobs` and `failed_jobs` tables, and grep the daily log for `evaluation.notify_failed`.
